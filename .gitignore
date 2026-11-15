@@ -1,0 +1,13 @@
+# 依赖与虚拟环境
+node_modules/
+.venv/
+
+# 生成的媒体资源（体积过大，不入库）
+frames/
+audio/
+output/
+*.png
+*.aiff
+
+# 系统文件
+.DS_Store

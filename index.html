@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>SpaceX 星舰 · 手绘科普</title>
+<style>
+:root{
+  --ink:#2d2822; --ink2:#4b4034; --red:#b23a2a;
+  --hand:"Hanzipen SC","Kaiti SC","STKaiti",cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0d0d0d;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;font-family:var(--hand)}
+#stage{
+  position:relative;width:1080px;height:1920px;flex:none;overflow:hidden;
+  transform-origin:center center;
+  background:
+    radial-gradient(75% 45% at 20% 4%, rgba(255,252,242,.95), rgba(255,252,242,0) 62%),
+    radial-gradient(60% 40% at 82% 88%, rgba(132,100,58,.16), rgba(132,100,58,0) 68%),
+    radial-gradient(40% 26% at 76% 14%, rgba(126,96,54,.09), rgba(126,96,54,0) 70%),
+    linear-gradient(160deg,#f7efdb 0%,#f0e3c5 42%,#e5d3ae 100%);
+}
+.tex{position:absolute;inset:0;pointer-events:none;opacity:.42;mix-blend-mode:multiply;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='260' height='260' filter='url(%23n)' opacity='0.55'/></svg>"),
+    repeating-linear-gradient(.5deg, rgba(92,68,38,.05) 0 1px, rgba(0,0,0,0) 1px 9px);
+  background-size:260px 260px, 100% 9px;
+}
+.vig{position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 300px rgba(86,64,36,.34), inset 0 0 90px rgba(86,64,36,.12);
+}
+.scene{position:absolute;inset:0;opacity:0;transition:opacity .55s ease;will-change:opacity}
+.scene.on{opacity:1}
+.art{position:absolute;inset:0;width:1080px;height:1920px;overflow:visible}
+/* 抖音安全区：整幅画面等比缩到 80%（864×1536）居中，上下各留 192px 黑边 */
+#safe{position:absolute;inset:0;transform:scale(.8);transform-origin:center center}
+
+/* ---------- 手写文字 ---------- */
+.n{position:absolute;color:var(--ink);font-family:var(--hand);font-size:46px;line-height:1.32;
+  letter-spacing:2px;white-space:nowrap;transform-origin:left center;text-shadow:0 0 1px rgba(45,40,34,.10)}
+.n.sm{font-size:38px;letter-spacing:1px}
+.n.md{font-size:54px}
+.n.big{font-size:72px}
+.n.huge{font-size:110px}
+.n.mega{font-size:180px;letter-spacing:18px}
+.n.red{color:var(--red)}
+.n.c{transform-origin:center center}
+.f{opacity:0;transform:translate(var(--tx,0px),16px) rotate(var(--rot,0deg));}
+.on .f{opacity:var(--op,1);transform:translate(var(--tx,0px),0px) rotate(var(--rot,0deg));
+  transition:opacity .8s var(--d,0s) ease,transform .8s var(--d,0s) ease}
+.on .f.in{transition:opacity .5s var(--d,0s) ease,transform .5s var(--d,0s) ease}
+
+/* ---------- 线条绘制动画 ---------- */
+.draw path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+.on .draw path{stroke-dashoffset:0;transition:stroke-dashoffset var(--dur,1.5s) var(--d,0s) ease}
+
+/* ---------- 关键帧 ---------- */
+@keyframes flick{from{transform:scaleY(.9) scaleX(1.05)}to{transform:scaleY(1.08) scaleX(.94)}}
+@keyframes lift{0%{transform:translateY(0)}100%{transform:translateY(-1860px)}}
+@keyframes ignite{0%{opacity:0}100%{opacity:1}}
+@keyframes sepShip{0%{transform:translateY(0)}100%{transform:translateY(-440px)}}
+@keyframes sepBooster{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-120px,240px) rotate(-13deg)}}
+@keyframes burn{0%{opacity:0}6%{opacity:1}80%{opacity:1}92%{opacity:0}100%{opacity:0}}
+@keyframes catchDescent{
+  0%{transform:translate(260px,-1300px) rotate(24deg)}
+  26%{transform:translate(140px,-820px) rotate(16deg)}
+  46%{transform:translate(40px,-430px) rotate(4deg)}
+  55%{transform:translate(0px,-330px) rotate(0deg)}
+  86%{transform:translate(0px,0px) rotate(0deg)}
+  90%{transform:translate(0px,7px) rotate(.8deg)}
+  94%{transform:translate(0px,-2px) rotate(-.4deg)}
+  100%{transform:translate(0px,0px) rotate(0deg)}
+}
+@keyframes countFlash{0%{opacity:0;transform:translate(var(--tx,0px),0) scale(1.7) rotate(-3deg)}
+  18%{opacity:1;transform:translate(var(--tx,0px),0) scale(1) rotate(0deg)}
+  72%{opacity:1;transform:translate(var(--tx,0px),0) scale(1) rotate(0deg)}
+  100%{opacity:0;transform:translate(var(--tx,0px),0) scale(.92) rotate(0deg)}}
+@keyframes armTopClose{from{transform:rotate(-7deg)}to{transform:rotate(1.4deg)}}
+@keyframes armBotClose{from{transform:rotate(7deg)}to{transform:rotate(-1.4deg)}}
+@keyframes stampPop{0%{opacity:0;transform:translate(var(--tx,0px),0) scale(1.6) rotate(-8deg)}
+  55%{opacity:1;transform:translate(var(--tx,0px),0) scale(.94) rotate(-3deg)}
+  100%{opacity:1;transform:translate(var(--tx,0px),0) scale(1) rotate(-4deg)}}
+@keyframes bob{from{transform:translateY(-8px)}to{transform:translateY(8px)}}
+@keyframes drift{0%{opacity:0;transform:translate(0,0) scale(.7)}
+  30%{opacity:.85}100%{opacity:0;transform:translate(-40px,-120px) scale(1.25)}}
+@keyframes splashDrop{0%{transform:translateY(0)}100%{transform:translateY(58px)}}
+@keyframes ripple{0%{opacity:.75;transform:scale(.25)}100%{opacity:0;transform:scale(1.6)}}
+@keyframes dashMove{to{stroke-dashoffset:-90}}
+@keyframes wob{0%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}100%{transform:rotate(-1.2deg)}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+
+/* SVG 动画组统一盒模型 */
+.g-rot{transform-box:fill-box;transform-origin:50% 50%}
+.g-top{transform-box:fill-box;transform-origin:50% 0%}
+.arm{transform-box:fill-box;transform-origin:0% 50%}
+
+.on .flame{animation:flick .16s infinite alternate}
+.spark{transform-box:fill-box;transform-origin:50% 50%}
+
+/* ---------- 各场景专属 ---------- */
+#s2.on .count3{animation:countFlash .95s .1s both}
+#s2.on .count2{animation:countFlash .95s .9s both}
+#s2.on .count1{animation:countFlash .95s 1.7s both}
+#s2.on .ignite{animation:stampPop .5s 2.55s both}
+#s2.on .stackLift{animation:lift 5s 2.95s cubic-bezier(.4,0,.7,1) both}
+#s2.on .flameLift{animation:ignite .35s 2.78s both}
+#s2.on .smokeLift{animation:drift 3.8s 3.0s ease-out both}
+#s2.on .smokeLift.b{animation-delay:3.4s}
+#s3.on .sepShip{animation:sepShip 5s .3s linear both}
+#s3.on .sepBooster{animation:sepBooster 5s .3s ease-in both}
+#s3.on .flameSep{animation:ignite .5s .5s both}
+#s4.on .shipFloat{animation:bob 3.2s ease-in-out infinite alternate}
+#s4.on .orbitDash{animation:dashMove 2.4s linear infinite}
+#s5.on .catchMove{animation:catchDescent 8.6s .2s linear both}
+#s5.on .burnWrap{animation:burn 8.75s .2s both}
+#s5.on .armTop{animation:armTopClose .8s 9.05s ease-in-out both}
+#s5.on .armBot{animation:armBotClose .8s 9.05s ease-in-out both}
+#s5.on .stamp{animation:stampPop .75s 10.0s both}
+#s5.on .spark{animation:stampPop .5s 10.05s both}
+#s6.on .plasma{animation:flick .12s infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+#s6.on .reentryShip{animation:wob 2.6s ease-in-out infinite}
+#s7.on .splashShip{animation:splashDrop 2.4s .3s ease-in both}
+#s7.on .splashFlame{animation:burn 2.2s .8s both}
+#s7.on .spray{animation:drift 2s 1.6s ease-out both}
+#s7.on .rip{transform-box:fill-box;transform-origin:50% 50%}
+#s7.on .rip.a{animation:ripple 1.6s 1.7s ease-out infinite}
+#s7.on .rip.b{animation:ripple 1.6s 2.1s ease-out infinite}
+#s8.on .outRocket{animation:bob 2.6s ease-in-out infinite alternate}
+.still .f{opacity:var(--op,1);transform:translate(var(--tx,0px),0px) rotate(var(--rot,0deg))}
+.still .scene *{animation:none!important;transition:none!important}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="tex"></div>
+  <div class="vig"></div>
+
+  <!-- 共享 defs -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="rough" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.014 0.021" numOctaves="2" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="rough2" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.03" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#3a3228" stroke-width="1.2"/>
+    </pattern>
+    <pattern id="hatchD" width="5.5" height="5.5" patternUnits="userSpaceOnUse" patternTransform="rotate(42)">
+      <line x1="0" y1="0" x2="0" y2="5.5" stroke="#2f2a24" stroke-width="1.15"/>
+    </pattern>
+    <pattern id="hatchGlow" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#c9612a" stroke-width="1.6"/>
+    </pattern>
+  </defs></svg>
+
+  <div id="safe">
+
+  <!-- S0 标题 -->
+  <section class="scene" id="s0">
+    <svg class="art" id="art0" viewBox="0 0 1080 1920"></svg>
+    <div class="n sm f" style="left:540px;top:520px;--tx:-50%;--d:.2s;letter-spacing:10px">SPACEX · STARSHIP</div>
+    <div class="n mega f c" style="left:540px;top:600px;--tx:-50%;--d:.35s;letter-spacing:26px">星舰</div>
+    <svg class="art" style="top:850px;height:60px" viewBox="0 0 1080 60">
+      <g filter="url(#rough2)"><path class="u1" d="M330,24 C420,10 520,40 600,22 C680,6 720,34 760,20"
+        fill="none" stroke="#b23a2a" stroke-width="5" stroke-linecap="round"/></g>
+    </svg>
+    <div class="n md f" style="left:540px;top:930px;--tx:-50%;--d:.8s">发射 · 回收 全过程</div>
+    <div class="n sm f" style="left:540px;top:1030px;--tx:-50%;--d:1.05s;--op:.85">三分钟，看懂人类最大的火箭</div>
+    <div class="n sm f c" style="left:868px;top:1496px;--tx:-50%;--d:1.9s;--rot:-2deg;--op:.92">目标：火星</div>
+    <div class="n sm f c" style="left:238px;top:1660px;--tx:-50%;--d:1.7s;--op:.9">地球</div>
+  </section>
+
+  <!-- S1 全箭 -->
+  <section class="scene" id="s1">
+    <svg class="art" id="art1" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f" style="left:88px;top:110px;--d:.15s">SpaceX 星舰</div>
+    <div class="n f" style="left:92px;top:235px;--d:.35s;--op:.9">人类史上最大的火箭</div>
+    <div class="n f" style="left:796px;top:312px;--d:1.15s;--rot:-1.5deg;font-size:44px">全长 121 米</div>
+    <div class="n f" style="left:812px;top:640px;--d:1.6s;--rot:-2deg">不锈钢箭体</div>
+    <div class="n f" style="left:322px;top:1424px;--d:2.0s;--rot:-1deg">33 台发动机</div>
+    <div class="n sm f" style="left:410px;top:300px;--d:2.3s;--rot:-2deg">“筷子”机械臂</div>
+  </section>
+
+  <!-- S2 倒计时起飞 -->
+  <section class="scene" id="s2">
+    <svg class="art" id="art2" viewBox="0 0 1080 1920"></svg>
+    <div class="n huge f c count3" style="left:470px;top:520px;--tx:-50%;--rot:-2deg;font-size:250px">3</div>
+    <div class="n huge f c count2" style="left:470px;top:520px;--tx:-50%;--rot:1deg;font-size:250px">2</div>
+    <div class="n huge f c count1" style="left:470px;top:520px;--tx:-50%;--rot:-1deg;font-size:250px">1</div>
+    <div class="n huge f c red ignite" style="left:470px;top:880px;--tx:-50%;--rot:-3deg;font-size:92px;letter-spacing:4px">点火！</div>
+    <div class="n sm f c" style="left:470px;top:1048px;--tx:-50%;--d:2.7s;--op:.9;font-size:38px">33 台发动机一起吼</div>
+  </section>
+
+  <!-- S3 热分离 -->
+  <section class="scene" id="s3">
+    <svg class="art" id="art3" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f" style="left:88px;top:400px;--d:.2s">热分离</div>
+    <div class="n f" style="left:92px;top:512px;--d:.45s;--op:.9">二级点火，一级掉头</div>
+    <div class="n f" style="left:604px;top:126px;--d:1.0s;--rot:-1deg">星舰继续加速</div>
+    <div class="n f" style="left:604px;top:212px;--d:1.15s;--op:.9">飞向近地轨道</div>
+    <div class="n f" style="left:470px;top:1360px;--d:1.6s;--rot:-1.5deg;font-size:44px">助推器返航</div>
+    <div class="n sm f" style="left:470px;top:1448px;--d:1.75s;--op:.9;font-size:40px">斜着冲回发射场</div>
+  </section>
+
+  <!-- S4 入轨 -->
+  <section class="scene" id="s4">
+    <svg class="art" id="art4" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f" style="left:96px;top:300px;--d:.2s">进入轨道</div>
+    <div class="n f red" style="left:100px;top:420px;--d:.5s;font-size:50px">约 27,000 km/h</div>
+    <div class="n f" style="left:100px;top:1320px;--d:1.0s;--rot:-1.5deg;font-size:46px">90 分钟绕地球一圈</div>
+    <div class="n sm f" style="left:100px;top:1404px;--d:1.4s;--op:.9;font-size:40px">这，就是“可重复使用”的底气</div>
+  </section>
+
+  <!-- S5 筷子回收 -->
+  <section class="scene" id="s5">
+    <svg class="art" id="art5" viewBox="0 0 1080 1920"></svg>
+    <div class="n sm f c" style="left:196px;top:250px;--tx:-50%;--d:.2s;font-size:36px;--op:.9">T+ 6 分 50 秒</div>
+    <div class="n f" style="left:826px;top:700px;--d:.35s;--rot:-2deg;font-size:48px">斜着冲回来</div>
+    <div class="n f" style="left:872px;top:818px;--d:3.6s;--rot:-1deg;font-size:48px">翻正</div>
+    <div class="n f" style="left:862px;top:936px;--d:5.6s;--rot:-2deg;font-size:48px">慢慢降</div>
+    <div class="n f c" style="left:520px;top:1712px;--tx:-50%;--d:7.4s;font-size:54px">慢慢降到两根筷子中间</div>
+    <div class="n red f c stamp" style="left:672px;top:1256px;--tx:-50%;font-size:96px">夹住了！</div>
+  </section>
+
+  <!-- S6 再入 -->
+  <section class="scene" id="s6">
+    <svg class="art" id="art6" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f" style="left:90px;top:320px;--d:.2s">再入大气层</div>
+    <div class="n f red" style="left:94px;top:440px;--d:.45s;font-size:50px">迎风面 ~1400℃</div>
+    <div class="n f" style="left:96px;top:560px;--d:.7s;font-size:46px;--op:.9">不锈钢 + 隔热瓦，扛得住</div>
+    <div class="n f" style="left:880px;top:556px;--d:1.0s;font-size:38px">100 km</div>
+    <div class="n f" style="left:880px;top:896px;--d:1.2s;font-size:38px">50 km</div>
+    <div class="n sm f" style="left:620px;top:1600px;--d:1.5s;--op:.85">像一颗流星，砸回大气层</div>
+  </section>
+
+  <!-- S7 溅落 -->
+  <section class="scene" id="s7">
+    <svg class="art" id="art7" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f" style="left:96px;top:320px;--d:.2s">最后一步</div>
+    <div class="n f red" style="left:100px;top:440px;--d:.45s;font-size:56px">垂直溅落海面</div>
+    <div class="n f" style="left:104px;top:560px;--d:.7s;font-size:46px;--op:.9">回收复用，成本大降</div>
+    <div class="n sm f c" style="left:540px;top:1700px;--tx:-50%;--d:1.6s;--op:.9">星舰：我也不用一次性</div>
+  </section>
+
+  <!-- S8 结尾 -->
+  <section class="scene" id="s8">
+    <svg class="art" id="art8" viewBox="0 0 1080 1920"></svg>
+    <div class="n big f c" style="left:540px;top:660px;--tx:-50%;--d:.3s;font-size:96px;letter-spacing:8px">让人类成为</div>
+    <div class="n big f c" style="left:540px;top:790px;--tx:-50%;--d:.55s;font-size:104px;letter-spacing:10px">多行星物种</div>
+    <div class="n f c" style="left:540px;top:990px;--tx:-50%;--d:1.0s;font-size:44px;letter-spacing:8px;--op:.85">SpaceX · Starship</div>
+    <div class="n sm f c" style="left:540px;top:1740px;--tx:-50%;--d:1.6s;--op:.85">感谢观看　·　手绘科普</div>
+  </section>
+
+  </div><!-- /#safe -->
+</div>
+
+<script>
+"use strict";
+/* ================= 工具 ================= */
+const NS = "http://www.w3.org/2000/svg";
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function jitterPts(pts, amp, rand, close){
+  const out=[];
+  const seg=(x1,y1,x2,y2)=>{
+    const n=Math.max(1,Math.round(Math.hypot(x2-x1,y2-y1)/64));
+    for(let i=1;i<=n;i++){
+      const t=i/n; let x=x1+(x2-x1)*t, y=y1+(y2-y1)*t;
+      if(i<n){x+=(rand()-.5)*amp*2;y+=(rand()-.5)*amp*2;}
+      out.push([x,y]);
+    }
+  };
+  out.push(pts[0]);
+  for(let i=0;i<pts.length-1;i++) seg(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);
+  if(close) seg(pts[pts.length-1][0],pts[pts.length-1][1],pts[0][0],pts[0][1]);
+  return 'M'+out.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');
+}
+function ln(pts, o){
+  o=o||{};
+  const rand=mulberry32(o.seed||1);
+  const d=jitterPts(pts, o.amp==null?1.4:o.amp, rand, false);
+  return '<path d="'+d+'" fill="none" stroke="'+(o.c||'#2d2822')+'" stroke-width="'+(o.w||3)+
+    '" stroke-linecap="round" stroke-linejoin="round" opacity="'+(o.op==null?1:o.op)+'"'+(o.dash?' stroke-dasharray="'+o.dash+'"':'')+'/>';
+}
+function circlePath(cx,cy,r,seed,amp){
+  const rand=mulberry32(seed||3), pts=[], n=18;
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2, rr=r*(0.95+(rand()-.5)*0.09*(amp==null?1:amp));
+    pts.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]);
+  }
+  pts.push(pts[0]);
+  return jitterPts(pts, 1.6, rand, false);
+}
+function circle(cx,cy,r,o){
+  o=o||{};
+  return '<path d="'+circlePath(cx,cy,r,o.seed,o.amp)+'" fill="'+(o.fill||'none')+'" stroke="'+(o.c||'#2d2822')+
+    '" stroke-width="'+(o.w||3)+'" stroke-linejoin="round" opacity="'+(o.op==null?1:o.op)+'"/>';
+}
+function arrow(x1,y1,x2,y2,o){
+  o=o||{};
+  const seed=o.seed||7;
+  const d=o.curve? ('M'+x1+','+y1+' Q'+((x1+x2)/2+(o.curve||0))+','+((y1+y2)/2-(o.curve||0))+','+x2+','+y2)
+                  : jitterPts([[x1,y1],[x2,y2]],1.2,mulberry32(seed));
+  const ang=Math.atan2(y2-y1,x2-x1), a1=ang+Math.PI-0.42, a2=ang+Math.PI+0.42, L=o.head||16;
+  return '<g opacity="'+(o.op==null?1:o.op)+'">'+
+    '<path d="'+d+'" fill="none" stroke="'+(o.c||'#2d2822')+'" stroke-width="'+(o.w||3)+'" stroke-linecap="round"/>'+
+    '<path d="M'+(x2+Math.cos(a1)*L)+','+(y2+Math.sin(a1)*L)+' L'+x2+','+y2+' L'+(x2+Math.cos(a2)*L)+','+(y2+Math.sin(a2)*L)+
+    '" fill="none" stroke="'+(o.c||'#2d2822')+'" stroke-width="'+(o.w||3)+'" stroke-linecap="round" stroke-linejoin="round"/></g>';
+}
+function sparkle(x,y,s,c){
+  return '<g stroke="'+(c||'#2d2822')+'" stroke-width="3" stroke-linecap="round" fill="none">'+
+    '<path d="M'+x+','+(y-s)+' L'+x+','+(y+s)+'"/><path d="M'+(x-s)+','+y+' L'+(x+s)+','+y+'"/>'+
+    '<path d="M'+(x-s*.45)+','+(y-s*.45)+' L'+(x+s*.45)+','+(y+s*.45)+'"/><path d="M'+(x+s*.45)+','+(y-s*.45)+' L'+(x-s*.45)+','+(y+s*.45)+'"/></g>';
+}
+function star(x,y,s,c,op){
+  return '<path d="M'+x+','+(y-s)+' L'+(x+s*.28)+','+(y-s*.28)+' L'+(x+s)+','+y+' L'+(x+s*.28)+','+(y+s*.28)+
+    ' L'+x+','+(y+s)+' L'+(x-s*.28)+','+(y+s*.28)+' L'+(x-s)+','+y+' L'+(x-s*.28)+','+(y-s*.28)+' Z" fill="'+(c||'none')+
+    '" stroke="#2d2822" stroke-width="2.4" stroke-linejoin="round" opacity="'+(op==null?1:op)+'"/>';
+}
+/* ================= 绘制部件 ================= */
+function groundLine(x1,x2,y,seed){
+  let s=ln([[x1,y],[x2,y]],{w:4,seed:seed||5,op:.9});
+  for(let i=0;i<7;i++){
+    const x=x1+40+Math.random()*(x2-x1-80);
+    s+=ln([[x,y+6],[x+18,i%2?y+14:y-2]],{w:2,seed:(seed||5)+i+3,op:.35});
+  }
+  return s;
+}
+function gridFin(x,y,w,h,dir,seed){
+  let s='<g>';
+  s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="rgba(246,238,220,.55)" stroke="#2d2822" stroke-width="3"/>';
+  s+=ln([[x+w/2,y],[x+w/2,y+h]],{w:1.8,op:.65,seed:seed});
+  for(let i=1;i<3;i++) s+=ln([[x,y+h*i/3],[x+w,y+h*i/3]],{w:1.6,op:.55,seed:seed+i*3});
+  s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#hatch)" opacity=".25"/>';
+  s+='</g>';
+  return s;
+}
+function engines(cx, baseY, n, w, seed){
+  let s='';
+  const gap=w*0.42;
+  for(let i=0;i<n;i++){
+    const x=cx+(i-(n-1)/2)*gap;
+    s+='<path d="M'+(x-15)+','+baseY+' L'+(x-22)+','+(baseY+40)+' Q'+x+','+(baseY+54)+' '+(x+22)+','+(baseY+40)+
+       ' L'+(x+15)+','+baseY+'" fill="rgba(246,238,220,.6)" stroke="#2d2822" stroke-width="3" stroke-linejoin="round"/>';
+    s+=ln([[x-8,baseY+4],[x-12,baseY+40]],{w:1.6,op:.5,seed:seed+i});
+  }
+  return s;
+}
+function boosterMarkup(w,bh,o){
+  o=o||{}; const hw=w/2, seed=o.seed||31, shaft=o.flameBase;
+  let s='<g filter="url(#rough)">';
+  const outline=jitterPts([[-hw,0],[-hw,-bh+8],[-hw+8,-bh],[hw-8,-bh],[hw,-bh+8],[hw,0],[-hw,0]],1.1,mulberry32(seed));
+  s+='<path d="'+outline+'" fill="rgba(246,238,220,.5)" stroke="#2d2822" stroke-width="4.2" stroke-linejoin="round"/>';
+  // 竖向焊缝
+  s+=ln([[-hw/3,-bh+18],[-hw/3,-6]],{w:2,op:.45,seed:seed+2});
+  s+=ln([[hw/3,-bh+18],[hw/3,-6]],{w:2,op:.45,seed:seed+3});
+  // 横向环缝
+  for(let i=1;i<6;i++){
+    const y=-bh+18+ (bh-24)*i/6;
+    s+=ln([[-hw+3,y],[hw-3,y]],{w:1.7,op:.26,seed:seed+10+i});
+  }
+  // 左侧体积阴影
+  s+='<path d="M'+(-hw+4)+','+(-bh+10)+' L'+(-hw+4)+',-4 L'+(-hw+26)+',-4 L'+(-hw+26)+','+(-bh+10)+' Z" fill="url(#hatch)" opacity=".30"/>';
+  // 格栅舵
+  s+=gridFin(-hw-30,-bh+32,30,66,-1,seed+21);
+  s+=gridFin(hw,-bh+32,30,66,1,seed+25);
+  // 顶部环
+  s+=ln([[-hw+2,-bh+6],[hw-2,-bh+6]],{w:3,op:.6,seed:seed+30});
+  // 底部裙
+  s+=ln([[-hw,0],[hw,0]],{w:3.4,op:.8,seed:seed+31});
+  s+=ln([[-hw+14,-2],[-hw+6,44]],{w:2.6,op:.7,seed:seed+32});
+  s+=ln([[hw-14,-2],[hw-6,44]],{w:2.6,op:.7,seed:seed+33});
+  // 发动机
+  s+=engines(0,42,3,w,seed+40);
+  s+='</g>';
+  return s;
+}
+function shipMarkup(w,sh,o){
+  o=o||{}; const hw=w/2, seed=o.seed||61;
+  const cyl=sh*0.52, cy=-cyl;
+  let s='<g filter="url(#rough)">';
+  const body='M'+(-hw)+',0 L'+(-hw)+','+cy+' C'+(-hw)+','+(cy-sh*0.24)+' '+(-hw*0.48)+','+(cy-sh*0.40)+' 0,'+(-sh)+
+    ' C'+(hw*0.48)+','+(cy-sh*0.40)+' '+(hw)+','+(cy-sh*0.24)+' '+(hw)+','+cy+' L'+(hw)+',0 Z';
+  s+='<path d="'+body+'" fill="rgba(246,238,220,.5)" stroke="#2d2822" stroke-width="4.2" stroke-linejoin="round"/>';
+  // 隔热瓦（右半）
+  s+='<path d="M0,'+(-sh)+' C'+(hw*0.48)+','+(cy-sh*0.40)+' '+(hw)+','+(cy-sh*0.24)+' '+(hw)+','+cy+' L'+(hw)+',0 L0,0 Z" fill="url(#hatchD)" opacity=".78"/>';
+  s+='<path d="M0,'+(-sh)+' C'+(hw*0.48)+','+(cy-sh*0.40)+' '+(hw)+','+(cy-sh*0.24)+' '+(hw)+','+cy+' L'+(hw)+',0 L0,0 Z" fill="#2f2a24" opacity=".14"/>';
+  s+=ln([[0,-sh+8],[0,-4]],{w:2.4,op:.7,seed:seed+2});
+  // 环缝
+  for(let i=1;i<4;i++){
+    const y=-cyl*i/4;
+    s+=ln([[-hw+3,y],[hw-3,y]],{w:1.7,op:.25,seed:seed+10+i});
+  }
+  // 襟翼（前后各一对）
+  const fF='M'+(-hw+2)+','+(-sh*0.84)+' C'+(-hw-24)+','+(-sh*0.87)+' '+(-hw-34)+','+(-sh*0.79)+' '+(-hw-28)+','+(-sh*0.73)+' L'+(-hw+2)+','+(-sh*0.70)+' Z';
+  const fA='M'+(-hw+2)+','+(-sh*0.20)+' C'+(-hw-28)+','+(-sh*0.23)+' '+(-hw-36)+','+(-sh*0.11)+' '+(-hw-26)+','+(-sh*0.04)+' L'+(-hw+2)+','+(-sh*0.02)+' Z';
+  [fF,fA].forEach((d,i)=>{
+    const op=i===0?0.26:0.3;
+    s+='<path d="'+d+'" fill="rgba(246,238,220,.72)" stroke="#2d2822" stroke-width="3.2" stroke-linejoin="round"/>';
+    s+='<path d="'+d+'" fill="url(#hatch)" opacity="'+op+'"/>';
+    s+='<g transform="scale(-1,1)"><path d="'+d+'" fill="rgba(246,238,220,.72)" stroke="#2d2822" stroke-width="3.2" stroke-linejoin="round"/>';
+    s+='<path d="'+d+'" fill="url(#hatch)" opacity="'+op+'"/></g>';
+  });
+  s+=ln([[0,-sh+4],[0,-sh-12]],{w:2.4,op:.7,seed:seed+7});
+  s+='</g>';
+  return s;
+}
+function stackMarkup(w,bh,sh,o){
+  o=o||{};
+  return boosterMarkup(w,bh,{seed:31})+'<g transform="translate(0,'+(-bh)+')">'+shipMarkup(w,sh,{seed:61})+'</g>';
+}
+function flameMarkup(cx,cy,sc,seed,o){
+  const S=sc, K=(o&&o.k)||1;
+  const tongue=(x,s,fill,op)=>'<path d="M'+x+',0 C'+(x-14*s)+','+(28*s)+' '+(x-20*s)+','+(74*s)+' '+x+','+(154*s)+
+    ' C'+(x+20*s)+','+(74*s)+' '+(x+14*s)+','+(28*s)+' '+x+',0 Z" fill="'+fill+'" opacity="'+op+'"/>';
+  let m='<g class="flame g-top"><g filter="url(#rough2)">';
+  m+=tongue(-38*S,0.82*K,'#e07a2c',.5);
+  m+=tongue(38*S,0.82*K,'#e07a2c',.5);
+  m+=tongue(0,1.3*K,'#e07a2c',.85);
+  m+=tongue(0,0.98*K,'#f2b24a',.95);
+  m+=tongue(0,0.6*K,'#f8e0a0',1);
+  m+=ln([[-56*S,8],[-72*S,40]],{w:2.4,op:.4,seed:seed});
+  m+=ln([[56*S,12],[72*S,46]],{w:2.4,op:.4,seed:seed+1});
+  m+='</g></g>';
+  return '<g transform="translate('+cx+','+cy+')">'+m+'</g>';
+}
+function puff(cx,cy,r,seed,op){
+  const rand=mulberry32(seed), pts=[], n=Math.max(16,Math.round(r*0.34));
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2, rr=r*(0.88+rand()*0.24);
+    pts.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]);
+  }
+  pts.push(pts[0]);
+  return '<path d="'+jitterPts(pts,Math.max(1,r*0.02),rand)+'" fill="rgba(250,244,228,.85)" stroke="#57493a" stroke-width="2.4" '+
+    'opacity="'+(op==null?.85:op)+'" stroke-linejoin="round"/>';
+}
+function towerMarkup(o){
+  const x=o.x, w=o.w, top=o.top, bottom=o.bottom, seed=o.seed||11;
+  let s='';
+  s+=ln([[x,top],[x,bottom]],{w:5.2,seed:seed});
+  s+=ln([[x+w,top],[x+w,bottom]],{w:5.2,seed:seed+1});
+  const rows=Math.round((bottom-top)/82);
+  for(let i=0;i<=rows;i++){
+    const y=top+i*(bottom-top)/rows;
+    s+=ln([[x,y],[x+w,y]],{w:2.7,op:.9,seed:seed+11+i});
+    if(i<rows){
+      const y2=top+(i+1)*(bottom-top)/rows;
+      s+=ln([[x,y],[x+w,y2]],{w:2.1,op:.72,seed:seed+41+i});
+      s+=ln([[x+w,y],[x,y2]],{w:1.9,op:.45,seed:seed+91+i});
+      if(i%4===1){
+        s+='<path d="M'+(x+8)+','+(y+9)+' L'+(x+w-8)+','+(y+9)+' L'+(x+w-8)+','+(y2-9)+' L'+(x+8)+','+(y2-9)+' Z" fill="url(#hatch)" opacity=".2"/>';
+      }
+    }
+  }
+  // 顶部平台
+  s+=ln([[x-24,top],[x+w+24,top]],{w:5.4,seed:seed+130});
+  s+=ln([[x-24,top],[x-24,top-56]],{w:4.2,seed:seed+131});
+  s+=ln([[x+w+24,top],[x+w+24,top-56]],{w:4.2,seed:seed+132});
+  s+=ln([[x-24,top-56],[x+w+24,top-56]],{w:4.2,seed:seed+133});
+  s+=ln([[x+24,top-56],[x+24,top]],{w:2,op:.55,seed:seed+134});
+  s+=ln([[x+w-24,top-56],[x+w-24,top]],{w:2,op:.55,seed:seed+135});
+  s+=ln([[x+w/2,top-56],[x+w/2,top-128]],{w:2.8,seed:seed+136});
+  s+=ln([[x+w/2-16,top-128],[x+w/2+16,top-128]],{w:2.8,seed:seed+137});
+  // 底座
+  s+=ln([[x-28,bottom],[x+w+28,bottom]],{w:5.4,seed:seed+140});
+  s+=ln([[x-8,bottom-12],[x-38,bottom]],{w:3.2,seed:seed+141});
+  s+=ln([[x+w+8,bottom-12],[x+w+38,bottom]],{w:3.2,seed:seed+142});
+  // 电梯
+  s+='<rect x="'+(x+w/2-17)+'" y="'+(top+240)+'" width="34" height="48" fill="rgba(246,238,220,.6)" stroke="#2d2822" stroke-width="2.4"/>';
+  s+=ln([[x+w/2-17,top+264],[x+w/2+17,top+264]],{w:1.8,op:.6,seed:seed+150});
+  return s;
+}
+function armMarkup(px,py,len,cls,seed){
+  let s='';
+  s+=ln([[0,0],[len,-2]],{w:4.2,seed:seed});
+  s+=ln([[0,0],[len,18]],{w:4.2,seed:seed+1});
+  for(let i=0;i<9;i++){
+    s+=ln([[i*len/9,1],[(i+1)*len/9,17]],{w:2,op:.68,seed:seed+10+i});
+  }
+  s+=ln([[len-8,-22],[len-8,32]],{w:4.4,seed:seed+30});
+  s+=ln([[len-8,-22],[len-40,-22]],{w:3.4,seed:seed+31});
+  s+=ln([[len-8,32],[len-40,32]],{w:3.4,seed:seed+32});
+  s+='<rect x="'+(len-40)+'" y="-20" width="18" height="48" fill="url(#hatch)" opacity=".3"/>';
+  return '<g transform="translate('+px+','+py+')"><g class="arm '+cls+'" filter="url(#rough)">'+s+'</g></g>';
+}
+/* ================= 场景拼装 ================= */
+function miniRocket(k){
+  return '<g transform="scale('+k+')"><g filter="url(#rough)">'+
+    '<path d="M-16,0 L-16,-62 C-16,-94 -7,-110 0,-122 C7,-110 16,-94 16,-62 L16,0 Z" fill="rgba(246,238,220,.75)" stroke="#2d2822" stroke-width="3.4" stroke-linejoin="round"/>'+
+    '<path d="M-16,-4 L-36,18 L-17,-2 Z" fill="rgba(246,238,220,.75)" stroke="#2d2822" stroke-width="3" stroke-linejoin="round"/>'+
+    '<path d="M16,-4 L36,18 L17,-2 Z" fill="rgba(246,238,220,.75)" stroke="#2d2822" stroke-width="3" stroke-linejoin="round"/>'+
+    '<circle cx="0" cy="-88" r="7" fill="none" stroke="#2d2822" stroke-width="2.6"/>'+
+    '<path d="M-16,-62 L16,-62" stroke="#2d2822" stroke-width="2.2" opacity=".6"/>'+
+    '<path d="M-8,2 L-8,16 M0,2 L0,22 M8,2 L8,14" stroke="#c9612a" stroke-width="3" stroke-linecap="round"/>'+
+    '</g></g>';
+}
+function ellipseJitter(cx,cy,rx,ry,seed){
+  const rand=mulberry32(seed), pts=[], n=44;
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2, f=.965+rand()*.07;
+    pts.push([cx+Math.cos(a)*rx*f, cy+Math.sin(a)*ry*f]);
+  }
+  pts.push(pts[0]);
+  return jitterPts(pts,1.7,rand);
+}
+function ring(cx,cy,rx,ry,seed){
+  const rand=mulberry32(seed), pts=[], n=26;
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2, f=.95+rand()*.1;
+    pts.push([cx+Math.cos(a)*rx*f, cy+Math.sin(a)*ry*f]);
+  }
+  pts.push(pts[0]);
+  return '<path d="'+jitterPts(pts,1.4,rand)+'" fill="none" stroke="#2d2822" stroke-width="2.4" opacity=".5"/>';
+}
+function setArt(id, markup){ document.getElementById(id).innerHTML = markup; }
+function markDraw(sel, base, step, dur){
+  const paths = document.querySelectorAll(sel+' .draw path');
+  paths.forEach((p,i)=>{
+    const L = Math.ceil(p.getTotalLength()||1200);
+    p.style.strokeDasharray = L;
+    p.style.setProperty('--len', L);
+    p.style.setProperty('--d', (base+i*step).toFixed(2)+'s');
+    p.style.setProperty('--dur', dur+'s');
+  });
+}
+
+/* S0 标题 */
+(function(){
+  let s='<g filter="url(#rough)">';
+  [[170,330,9],[860,250,8],[706,438,7],[958,560,6],[120,760,7],[972,930,7],[300,1010,6],[890,1520,7]]
+    .forEach((p,i)=>{ s+=star(p[0],p[1],p[2], i%3===0?'#b23a2a':'none', .42); });
+  // 地球
+  s+=circle(238,1562,82,{seed:5,fill:'rgba(246,238,220,.55)',w:3.4});
+  s+=ln([[190,1522],[216,1546],[244,1530],[272,1552]],{w:2.2,op:.5,seed:9});
+  s+=ln([[206,1582],[234,1606],[262,1588]],{w:2.2,op:.5,seed:10});
+  // 火星
+  s+=circle(838,1394,36,{seed:6,fill:'url(#hatch)',w:3});
+  s+=circle(826,1382,7,{seed:7,op:.5,w:2});
+  s+=circle(850,1408,5,{seed:8,op:.5,w:2});
+  // 弧线
+  s+='<path d="M322,1520 C414,1330 520,1120 700,1112 C770,1108 800,1202 812,1318" fill="none" stroke="#2d2822" stroke-width="3" stroke-dasharray="16 18" opacity=".7"/>';
+  s+=arrow(792,1352,812,1316,{seed:3,w:2.6,head:13});
+  s+='<g transform="translate(598,1176) rotate(-40)">'+miniRocket(1)+'</g>';
+  s+='</g>';
+  setArt('art0',s);
+})();
+
+/* S1 全箭 */
+(function(){
+  let s='';
+  s+='<g filter="url(#rough)">'+groundLine(60,1020,1615,3)+'</g>';
+  s+='<g class="draw"><g filter="url(#rough)">'+towerMarkup({x:150,w:150,top:380,bottom:1616,seed:11})+'</g></g>';
+  s+='<g filter="url(#rough)">'+armMarkup(300,486,318,'',95)+armMarkup(300,614,318,'',99)+'</g>';
+  s+='<g class="draw"><g filter="url(#rough)"><g transform="translate(720,1560)">'+stackMarkup(156,690,470)+'</g></g></g>';
+  s+='<g filter="url(#rough2)">';
+  s+=ln([[1012,398],[1012,1560]],{w:2,op:.45,dash:'9 12',seed:120});
+  s+=ln([[996,398],[1028,398]],{w:2.6,op:.7,seed:121});
+  s+=ln([[996,1560],[1028,1560]],{w:2.6,op:.7,seed:122});
+  s+=arrow(866,486,806,470,{curve:-16,seed:123,w:2.6,head:13});
+  s+=arrow(898,676,802,706,{seed:124,w:2.6,head:13});
+  s+=arrow(618,1450,680,1528,{seed:125,w:2.6,head:13});
+  s+=arrow(492,344,516,462,{seed:126,w:2.6,head:13});
+  s+='</g>';
+  setArt('art1',s);
+  markDraw('#art1', .1, .012, 1.4);
+})();
+
+/* S2 点火起飞 */
+(function(){
+  let s='';
+  s+='<g filter="url(#rough)">'+groundLine(40,1040,1616,6)+'</g>';
+  s+='<g filter="url(#rough)">'+towerMarkup({x:150,w:150,top:380,bottom:1616,seed:13})+'</g>';
+  s+='<g filter="url(#rough)">'+armMarkup(300,486,318,'',75)+armMarkup(300,614,318,'',79)+'</g>';
+  s+='<g filter="url(#rough)">';
+  s+='<g class="smokeLift">'+puff(846,1560,104,101,.78)+puff(968,1512,78,102,.62)+puff(742,1588,70,107,.6)+'</g>';
+  s+='<g class="smokeLift b">'+puff(806,1620,86,103,.72)+puff(1010,1588,66,104,.55)+puff(700,1620,56,108,.5)+'</g>';
+  s+=ln([[652,1690],[652,1822]],{w:2.4,op:.3,seed:41});
+  s+=ln([[792,1700],[792,1852]],{w:2.4,op:.26,seed:42});
+  s+='</g>';
+  s+='<g transform="translate(720,1560)"><g class="stackLift">';
+  s+=stackMarkup(156,690,470);
+  s+='<g class="flameLift">'+flameMarkup(0,96,1.55,55,{k:1.5})+'</g>';
+  s+='</g></g>';
+  setArt('art2',s);
+})();
+
+/* S3 热分离 */
+(function(){
+  let s='<g filter="url(#rough)">';
+  s+='<path d="M492,1214 C446,1300 372,1432 300,1512" fill="none" stroke="#2d2822" stroke-width="2.6" stroke-dasharray="14 20" opacity=".38"/>';
+  s+='<path d="M320,1506 L296,1520 L318,1530" fill="none" stroke="#2d2822" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>';
+  // 星舰
+  s+='<g transform="translate(660,1160)"><g class="sepShip g-rot">';
+  s+=shipMarkup(150,470,{seed:62});
+  s+='<g class="flameSep">'+flameMarkup(0,0,.72,66)+'</g>';
+  s+='</g></g>';
+  // 助推器
+  s+='<g transform="translate(340,1648)"><g class="sepBooster g-rot">';
+  s+=boosterMarkup(156,620,{seed:33});
+  s+='<g class="flameSep">'+flameMarkup(0,94,.52,67)+'</g>';
+  s+='</g></g>';
+  // 分离烟雾
+  s+=puff(516,986,62,105,.6)+puff(568,1058,42,106,.45);
+  s+=sparkle(576,912,15,'#b23a2a');
+  s+='</g>';
+  setArt('art3',s);
+})();
+
+/* S4 入轨 */
+(function(){
+  let s='<g filter="url(#rough)">';
+  s+=circle(540,2680,1180,{seed:12,w:4.2,fill:'rgba(244,232,208,.55)'});
+  s+='<path d="M-90,1688 A 1180,1180 0 0 1 1170,1688" fill="none" stroke="url(#hatch)" stroke-width="52" opacity=".26"/>';
+  // 大陆轮廓
+  s+='<path d="M260,1762 C332,1702 432,1718 450,1774 C422,1832 306,1842 276,1798 Z" fill="none" stroke="#2d2822" stroke-width="2.4" opacity=".32"/>';
+  s+='<path d="M642,1742 C702,1706 786,1720 802,1774 C778,1826 690,1836 656,1796 Z" fill="none" stroke="#2d2822" stroke-width="2.4" opacity=".28"/>';
+  // 云
+  s+=puff(330,1398,34,401,.35)+puff(762,1468,28,402,.3);
+  // 轨道
+  s+='<path d="'+ellipseJitter(540,1960,840,650,7)+'" fill="none" stroke="#2d2822" stroke-width="3" stroke-dasharray="18 20" opacity=".6" class="orbitDash"/>';
+  // 星舰
+  s+='<g transform="translate(796,1258) rotate(16)"><g class="shipFloat g-rot">'+
+      shipMarkup(96,268,{seed:63})+flameMarkup(0,-2,.45,70)+'</g></g>';
+  s+=arrow(876,1112,926,1022,{seed:28,w:2.6,head:13});
+  s+=star(184,1132,10,'#b23a2a',.45)+star(920,880,9,'none',.45)+star(120,900,7,'none',.4);
+  s+=sparkle(980,1170,12,'#2d2822');
+  s+='</g>';
+  setArt('art4',s);
+})();
+
+/* S5 筷子回收 */
+(function(){
+  let s='';
+  s+='<g filter="url(#rough)">'+groundLine(40,1040,1616,8)+'</g>';
+  s+='<g filter="url(#rough)">'+towerMarkup({x:140,w:140,top:380,bottom:1616,seed:15})+'</g>';
+  s+='<g filter="url(#rough2)">'+ln([[650,470],[650,1080]],{w:2,op:.28,dash:'8 14',seed:150})+'</g>';
+  // 返回的助推器
+  s+='<g transform="translate(650,1090)"><g class="catchMove g-rot">';
+  s+=boosterMarkup(156,620,{seed:35});
+  s+='<g class="burnWrap">'+flameMarkup(0,88,1.45,71)+'</g>';
+  s+='</g></g>';
+  // 机械臂（覆盖在助推器前，形成夹持感）
+  s+='<g filter="url(#rough)">'+armMarkup(280,520,430,'armTop',91)+armMarkup(280,640,430,'armBot',97)+'</g>';
+  // 右上角秒表
+  s+='<g filter="url(#rough2)" transform="translate(196,152)">';
+  s+=circle(0,0,64,{seed:16,w:3.2});
+  s+=ln([[0,0],[0,-38]],{w:3.4,seed:18});
+  s+=ln([[0,0],[24,12]],{w:3.4,seed:19});
+  s+=ln([[0,-64],[0,-86]],{w:3.4,seed:20});
+  s+=ln([[-16,-92],[16,-92]],{w:3.4,seed:21});
+  for(let i=0;i<12;i++){
+    const a=i/12*Math.PI*2;
+    s+=ln([[Math.cos(a)*50,Math.sin(a)*50],[Math.cos(a)*57,Math.sin(a)*57]],{w:2,op:.6,seed:220+i});
+  }
+  s+='<circle cx="0" cy="0" r="5" fill="#2d2822"/>';
+  s+='</g>';
+  // 夹住时的火花
+  s+='<g class="spark">'+sparkle(700,436,17,'#b23a2a')+sparkle(796,528,11,'#2d2822')+sparkle(608,416,9,'#2d2822')+'</g>';
+  setArt('art5',s);
+})();
+
+/* S6 再入 */
+(function(){
+  let s='<g filter="url(#rough)">';
+  // 高度刻度
+  [560,900,1240].forEach((y,i)=>{ s+=ln([[1000,y],[1044,y]],{w:2.6,op:.6,seed:150+i}); });
+  s+=ln([[1022,540],[1022,1260]],{w:2,op:.3,dash:'8 10',seed:155});
+  // 星舰（倾斜）+ 等离子
+  s+='<g transform="translate(560,1080) rotate(38)">';
+  s+=shipMarkup(150,470,{seed:64});
+  s+='<g transform="translate(0,6)">';
+  s+='<ellipse cx="0" cy="150" rx="80" ry="230" fill="#e07a2c" opacity=".16" class="plasma" style="transform-box:fill-box;transform-origin:50% 0%"/>';
+  s+='<ellipse cx="0" cy="110" rx="46" ry="150" fill="#f2b24a" opacity=".2" class="plasma" style="transform-box:fill-box;transform-origin:50% 0%"/>';
+  s+=ln([[-26,40],[-52,300]],{w:3,op:.55,c:'#c9612a',seed:156});
+  s+=ln([[0,50],[6,340]],{w:4,op:.6,c:'#d97632',seed:157});
+  s+=ln([[26,44],[48,290]],{w:3,op:.5,c:'#c9612a',seed:158});
+  s+='<path d="M-74,26 C-106,128 -100,232 -66,318" fill="none" stroke="#c9612a" stroke-width="2.8" opacity=".38"/>';
+  s+='<path d="M74,32 C106,134 100,238 66,324" fill="none" stroke="#c9612a" stroke-width="2.8" opacity=".32"/>';
+  s+='</g></g>';
+  // 小烟
+  s+=puff(436,880,30,160,.35)+puff(700,660,24,161,.3);
+  s+='</g>';
+  setArt('art6',s);
+})();
+
+/* S7 溅落 */
+(function(){
+  function wave(x,y,len,seed,op){
+    let d='M'+x+','+y;
+    const n=Math.max(1,Math.round(len/68));
+    for(let i=0;i<n;i++) d+=' q17,'+((i%2)?-9:9)+' 34,0';
+    return '<path d="'+d+'" fill="none" stroke="#2d2822" stroke-width="2" opacity="'+op+'" stroke-linecap="round"/>';
+  }
+  let s='<g filter="url(#rough)">';
+  // 云 + 下降箭头
+  s+=puff(258,1012,40,410,.3)+puff(812,918,32,411,.26);
+  s+='<g filter="url(#rough2)">'+
+     '<path d="M540,806 L540,1064" stroke="#2d2822" stroke-width="2.6" stroke-dasharray="12 16" opacity=".35" fill="none"/>'+
+     arrow(540,1064,540,1122,{seed:412,w:2.6,head:16,op:.45})+'</g>';
+  // 海面
+  s+=ln([[-10,1432],[1090,1432]],{w:4,seed:44,op:.85});
+  for(let r=0;r<4;r++){
+    for(let i=0;i<6;i++){
+      const y=1486+r*96, x=12+i*180+r*48;
+      s+=wave(x,y,150,300+r*10+i,.30-r*.045);
+    }
+  }
+  s+='<g class="rip a">'+ring(540,1570,210,42,171)+'</g>';
+  s+='<g class="rip b">'+ring(540,1570,270,56,172)+'</g>';
+  s+='<g class="spray">'+puff(432,1524,46,173,.6)+puff(662,1534,38,174,.5)+puff(560,1508,30,176,.45)+'</g>';
+  s+='<g transform="translate(540,1496)"><g class="splashShip">';
+  s+=shipMarkup(134,420,{seed:65});
+  s+='<g class="splashFlame">'+flameMarkup(0,6,.55,72)+'</g>';
+  s+='</g></g>';
+  s+='</g>';
+  setArt('art7',s);
+})();
+
+/* S8 结尾 */
+(function(){
+  let s='<g filter="url(#rough)">';
+  s+=circle(360,1444,66,{seed:18,fill:'rgba(246,238,220,.5)'});
+  s+=ln([[324,1414],[352,1436],[382,1418]],{w:2,op:.45,seed:19});
+  s+='<path d="'+ellipseJitter(540,1362,332,172,21)+'" fill="none" stroke="#2d2822" stroke-width="2.6" stroke-dasharray="14 16" opacity=".5"/>';
+  s+='<g transform="translate(702,1244) rotate(28)"><g class="outRocket g-rot">'+miniRocket(.92)+'</g></g>';
+  s+=star(180,1182,10,'#b23a2a',.45)+star(906,1104,8,'none',.45)+star(240,1020,6,'none',.35);
+  s+=sparkle(824,1582,12,'#2d2822')+sparkle(300,1600,9,'#2d2822');
+  s+='</g>';
+  setArt('art8',s);
+})();
+
+/* ================= 时间轴 ================= */
+const BEATS = [['s0',0],['s1',12.9],['s2',32.4],['s3',44.2],['s4',57.9],['s5',71.7],['s6',86.2],['s7',101.9],['s8',113.8]];
+const TOTAL = 122.4;
+let currentScene=null, beatIdx=0, t0=0, started=false;
+function activate(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.add('on');
+  if(currentScene && currentScene!==el){
+    const prev=currentScene;
+    setTimeout(()=>prev.classList.remove('on'), 520);
+  }
+  currentScene=el;
+}
+function start(){
+  if(started) return;
+  started=true;
+  t0=performance.now();
+  const tick=()=>{
+    const t=(performance.now()-t0)/1000;
+    while(beatIdx<BEATS.length && t>=BEATS[beatIdx][1]){ activate(BEATS[beatIdx][0]); beatIdx++; }
+    if(t<TOTAL+2) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+window.__start = start;
+
+/* 逐帧渲染：?render=1 时由 puppeteer 调用 __seek(ms) 精确定格 */
+let rIdx=-1, rSwitch=0;
+window.__seek = function(ms){
+  let i=0;
+  for(let k=0;k<BEATS.length;k++) if(ms>=BEATS[k][1]*1000) i=k;
+  if(i!==rIdx){
+    if(rIdx>=0) document.getElementById(BEATS[rIdx][0]).classList.remove('on');
+    document.getElementById(BEATS[i][0]).classList.add('on');
+    rIdx=i; rSwitch=ms;
+  }
+  BEATS.forEach((b,k)=>{
+    const el=document.getElementById(b[0]);
+    if(!el.classList.contains('on')) return;
+    const local = (k===rIdx) ? ms-b[1]*1000 : ms-rSwitch;
+    el.getAnimations({subtree:true}).forEach(a=>{
+      try{ a.pause(); a.currentTime=Math.max(0,local); }catch(e){}
+    });
+  });
+  return i;
+};
+
+const q = new URLSearchParams(location.search);
+if(q.get('still')==='1') document.getElementById('stage').classList.add('still');
+function fit(){
+  const k=Math.min(innerWidth/1080, innerHeight/1920);
+  document.getElementById('stage').style.transform='scale('+k+')';
+}
+fit();
+addEventListener('resize', fit);
+
+document.fonts.ready.then(()=>{
+  window.__ready = true;
+  if(q.get('scene')){
+    activate(q.get('scene'));
+    beatIdx = BEATS.length;
+    started = true;
+    markDraw('#art1', 0, 0, 1.2);
+  } else if(q.get('manual')!=='1' && q.get('render')!=='1'){
+    setTimeout(start, 400);
+  }
+});
+</script>
+</body>
+</html>
