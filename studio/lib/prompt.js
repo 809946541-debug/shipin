@@ -1,0 +1,123 @@
+'use strict';
+// 分镜提示词与结果校验
+
+const KINDS = ['cover', 'bullets', 'list', 'flow', 'compare', 'bars', 'line', 'stats', 'end'];
+// 实测：YunjianNeural +12% 语速约 5.05 个汉字/秒
+const CHARS_PER_SEC = 5.05;
+const GAP_PER_SCENE = 1.3; // 句首 0.3s + 句尾 1.0s
+
+function planScenes(minutes) {
+  return Math.min(38, Math.max(16, Math.round(minutes * 5.5)));
+}
+
+const SYSTEM = `你是一名中文财经竖屏短视频的分镜编导。你把用户给出的主题，整理成一份可直接渲染的 JSON 分镜。
+
+【硬性要求】
+1. 只输出 JSON，不要解释、不要 markdown 代码块。
+2. 内容必须客观：只做公开信息梳理与情景推演，不荐股、不喊单、不预测具体点位、不评价他国领导人、不描述暴力细节、不使用煽动性表述。
+3. 数值只写你确定有公开来源的；不确定就改用定性表述。不要编造精确数字。
+4. 最后一屏必须是 end 类型，stamp 固定为「不构成投资建议」。
+5. 语言风格：口语、短句、克制，不用感叹号，不用“我们必须”“震惊”“内幕”等词。
+
+【结构】
+{"meta":{"title":"主标题，不超过 16 字","subtitle":"副标题，一句话，不超过 26 字","kicker":"手绘财经 · 情景推演 · 2026.11","disclaimer":"公开信息梳理 · 不构成投资建议","source":"数据来源说明，不超过 22 字"},"scenes":[...]}
+
+scenes 第 1 屏固定 kind="cover"，最后一屏固定 kind="end"，中间每屏从下列类型中选最合适的一种：
+- bullets：3–4 条并列要点 {points:[{"t":"要点，不超过 16 字","d":"说明，不超过 28 字"}]}
+- list：4–5 条纵向清单，字段同上
+- flow：3–4 步因果或流程 {steps:["不超过 8 字", ...]}
+- compare：左右对比 {left:{"title":"不超过 10 字","items":["不超过 14 字","..."]},"right":{...},"notes":["..."]}
+- bars：3–4 根柱状对比 {bars:[{"label":"不超过 8 字","value":数字,"note":"顶部显示的文本，如 29.7%"}],"unit":"%","notes":["..."]}
+- line：3–6 个时间点走势 {line:{"labels":["2月","6月","9月"],"values":[70,118,83],"unit":"美元"},"notes":["..."]}
+- stats：2–3 个关键数字 {stats:[{"v":"29.7%","l":"说明，不超过 12 字"}],"notes":["..."]}
+- end：结论 {title:"不超过 12 字","sub":"不超过 24 字","lines":["第一句，不超过 30 字","第二句","第三句"]}
+
+每屏都必带：
+- "narration"：这一屏的旁白，一句完整口语，长度见用户要求，句末用句号。只描述画面对应的信息，不要念“如图所示”。
+- "kicker"：短标签，2–6 字，如「第一层」「通道」「结论」。
+- "foot"：数据口径或来源提示，不超过 18 字，如「公开数据整理 · 2026」。
+- 非 cover 屏的 "title"：不超过 12 字；"sub"：不超过 24 字。
+
+【画面匹配】
+标题与图形要互补：有先后关系用 flow，有对立用 compare，有数量差距用 bars，有时间变化用 line，有 2–3 个关键数字用 stats，多要点用 bullets，条目多且需要解释用 list。
+相邻两屏不要连续使用同一种图形类型（cover/end 除外）。`;
+
+function buildUserPrompt(brief) {
+  const minutes = Number(brief.minutes) || 5;
+  const scenes = planScenes(minutes);
+  const narrationChars = Math.round((minutes * 60 - scenes * GAP_PER_SCENE) / scenes * CHARS_PER_SEC / 5) * 5;
+  return `请为下面这个选题做分镜。
+
+标题：${brief.title}
+一句话介绍：${brief.summary}
+补充要求：${brief.requirements || '无'}
+目标时长：约 ${minutes} 分钟
+屏数：${scenes} 屏（含首尾）
+每屏旁白字数：${Math.max(35, narrationChars - 6)}–${narrationChars + 4} 个汉字（这是配音时长匹配的关键，务必遵守）
+
+输出 JSON。`;
+}
+
+function stripFence(text) {
+  let t = String(text || '').trim();
+  t = t.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+  const s = t.indexOf('{');
+  const e = t.lastIndexOf('}');
+  if (s >= 0 && e > s) t = t.slice(s, e + 1);
+  return t;
+}
+
+const clean = (v, max = 200) => String(v == null ? '' : v)
+  .replace(/[\r\n\t]+/g, ' ')
+  .replace(/\*\*/g, '')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .slice(0, max);
+
+function validate(raw) {
+  const board = typeof raw === 'string' ? JSON.parse(stripFence(raw)) : raw;
+  if (!board || !Array.isArray(board.scenes) || board.scenes.length < 8) {
+    throw new Error('分镜数量不足或格式错误');
+  }
+  const meta = board.meta || {};
+  board.meta = {
+    title: clean(meta.title || '', 30) || '未命名选题',
+    subtitle: clean(meta.subtitle || '', 40),
+    kicker: clean(meta.kicker || '手绘财经 · 情景推演', 40),
+    disclaimer: clean(meta.disclaimer || '公开信息梳理 · 不构成投资建议', 40),
+    source: clean(meta.source || '公开信息整理', 30),
+  };
+
+  const src = board.scenes.slice(0, 40);
+  board.scenes = src.map((s, i) => {
+    const kind = KINDS.includes(s.kind) ? s.kind : 'bullets';
+    const out = { kind, kicker: clean(s.kicker, 12), narration: clean(s.narration, 300), foot: clean(s.foot, 30) };
+    if (i === 0) out.kind = 'cover';
+    if (i === src.length - 1) out.kind = 'end';
+    out.title = clean(s.title, 30);
+    out.sub = clean(s.sub, 40);
+    if (Array.isArray(s.points)) out.points = s.points.slice(0, 5).map(p => ({ t: clean(p.t || p.title, 30), d: clean(p.d || p.desc, 60) }));
+    if (Array.isArray(s.steps)) out.steps = s.steps.slice(0, 4).map(x => clean(x, 20));
+    if (s.left) out.left = { title: clean(s.left.title || s.left.h, 24), items: (s.left.items || []).slice(0, 3).map(x => clean(x, 30)), win: !!s.left.win };
+    if (s.right) out.right = { title: clean(s.right.title || s.right.h, 24), items: (s.right.items || []).slice(0, 3).map(x => clean(x, 30)), win: !!s.right.win };
+    if (Array.isArray(s.bars)) out.bars = s.bars.slice(0, 4).map(b => ({ label: clean(b.label, 16), value: Number(b.value) || 0, note: clean(b.note || b.value, 16) }));
+    if (s.line) out.line = { labels: (s.line.labels || []).slice(0, 6).map(x => clean(x, 12)), values: (s.line.values || []).slice(0, 6).map(v => Number(v) || 0), unit: clean(s.line.unit, 8) };
+    if (Array.isArray(s.stats)) out.stats = s.stats.slice(0, 3).map(x => ({ v: clean(x.v, 12), l: clean(x.l, 24) }));
+    if (Array.isArray(s.notes)) out.notes = s.notes.slice(0, 3).map(x => clean(x, 40));
+    if (Array.isArray(s.lines)) out.lines = s.lines.slice(0, 3).map(x => clean(x, 60));
+    out.unit = clean(s.unit, 10);
+    out.stamp = clean(s.stamp, 20);
+    if (!out.narration || out.narration.length < 12) throw new Error(`第 ${i + 1} 屏缺少旁白`);
+    return out;
+  });
+
+  board.scenes[0].kind = 'cover';
+  board.scenes[board.scenes.length - 1].kind = 'end';
+  return board;
+}
+
+function durationEstimate(board) {
+  return board.scenes.reduce((a, s) => a + s.narration.length / CHARS_PER_SEC + GAP_PER_SCENE, 0);
+}
+
+module.exports = { SYSTEM, buildUserPrompt, validate, planScenes, durationEstimate, stripFence, CHARS_PER_SEC, GAP_PER_SCENE };

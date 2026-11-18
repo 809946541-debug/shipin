@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>宁德时代：去宁化是裂缝，还是接棒？</title>
+<style>
+:root{--paper:#f4efe2;--ink:#2d2822;--ink2:#5c4e3d;--red:#b23a2a;--blue:#33506f;--gold:#b08a3e;--hand:"Songti SC","STSong","Hiragino Sans GB",serif;--num:"Baskerville","Songti SC",serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1728px;overflow:hidden;background:var(--paper);font-family:var(--hand);color:var(--ink)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 8%,rgba(90,60,20,.06),transparent 42%),radial-gradient(circle at 82% 92%,rgba(90,60,20,.05),transparent 40%),repeating-linear-gradient(0deg,rgba(80,60,30,.022) 0 1px,transparent 1px 5px);mix-blend-mode:multiply}
+#stage{position:relative;width:1080px;height:1728px;overflow:hidden}
+.scene{position:absolute;inset:0;visibility:hidden;opacity:0}
+.scene.on{visibility:visible;opacity:1}
+.art{position:absolute;inset:0;width:1080px;height:1920px;overflow:visible}
+.f{opacity:0;animation:fade .85s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes fade{to{opacity:1}}
+.rise{opacity:0;transform:translateY(18px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+.draw{stroke-dasharray:1700;stroke-dashoffset:1700;opacity:0;animation:draw 2.3s ease-out forwards;animation-delay:var(--d,0s)}
+@keyframes draw{0%{opacity:0}12%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+.grow{opacity:0;transform:scaleY(0);transform-origin:bottom;transform-box:fill-box;animation:grow 1s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes grow{to{opacity:1;transform:scaleY(1)}}
+.render .f,.render .rise,.render .draw,.render .grow{animation-play-state:paused}
+.k{position:absolute;left:104px;top:236px;font-size:27px;letter-spacing:.34em;color:var(--ink2)}
+.h1{position:absolute;left:100px;top:292px;width:890px;font-size:86px;line-height:1.16;font-weight:700;letter-spacing:.01em}
+.h1.sm{font-size:74px}
+.h2{position:absolute;left:104px;top:424px;width:870px;font-size:41px;line-height:1.5;color:var(--ink2)}
+.body{position:absolute;left:104px;font-size:37px;line-height:1.78}
+.s{font-size:30px;line-height:1.7;color:var(--ink2)}
+.s[style^="top:"]{position:absolute;left:104px}
+.red{color:var(--red)}.blue{color:var(--blue)}.gold{color:var(--gold)}.b{font-weight:700}
+.num{font-family:var(--num);font-weight:700}
+.big{font-family:var(--num);font-weight:700;font-size:82px;line-height:1.1}
+.foot{position:absolute;left:104px;bottom:24px;font-size:25px;letter-spacing:.08em;color:var(--ink2)}
+.rule{position:absolute;height:3px;background:var(--ink);opacity:.45}
+.tag{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:6px 15px;margin:0 8px 10px 0;font-size:26px;background:rgba(255,255,255,.22)}
+.card{position:absolute;border:3px solid var(--ink);border-radius:10px;background:rgba(255,255,255,.22);padding:16px 18px}
+.card h3{font-size:39px;line-height:1.2;margin-bottom:6px}
+.card p{font-size:26px;line-height:1.6;color:var(--ink2)}
+.stat{position:absolute;border:3px solid var(--ink);border-radius:9px;background:rgba(255,255,255,.24);padding:10px 14px}
+.stat .v{font-family:var(--num);font-weight:700;font-size:51px;line-height:1.12}
+.stat .l{font-size:25px;color:var(--ink2);margin-top:4px}
+.tbl{position:absolute;left:96px;top:500px;width:888px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.2)}
+.tr{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;border-bottom:2px solid rgba(45,40,34,.32)}
+.tr:last-child{border-bottom:none}
+.td{padding:14px 8px;font-size:28px;text-align:center;border-right:2px solid rgba(45,40,34,.22)}
+.td:first-child{text-align:left;padding-left:16px;color:var(--ink2)}
+.tr.head .td{font-weight:700;background:rgba(45,40,34,.06);font-size:27px}
+.tr.head .td:first-child{color:var(--ink)}
+.cover-k{left:0;width:1080px;text-align:center;top:282px}
+.cover-h{left:0;width:1080px;text-align:center;top:352px;font-size:122px;letter-spacing:.06em}
+.cover-sub{position:absolute;left:0;width:1080px;text-align:center;top:540px;font-size:45px;color:var(--ink2)}
+.cover-tag{position:absolute;left:0;width:1080px;text-align:center;top:640px;font-size:33px;letter-spacing:.16em}
+.ghost{position:absolute;font-family:var(--num);font-weight:700;color:var(--ink);opacity:.055;font-size:520px;line-height:1;pointer-events:none}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#2d2822"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#b23a2a"/></marker>
+<g id="cell">
+<rect x="18" y="-12" width="18" height="12" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/>
+<rect x="54" y="-12" width="18" height="12" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/>
+<rect x="0" y="0" width="90" height="150" rx="10" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<rect x="8" y="8" width="74" height="134" rx="6" fill="none" stroke="#2d2822" stroke-width="2.4" opacity=".5"/>
+<line x1="8" y1="46" x2="82" y2="46" stroke="#2d2822" stroke-width="2" opacity=".3"/>
+<line x1="8" y1="104" x2="82" y2="104" stroke="#2d2822" stroke-width="2" opacity=".3"/>
+</g>
+<g id="pack">
+<rect x="0" y="0" width="220" height="120" rx="12" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<rect x="14" y="14" width="46" height="92" rx="5" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<rect x="68" y="14" width="46" height="92" rx="5" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<rect x="122" y="14" width="46" height="92" rx="5" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<line x1="180" y1="14" x2="180" y2="106" stroke="#2d2822" stroke-width="2" opacity=".4"/>
+<circle cx="196" cy="34" r="4" fill="#b23a2a"/><circle cx="196" cy="60" r="4" fill="#33506f"/>
+</g>
+<g id="tank">
+<rect x="0" y="0" width="220" height="140" rx="8" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<line x1="0" y1="34" x2="220" y2="34" stroke="#2d2822" stroke-width="2.4" opacity=".5"/>
+<rect x="16" y="52" width="36" height="72" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<rect x="60" y="52" width="36" height="72" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<rect x="104" y="52" width="36" height="72" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<rect x="148" y="52" width="56" height="72" fill="none" stroke="#2d2822" stroke-width="2.6"/>
+<circle cx="20" cy="17" r="4" fill="#b23a2a"/>
+<path d="M180 8 l-10 16 h10 l-8 14" fill="none" stroke="#b23a2a" stroke-width="3"/>
+</g>
+<g id="factory">
+<path d="M0 150 V70 L40 88 V70 L80 88 V70 L120 88 V150 Z" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4" stroke-linejoin="round"/>
+<rect x="140" y="30" width="34" height="120" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<rect x="150" y="46" width="14" height="12" fill="#f4efe2" stroke="#2d2822" stroke-width="2"/>
+<rect x="18" y="106" width="22" height="26" fill="none" stroke="#2d2822" stroke-width="2.4"/>
+<rect x="56" y="106" width="22" height="26" fill="none" stroke="#2d2822" stroke-width="2.4"/>
+<rect x="94" y="106" width="22" height="26" fill="none" stroke="#2d2822" stroke-width="2.4"/>
+</g>
+<g id="station">
+<rect x="0" y="0" width="180" height="240" rx="10" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<rect x="18" y="22" width="144" height="88" rx="6" fill="none" stroke="#2d2822" stroke-width="3"/>
+<rect x="36" y="126" width="108" height="92" rx="6" fill="none" stroke="#2d2822" stroke-width="3"/>
+<path d="M92 48 l-20 34 h16 l-10 26" fill="none" stroke="#b23a2a" stroke-width="4" stroke-linejoin="round"/>
+<line x1="18" y1="172" x2="144" y2="172" stroke="#2d2822" stroke-width="2.4" opacity=".4"/>
+</g>
+<g id="car">
+<path d="M12 78 L12 54 Q12 46 22 46 L62 46 L84 20 L150 20 L172 46 L214 46 Q226 46 226 56 L226 78 Z" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="60" cy="80" r="16" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<circle cx="178" cy="80" r="16" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<line x1="84" y1="46" x2="150" y2="46" stroke="#2d2822" stroke-width="2.4" opacity=".5"/>
+</g>
+</defs></svg>
+<div id="stage">
+<section class="scene" id="s0">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M140 1270 L280 1150 L420 1030 L540 950 L640 910 L720 1120 L820 1240 L900 1290" fill="none" stroke="#2d2822" stroke-width="5" class="draw" style="--d:.5s"/>
+<line x1="640" y1="910" x2="960" y2="910" stroke="#b23a2a" stroke-width="3" stroke-dasharray="10 12" class="f" style="--d:1.2s"/>
+<circle cx="640" cy="910" r="9" fill="#b23a2a" class="f" style="--d:1.1s"/>
+<text x="655" y="880" font-size="31" fill="#b23a2a" font-family="Baskerville,serif">460.00</text>
+<circle cx="900" cy="1290" r="9" fill="#33506f" class="f" style="--d:1.5s"/>
+<text x="742" y="1340" font-size="29" fill="#33506f" font-family="Baskerville,serif">227.09</text>
+<g class="f" style="--d:1.5s" transform="translate(150,1430) scale(.9)"><use href="#pack"/></g>
+<g class="f" style="--d:1.65s" transform="translate(400,1450) scale(.85)"><use href="#cell"/></g>
+<g class="f" style="--d:1.8s" transform="translate(640,1430) scale(.9)"><use href="#tank"/></g>
+<text x="880" y="1600" font-size="150" fill="#b23a2a" fill-opacity=".14" font-family="Baskerville,serif">?</text>
+</svg>
+<div class="k f cover-k" style="--d:.05s">手绘财经 · 2026.11</div>
+<h1 class="h1 rise cover-h" style="--d:.15s">宁德时代</h1>
+<div class="f cover-sub" style="--d:.35s">去宁化，是裂缝，还是接棒？</div>
+<div class="f cover-tag red" style="--d:.55s">营收高增 · 利润降速 · 估值回落</div>
+<div class="foot f" style="--d:1.4s">公开数据复盘 · 不构成投资建议</div>
+</section>
+<section class="scene" id="s1">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M140 1200 L320 1060 L500 960 L680 880 L860 820" fill="none" stroke="#b23a2a" stroke-width="5" class="draw" style="--d:.4s"/>
+<path d="M140 1200 L320 1120 L500 1080 L680 1090 L860 1120" fill="none" stroke="#33506f" stroke-width="5" class="draw" style="--d:.7s"/>
+<circle cx="140" cy="1200" r="8" fill="#2d2822"/>
+<text x="700" y="845" font-size="30" fill="#b23a2a" font-family="Songti SC,serif">营收</text>
+<text x="700" y="1170" font-size="30" fill="#33506f" font-family="Songti SC,serif">净利</text>
+<line x1="140" y1="1240" x2="900" y2="1240" stroke="#2d2822" stroke-width="2" stroke-dasharray="10 12" opacity=".25"/>
+</svg>
+<div class="k f" style="--d:.05s">01 / 先看分歧</div>
+<h1 class="h1 rise" style="--d:.12s">一个分歧，两个方向</h1>
+<div class="h2 f" style="--d:.3s">同一份季报，读出两种叙事</div>
+<div class="stat f" style="--d:.5s;left:104px;top:520px;width:268px"><div class="v">4421<span style="font-size:30px">亿</span></div><div class="l">营收 · 同比 +56.2%</div></div>
+<div class="stat f" style="--d:.65s;left:396px;top:520px;width:268px"><div class="v">645<span style="font-size:30px">亿</span></div><div class="l">归母净利 · +31.6%</div></div>
+<div class="stat f" style="--d:.8s;left:688px;top:520px;width:268px"><div class="v red">212<span style="font-size:30px">亿</span></div><div class="l">Q3 净利 · 仅 +14.5%</div></div>
+<div class="body f" style="top:1310px;font-size:38px">营收还在高增，利润却开始降速。</div>
+<div class="body f" style="top:1420px;font-size:34px">市场担心的不是有没有增长，而是增长的质量。</div>
+<div class="s f" style="top:1540px">同一份报表，可以讲成两个故事。</div>
+<div class="foot f" style="--d:1.5s">数据：2026 年三季报</div>
+</section>
+
+<section class="scene" id="s2">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="120" y1="1180" x2="960" y2="1180" stroke="#2d2822" stroke-width="4"/>
+<line x1="120" y1="1180" x2="120" y2="700" stroke="#2d2822" stroke-width="4"/>
+<rect x="180" y="886" width="90" height="294" fill="#33506f" fill-opacity=".7" class="grow" style="--d:.3s"/>
+<rect x="300" y="1129" width="90" height="51" fill="#33506f" fill-opacity=".4" class="grow" style="--d:.45s"/>
+<rect x="600" y="720" width="90" height="460" fill="#b23a2a" fill-opacity=".78" class="grow" style="--d:.6s"/>
+<rect x="720" y="1113" width="90" height="67" fill="#b23a2a" fill-opacity=".42" class="grow" style="--d:.75s"/>
+<text x="200" y="858" font-size="30" text-anchor="middle" fill="#2d2822" font-family="Baskerville,serif">2831</text>
+<text x="345" y="1102" font-size="27" text-anchor="middle" fill="#2d2822" font-family="Baskerville,serif">490</text>
+<text x="645" y="692" font-size="30" text-anchor="middle" fill="#b23a2a" font-family="Baskerville,serif">4421</text>
+<text x="765" y="1086" font-size="27" text-anchor="middle" fill="#b23a2a" font-family="Baskerville,serif">645</text>
+<text x="255" y="1228" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">2025 前三季</text>
+<text x="675" y="1228" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">2026 前三季</text>
+<text x="860" y="760" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">单位：亿元</text>
+</svg>
+<div class="k f" style="--d:.05s">02 / 单季拆解</div>
+<h1 class="h1 rise" style="--d:.12s">单季：营收快，利润慢</h1>
+<div class="h2 f" style="--d:.3s">Q3 营收 1652 亿，净利 212 亿</div>
+<div class="body f" style="top:1290px;font-size:37px">营收 <span class="num red">+58.6%</span>　净利 <span class="num red">+14.5%</span></div>
+<div class="body f" style="top:1390px;font-size:35px">Q3 毛利率 <span class="b red">20.69%</span>，同比 −5.11pct</div>
+<div class="body f" style="top:1490px;font-size:35px">净利率 12.9%，一季度还是 16.1%</div>
+<div class="foot f" style="--d:1.4s">2025 前三季数据按同比增速推算</div>
+</section>
+
+<section class="scene" id="s3">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M540 960 L540 1030" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:.9s"/>
+<path d="M300 940 L470 1000" stroke="#2d2822" stroke-width="3" stroke-dasharray="8 10" opacity=".4"/>
+<path d="M780 940 L610 1000" stroke="#2d2822" stroke-width="3" stroke-dasharray="8 10" opacity=".4"/>
+<text x="540" y="1085" font-size="30" text-anchor="middle" fill="#b23a2a" font-family="Songti SC,serif">两个政策 + 两个结构</text>
+</svg>
+<div class="k f" style="--d:.05s">03 / 利润为什么慢</div>
+<h1 class="h1 rise" style="--d:.12s">利润为什么慢下来</h1>
+<div class="h2 f" style="--d:.3s">公司给了四个解释</div>
+<div class="card f" style="--d:.45s;left:100px;top:520px;width:420px;height:190px"><h3>产品结构</h3><p>储能系统、低毛利项目交付占比上升</p></div>
+<div class="card f" style="--d:.6s;left:560px;top:520px;width:420px;height:190px"><h3>消费税</h3><p>9 月起恢复征收 2%，明年 9 月提高到 4%</p></div>
+<div class="card f" style="--d:.75s;left:100px;top:740px;width:420px;height:190px"><h3>出口退税</h3><p>退税率由 9% 降到 6%</p></div>
+<div class="card f" style="--d:.9s;left:560px;top:740px;width:420px;height:190px"><h3>汇兑</h3><p>财务费用 −70 亿 → −14 亿</p></div>
+<div class="body f" style="top:1160px;font-size:35px">四项里，两项是政策，两项是结构。</div>
+<div class="body f" style="top:1260px;font-size:35px">政策可以协商分担，结构要看产品组合。</div>
+<div class="s f" style="top:1390px">单季度的结构波动，不代表长期方向——这是公司的说法。</div>
+<div class="foot f" style="--d:1.5s">来源：公司业绩说明会、2026 年三季报</div>
+</section>
+<section class="scene" id="s4">
+<svg class="art" viewBox="0 0 1080 1920">
+<circle cx="540" cy="730" r="190" fill="none" stroke="#2d2822" stroke-width="26" opacity=".13"/>
+<circle cx="540" cy="730" r="190" fill="none" stroke="#b23a2a" stroke-width="26" stroke-dasharray="470 724" transform="rotate(-90 540 730)" stroke-linecap="round" class="f" style="--d:.5s"/>
+<text x="540" y="752" text-anchor="middle" font-size="86" fill="#b23a2a" font-family="Baskerville,serif">39.4%</text>
+<text x="540" y="806" text-anchor="middle" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">2026 年 1-8 月全球份额</text>
+</svg>
+<div class="k f" style="--d:.05s">04 / 份额</div>
+<h1 class="h1 rise" style="--d:.12s">份额，没有崩</h1>
+<div class="h2 f" style="--d:.3s">全球动力电池，仍排第一</div>
+<div class="stat f" style="--d:.55s;left:104px;top:1010px;width:260px"><div class="v" style="font-size:44px">44.16%</div><div class="l">国内份额 · 1-9 月</div></div>
+<div class="stat f" style="--d:.7s;left:396px;top:1010px;width:260px"><div class="v" style="font-size:44px">33.7%</div><div class="l">海外份额 · 1-5 月</div></div>
+<div class="stat f" style="--d:.85s;left:688px;top:1010px;width:270px"><div class="v" style="font-size:44px">+1.7pct</div><div class="l">全球份额同比提升</div></div>
+<div class="body f" style="top:1230px;font-size:35px">1-8 月全球装车 333GWh，同比 +25.2%。</div>
+<div class="body f" style="top:1330px;font-size:35px">宁德时代 39.4%，比去年还高 1.7 个百分点。</div>
+<div class="s f" style="top:1450px">去宁化喊了很久，份额并没有简单崩塌。</div>
+<div class="foot f" style="--d:1.5s">来源：SNE Research、动力电池联盟</div>
+</section>
+
+<section class="scene" id="s5">
+<div class="k f" style="--d:.05s">05 / 去宁化</div>
+<h1 class="h1 rise" style="--d:.12s">去宁化，发生在哪里</h1>
+<div class="h2 f" style="--d:.3s">主要在国内乘用车</div>
+<div class="card f" style="--d:.45s;left:100px;top:520px;width:420px;height:210px"><h3>小米 · 龙甲电池</h3><p>电芯来自中创新航、欣旺达<br>宁德不在部分车型名单</p></div>
+<div class="card f" style="--d:.6s;left:560px;top:520px;width:420px;height:210px"><h3>理想 · 自研电池</h3><p>L8 / L6 / i8 开始搭载<br>高端车型逐步切换</p></div>
+<div class="card f" style="--d:.75s;left:100px;top:760px;width:880px;height:190px;border-color:#b23a2a"><h3>但 MEGA、i9 首批仍用宁德时代电芯</h3><p>李想公开表示：不是谁替代谁，而是更深的协同</p></div>
+<div class="body f" style="top:1160px;font-size:35px">宁德时代，确实从部分车型名单里消失。</div>
+<div class="body f" style="top:1260px;font-size:35px">但更多是“多供”，不是“断供”。</div>
+<div class="s f" style="top:1380px">车企要的是议价权和供应链安全，不一定是清零。</div>
+<div class="foot f" style="--d:1.5s">来源：公开报道、公司公告</div>
+</section>
+
+<section class="scene" id="s6">
+<svg class="art" viewBox="0 0 1080 1920">
+<circle cx="300" cy="760" r="140" fill="none" stroke="#2d2822" stroke-width="22" opacity=".13"/>
+<circle cx="300" cy="760" r="140" fill="none" stroke="#33506f" stroke-width="22" stroke-dasharray="352 528" transform="rotate(-90 300 760)" stroke-linecap="round" class="f" style="--d:.5s"/>
+<text x="300" y="775" text-anchor="middle" font-size="58" fill="#33506f" font-family="Baskerville,serif">&lt;40%</text>
+<text x="300" y="830" text-anchor="middle" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">国内乘用车毛利贡献</text>
+<path d="M470 700 L600 640" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:.8s"/>
+<path d="M470 760 L600 760" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:.95s"/>
+<path d="M470 820 L600 880" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:1.1s"/>
+<text x="620" y="650" font-size="30" fill="#2d2822" font-family="Songti SC,serif">储能</text>
+<text x="620" y="772" font-size="30" fill="#2d2822" font-family="Songti SC,serif">海外</text>
+<text x="620" y="895" font-size="30" fill="#2d2822" font-family="Songti SC,serif">商用车</text>
+</svg>
+<div class="k f" style="--d:.05s">06 / 影响多大</div>
+<h1 class="h1 rise" style="--d:.12s">影响，没有想象中大</h1>
+<div class="h2 f" style="--d:.3s">国内乘用车贡献的毛利不足四成</div>
+<div class="body f" style="top:1150px;font-size:35px">真正拉动增量的，是储能、海外和商用车。</div>
+<div class="body f" style="top:1250px;font-size:35px">国内动力装车 +16.7%，储能销量 +112%。</div>
+<div class="s f" style="top:1370px">以上为行业口径；用一个市场的份额变化，推不出整家公司的结论。</div>
+<div class="foot f" style="--d:1.5s">来源：公开报道、行业数据</div>
+</section>
+<section class="scene" id="s7">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.8s" transform="translate(120,1050)"><use href="#tank"/></g>
+<g class="f" style="--d:1s" transform="translate(420,1060) scale(.9)"><use href="#cell"/></g>
+<path d="M700 1300 L700 1160" stroke="#b23a2a" stroke-width="5" marker-end="url(#ahr)" class="draw" style="--d:1.1s"/>
+<text x="640" y="1120" font-size="36" fill="#b23a2a" font-family="Baskerville,serif">587Ah</text>
+<text x="640" y="1160" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">储能大电芯</text>
+</svg>
+<div class="k f" style="--d:.05s">07 / 第二曲线</div>
+<h1 class="h1 rise" style="--d:.12s">第二曲线：储能</h1>
+<div class="h2 f" style="--d:.3s">Q3 储能占比约四分之一</div>
+<div class="stat f" style="--d:.5s;left:104px;top:520px;width:250px"><div class="v">260<span style="font-size:30px">GWh+</span></div><div class="l">Q3 电池销量</div></div>
+<div class="stat f" style="--d:.65s;left:390px;top:520px;width:250px"><div class="v">25%</div><div class="l">储能销量占比</div></div>
+<div class="stat f" style="--d:.8s;left:676px;top:520px;width:270px"><div class="v red">+60%</div><div class="l">储能销量同比</div></div>
+<div class="body f" style="top:780px;font-size:35px">上半年，储能电芯出货量全球第一。</div>
+<div class="body f" style="top:880px;font-size:35px">钠电签下三年 60GWh 的储能协议。</div>
+<div class="s f" style="top:1420px">储能从卖电芯走向系统，交付周期更长。</div>
+<div class="foot f" style="--d:1.5s">来源：公司三季报、半年报</div>
+</section>
+
+<section class="scene" id="s8">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.7s" transform="translate(820,560) scale(1.1)"><use href="#station"/></g>
+<g class="f" style="--d:1s" transform="translate(150,1250) scale(.8)"><use href="#cell"/></g>
+<g class="f" style="--d:1.1s" transform="translate(310,1250) scale(.8)"><use href="#cell"/></g>
+<g class="f" style="--d:1.2s" transform="translate(470,1250) scale(.8)"><use href="#cell"/></g>
+</svg>
+<div class="k f" style="--d:.05s">08 / 第三曲线</div>
+<h1 class="h1 rise" style="--d:.12s">第三曲线：换电</h1>
+<div class="h2 f" style="--d:.3s">巧克力换电站，累计 2500+ 座</div>
+<div class="big f red" style="--d:.5s;position:absolute;left:104px;top:540px">2500<span style="font-size:52px">+</span></div>
+<div class="body f" style="top:720px;font-size:35px">巧克力换电站累计建成</div>
+<div class="body f" style="top:820px;font-size:35px">全年目标 <span class="b red">3000 座</span></div>
+<div class="s f" style="top:950px">把电池从一次性买卖，变成长期服务。</div>
+<div class="s f" style="top:1050px">但现在，它还在投入期，短期利润贡献有限。</div>
+<div class="foot f" style="--d:1.5s">数据：2026 年 10 月公开报道</div>
+</section>
+
+<section class="scene" id="s9">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="140" y1="1330" x2="940" y2="1330" stroke="#2d2822" stroke-width="4"/>
+<path d="M940 1330 L900 1316 M940 1330 L900 1344" stroke="#2d2822" stroke-width="4" fill="none"/>
+<circle cx="220" cy="1330" r="22" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<circle cx="540" cy="1330" r="22" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<circle cx="860" cy="1330" r="22" fill="#b23a2a" stroke="#2d2822" stroke-width="4"/>
+<text x="220" y="1390" text-anchor="middle" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">2026 中试</text>
+<text x="540" y="1390" text-anchor="middle" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">2027 小批量</text>
+<text x="860" y="1390" text-anchor="middle" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">2030 规模化</text>
+<text x="220" y="1290" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">宜宾通线</text>
+<text x="540" y="1290" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">1GWh 爬良率</text>
+<text x="860" y="1290" text-anchor="middle" font-size="26" fill="#b23a2a" font-family="Songti SC,serif">成本与装车</text>
+</svg>
+<div class="k f" style="--d:.05s">09 / 更远的期权</div>
+<h1 class="h1 rise" style="--d:.12s">更远的期权：固态</h1>
+<div class="h2 f" style="--d:.3s">硫化物路线，目标 500Wh/kg</div>
+<div class="stat f" style="--d:.5s;left:104px;top:520px;width:250px"><div class="v" style="font-size:40px">2027</div><div class="l">有望小批量生产</div></div>
+<div class="stat f" style="--d:.65s;left:390px;top:520px;width:250px"><div class="v" style="font-size:40px">2030</div><div class="l">前后规模化</div></div>
+<div class="stat f" style="--d:.8s;left:676px;top:520px;width:270px"><div class="v red" style="font-size:40px">4 / 9</div><div class="l">曾毓群：成熟度</div></div>
+<div class="big f red" style="--d:1s;position:absolute;left:104px;top:760px">500<span style="font-size:48px">Wh/kg</span></div>
+<div class="body f" style="top:950px;font-size:35px">宜宾中试线已通线，1GWh 线在爬良率，</div>
+<div class="body f" style="top:1050px;font-size:35px">10Ah 平台、20Ah 样品已就位。</div>
+<div class="s f" style="top:1170px">但成熟度只有第 4 级，离量产还远。</div>
+<div class="foot f" style="--d:1.5s">来源：互动易、公开报道</div>
+</section>
+<section class="scene" id="s10">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.4s" transform="translate(130,600) scale(.95)"><use href="#factory"/></g>
+<g class="f" style="--d:.6s" transform="translate(440,600) scale(.95)"><use href="#factory"/></g>
+<g class="f" style="--d:.8s" transform="translate(750,600) scale(.95)"><use href="#factory"/></g>
+<text x="220" y="790" text-anchor="middle" font-size="28" fill="#2d2822" font-family="Songti SC,serif">德国 · 运营</text>
+<text x="530" y="790" text-anchor="middle" font-size="28" fill="#2d2822" font-family="Songti SC,serif">匈牙利 · 试产</text>
+<text x="840" y="790" text-anchor="middle" font-size="28" fill="#2d2822" font-family="Songti SC,serif">西班牙 · 在建</text>
+<path d="M220 830 Q530 870 840 830" fill="none" stroke="#2d2822" stroke-width="2" stroke-dasharray="8 10" opacity=".25"/>
+</svg>
+<div class="k f" style="--d:.05s">10 / 海外</div>
+<h1 class="h1 rise" style="--d:.12s">海外产能，另一道保险</h1>
+<div class="h2 f" style="--d:.3s">本地化生产，绕开关税与政策风险</div>
+<div class="stat f" style="--d:.55s;left:104px;top:900px;width:380px"><div class="v">33.7%</div><div class="l">海外市场份额 · 1-5 月</div></div>
+<div class="stat f" style="--d:.7s;left:514px;top:900px;width:380px"><div class="v red">+3.7pct</div><div class="l">海外份额同比</div></div>
+<div class="body f" style="top:1090px;font-size:35px">中国以外市场，份额已到 34%。</div>
+<div class="body f" style="top:1190px;font-size:35px">但资本开支与爬坡，会先吃掉一部分利润。</div>
+<div class="s f" style="top:1310px">海外是溢价，也是成本。</div>
+<div class="foot f" style="--d:1.5s">来源：公司公告、公开报道</div>
+</section>
+
+<section class="scene" id="s11">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="140" y1="1150" x2="960" y2="1150" stroke="#2d2822" stroke-width="3" opacity=".5"/>
+<path d="M160 1120 L260 980 L360 840 L460 700 L560 620 L660 760 L760 940 L900 1060" fill="none" stroke="#b23a2a" stroke-width="5" class="draw" style="--d:.4s"/>
+<circle cx="560" cy="620" r="9" fill="#b23a2a"/>
+<line x1="560" y1="620" x2="560" y2="600" stroke="#b23a2a" stroke-width="2"/>
+<text x="575" y="596" font-size="29" fill="#b23a2a" font-family="Baskerville,serif">460.00</text>
+<circle cx="760" cy="940" r="8" fill="#33506f"/>
+<text x="775" y="930" font-size="26" fill="#33506f" font-family="Baskerville,serif">291.11</text>
+<circle cx="900" cy="1060" r="9" fill="#33506f"/>
+<text x="770" y="1110" font-size="28" fill="#33506f" font-family="Baskerville,serif">227.09</text>
+<line x1="560" y1="620" x2="900" y2="620" stroke="#2d2822" stroke-width="2" stroke-dasharray="8 12" opacity=".25"/>
+</svg>
+<div class="k f" style="--d:.05s">11 / 股价</div>
+<h1 class="h1 rise" style="--d:.12s">股价：460 → 227</h1>
+<div class="h2 f" style="--d:.3s">较高点回撤约五成</div>
+<div class="big f red" style="--d:.45s;position:absolute;left:104px;top:1175px">−51%</div>
+<div class="body f" style="top:1290px;font-size:34px">5/6 盘中最高 460.00 元；9/30 收 291.11 元。</div>
+<div class="body f" style="top:1380px;font-size:34px">三季报后 10/21 收 227.09 元，单日 −12.03%。</div>
+<div class="s f" style="top:1480px">年内累计 −36.7%；市值从 2.13 万亿回到 1.05 万亿。</div>
+<div class="foot f" style="--d:1.5s">2026 年 10 月 21 日收盘 · A 股</div>
+</section>
+
+<section class="scene" id="s12">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M200 1400 L860 1400" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:.6s"/>
+<path d="M200 1400 L200 1340" stroke="#2d2822" stroke-width="3"/>
+<path d="M380 1400 L380 1340" stroke="#2d2822" stroke-width="3"/>
+<path d="M560 1400 L560 1270" stroke="#2d2822" stroke-width="3"/>
+<path d="M740 1400 L740 1220" stroke="#2d2822" stroke-width="3"/>
+<text x="200" y="1460" text-anchor="middle" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2023</text>
+<text x="380" y="1460" text-anchor="middle" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2024</text>
+<text x="560" y="1460" text-anchor="middle" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2025</text>
+<text x="740" y="1460" text-anchor="middle" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2026E</text>
+<text x="880" y="1400" font-size="26" fill="#b23a2a" font-family="Songti SC,serif">时间 →</text>
+<text x="770" y="1290" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">估值中枢下移</text>
+</svg>
+<div class="k f" style="--d:.05s">12 / 估值</div>
+<h1 class="h1 rise" style="--d:.12s">估值：从成长到现金</h1>
+<div class="h2 f" style="--d:.3s">市盈率回到十几倍</div>
+<div class="stat f" style="--d:.5s;left:104px;top:520px;width:250px"><div class="v">约 11x</div><div class="l">2026E 市盈率</div></div>
+<div class="stat f" style="--d:.65s;left:390px;top:520px;width:250px"><div class="v">约 9x</div><div class="l">2027E 市盈率</div></div>
+<div class="stat f" style="--d:.8s;left:676px;top:520px;width:270px"><div class="v" style="font-size:44px">4300 亿</div><div class="l">现金 + 交易性金融资产</div></div>
+<div class="body f" style="top:780px;font-size:35px">回购 200–400 亿，已回购约 51 亿。</div>
+<div class="body f" style="top:880px;font-size:35px">中期分红 64.93 亿，每 10 股派 14.11 元。</div>
+<div class="big f" style="--d:1s;position:absolute;left:104px;top:1020px;font-size:62px">从成长股，到现金牛</div>
+<div class="s f" style="top:1160px">估值下移，说明预期变低了，不等于风险消失。</div>
+<div class="foot f" style="--d:1.5s">机构预测为公开研报口径 · 不构成投资建议</div>
+</section>
+<section class="scene" id="s13">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M180 1040 L900 680" fill="none" stroke="#b23a2a" stroke-width="5" class="draw" style="--d:.4s"/>
+<path d="M180 760 L900 1060" fill="none" stroke="#33506f" stroke-width="5" class="draw" style="--d:.7s"/>
+<text x="820" y="660" font-size="30" fill="#b23a2a" font-family="Songti SC,serif">销量</text>
+<text x="800" y="1105" font-size="30" fill="#33506f" font-family="Songti SC,serif">单位净利</text>
+<circle cx="540" cy="900" r="7" fill="#2d2822"/>
+</svg>
+<div class="k f" style="--d:.05s">13 / 分歧一</div>
+<h1 class="h1 rise" style="--d:.12s">分歧一：量增价减</h1>
+<div class="h2 f" style="--d:.3s">卖得更多，每一瓦时更薄</div>
+<div class="big f red" style="--d:.45s;position:absolute;left:104px;top:1140px">0.082<span style="font-size:44px">元/Wh</span></div>
+<div class="body f" style="top:1290px;font-size:35px">Q3 电池销量 260GWh+，同比 +58%。</div>
+<div class="body f" style="top:1390px;font-size:35px">碳酸锂低位、结构下移、价格战未完全结束。</div>
+<div class="s f" style="top:1500px">规模能摊薄成本，但摊薄不了价格。</div>
+<div class="foot f" style="--d:1.5s">单 Wh 净利为券商测算口径</div>
+</section>
+
+<section class="scene" id="s14">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="160" y1="1160" x2="920" y2="1160" stroke="#2d2822" stroke-width="4"/>
+<rect x="200" y="806" width="150" height="354" fill="#33506f" fill-opacity=".75" class="grow" style="--d:.3s"/>
+<rect x="460" y="823" width="150" height="337" fill="#33506f" fill-opacity=".55" class="grow" style="--d:.45s"/>
+<rect x="720" y="876" width="150" height="284" fill="#b23a2a" fill-opacity=".7" class="grow" style="--d:.6s"/>
+<text x="275" y="778" text-anchor="middle" font-size="40" fill="#2d2822" font-family="Baskerville,serif">16.1%</text>
+<text x="535" y="795" text-anchor="middle" font-size="40" fill="#2d2822" font-family="Baskerville,serif">15.3%</text>
+<text x="795" y="848" text-anchor="middle" font-size="40" fill="#b23a2a" font-family="Baskerville,serif">12.9%</text>
+<text x="275" y="1210" text-anchor="middle" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">Q1</text>
+<text x="535" y="1210" text-anchor="middle" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">Q2</text>
+<text x="795" y="1210" text-anchor="middle" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">Q3</text>
+<text x="540" y="650" text-anchor="middle" font-size="30" fill="#5c4e3d" font-family="Songti SC,serif">单季归母净利率</text>
+</svg>
+<div class="k f" style="--d:.05s">14 / 分歧二</div>
+<h1 class="h1 rise" style="--d:.12s">分歧二：毛利与现金流</h1>
+<div class="h2 f" style="--d:.3s">净利率逐季回落</div>
+<div class="body f" style="top:1280px;font-size:34px">Q3 经营现金流 14 亿，去年同期 220 亿。</div>
+<div class="body f" style="top:1370px;font-size:34px">公司主动缩短账期、增加预付款。</div>
+<div class="s f" style="top:1470px">存货 1448 亿，较年初 +53%。</div>
+<div class="foot f" style="--d:1.5s">来源：2026 年三季报</div>
+</section>
+
+<section class="scene" id="s15">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.4s" transform="translate(110,620) scale(1.15)"><use href="#factory"/></g>
+<text x="480" y="690" font-size="30" fill="#5c4e3d" font-family="Songti SC,serif">现有产能</text>
+<rect x="480" y="710" width="320" height="52" fill="#33506f" fill-opacity=".6" class="grow" style="--d:.5s"/>
+<text x="826" y="750" font-size="34" fill="#2d2822" font-family="Baskerville,serif">525GWh</text>
+<text x="480" y="830" font-size="30" fill="#5c4e3d" font-family="Songti SC,serif">在建产能</text>
+<rect x="480" y="850" width="466" height="52" fill="#b23a2a" fill-opacity=".65" class="grow" style="--d:.65s"/>
+<text x="480" y="940" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">764GWh</text>
+<text x="480" y="1010" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">产能利用率 94.9%（上半年）</text>
+</svg>
+<div class="k f" style="--d:.05s">15 / 分歧三</div>
+<h1 class="h1 rise" style="--d:.12s">分歧三：扩产</h1>
+<div class="h2 f" style="--d:.3s">扩产是护城河，也是折旧</div>
+<div class="body f" style="top:1090px;font-size:35px">上半年产能利用率接近 95%，</div>
+<div class="body f" style="top:1190px;font-size:35px">在建产能还有 764GWh。</div>
+<div class="s f" style="top:1320px">需求一旦降速，产能就会变成压力。</div>
+<div class="s f" style="top:1420px">资本开支的节奏，决定未来两年的利润弹性。</div>
+<div class="foot f" style="--d:1.5s">2026 年半年报 · 期末口径</div>
+</section>
+<section class="scene" id="s16">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="170" y="1260" width="130" height="190" fill="#b23a2a" fill-opacity=".3" stroke="#2d2822" stroke-width="3" class="grow" style="--d:.5s"/>
+<rect x="390" y="1290" width="130" height="160" fill="#33506f" fill-opacity=".3" stroke="#2d2822" stroke-width="3" class="grow" style="--d:.62s"/>
+<rect x="610" y="1320" width="130" height="130" fill="#b08a3e" fill-opacity=".35" stroke="#2d2822" stroke-width="3" class="grow" style="--d:.74s"/>
+<rect x="830" y="1350" width="130" height="100" fill="#2d2822" fill-opacity=".18" stroke="#2d2822" stroke-width="3" class="grow" style="--d:.86s"/>
+<text x="235" y="1490" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">动力</text>
+<text x="455" y="1490" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">储能</text>
+<text x="675" y="1490" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">海外</text>
+<text x="895" y="1490" text-anchor="middle" font-size="26" fill="#2d2822" font-family="Songti SC,serif">新技术</text>
+</svg>
+<div class="k f" style="--d:.05s">16 / 多头</div>
+<h1 class="h1 rise" style="--d:.12s">多头看到什么</h1>
+<div class="h2 f" style="--d:.3s">四条腿走路</div>
+<div class="card f" style="--d:.45s;left:100px;top:520px;width:420px;height:180px"><h3>动力基本盘</h3><p>全球份额 39.4%，仍排第一</p></div>
+<div class="card f" style="--d:.6s;left:560px;top:520px;width:420px;height:180px"><h3>储能增量</h3><p>Q3 占比约四分之一，同比 +60%</p></div>
+<div class="card f" style="--d:.75s;left:100px;top:730px;width:420px;height:180px"><h3>海外溢价</h3><p>海外份额 33.7%，本地化推进</p></div>
+<div class="card f" style="--d:.9s;left:560px;top:730px;width:420px;height:180px"><h3>新技术期权</h3><p>固态 2027 小批量，钠电签单</p></div>
+<div class="body f" style="top:980px;font-size:35px">任何一条跑出来，都能对冲国内份额波动。</div>
+<div class="s f" style="top:1100px">四条腿里，三条还在投入期，一条是现金牛。</div>
+<div class="foot f" style="--d:1.5s">仅作逻辑梳理，不构成推荐</div>
+</section>
+
+<section class="scene" id="s17">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.5s" transform="rotate(-8 210 1330)"><rect x="160" y="1210" width="100" height="220" rx="6" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/></g>
+<g class="f" style="--d:.65s" transform="rotate(-4 390 1330)"><rect x="340" y="1210" width="100" height="220" rx="6" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/></g>
+<g class="f" style="--d:.8s" transform="rotate(3 570 1330)"><rect x="520" y="1210" width="100" height="220" rx="6" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/></g>
+<g class="f" style="--d:.95s" transform="rotate(9 750 1330)"><rect x="700" y="1210" width="100" height="220" rx="6" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/></g>
+<path d="M880 1200 L800 1330" stroke="#b23a2a" stroke-width="4" marker-end="url(#ahr)" class="draw" style="--d:1.1s"/>
+<text x="700" y="1490" font-size="27" fill="#b23a2a" font-family="Songti SC,serif">一个季度证伪不了</text>
+</svg>
+<div class="k f" style="--d:.05s">17 / 空头</div>
+<h1 class="h1 rise" style="--d:.12s">空头担心什么</h1>
+<div class="h2 f" style="--d:.3s">四件事，都不在一个季度内证伪</div>
+<div class="card f" style="--d:.45s;left:100px;top:520px;width:420px;height:180px"><h3>价格战与过剩</h3><p>行业扩产快，价格中枢下移</p></div>
+<div class="card f" style="--d:.6s;left:560px;top:520px;width:420px;height:180px"><h3>税费与贸易</h3><p>消费税、出口退税、海外政策</p></div>
+<div class="card f" style="--d:.75s;left:100px;top:730px;width:420px;height:180px"><h3>车企自研与二供</h3><p>国内乘用车份额被分流</p></div>
+<div class="card f" style="--d:.9s;left:560px;top:730px;width:420px;height:180px"><h3>固态良率与成本</h3><p>2027 小批量，仍未到规模化</p></div>
+<div class="body f" style="top:980px;font-size:35px">这些变量，决定的是估值，不是当期利润。</div>
+<div class="s f" style="top:1100px">真正的分歧，是愿意给“第二曲线”多少倍。</div>
+<div class="foot f" style="--d:1.5s">仅作风险梳理，不构成投资建议</div>
+</section>
+
+<section class="scene" id="s18">
+<svg class="art" viewBox="0 0 1080 1920">
+<text x="760" y="1500" font-size="300" fill="#b23a2a" fill-opacity=".08" font-family="Baskerville,serif">?</text>
+<g class="f" style="--d:1.1s" transform="translate(180,1430) scale(.85)"><use href="#cell"/></g>
+<g class="f" style="--d:1.2s" transform="translate(360,1450) scale(.8)"><use href="#tank"/></g>
+<g class="f" style="--d:1.3s" transform="translate(640,1430) scale(.85)"><use href="#station"/></g>
+<line x1="120" y1="1400" x2="960" y2="1400" stroke="#2d2822" stroke-width="2" stroke-dasharray="8 12" opacity=".25"/>
+</svg>
+<div class="k f" style="--d:.05s">18 / 结尾</div>
+<h1 class="h1 rise" style="--d:.12s;top:280px;font-size:92px">不是崩塌，<br>是重新定价</h1>
+<div class="h2 f" style="--d:.35s;top:540px">从成长股，到多业务共同定价</div>
+<div class="card f" style="--d:.55s;left:100px;top:660px;width:420px;height:160px"><h3>储能占比</h3><p>能否稳定在四分之一以上</p></div>
+<div class="card f" style="--d:.7s;left:560px;top:660px;width:420px;height:160px"><h3>海外爬坡</h3><p>匈牙利、西班牙的产能进度</p></div>
+<div class="card f" style="--d:.85s;left:100px;top:845px;width:420px;height:160px"><h3>单 Wh 净利</h3><p>能否止跌，回到 0.09 元以上</p></div>
+<div class="card f" style="--d:1s;left:560px;top:845px;width:420px;height:160px"><h3>固态良率</h3><p>90% 之后，才有成本讨论</p></div>
+<div class="big f red" style="--d:1.15s;position:absolute;left:104px;top:1070px;font-size:58px">不构成投资建议</div>
+<div class="s f" style="top:1180px">仅基于公开财报与公开报道 · 数据截至 2026.11</div>
+<div class="foot f" style="--d:1.5s">只做数据复盘，不评价公司经营</div>
+</section>
+</div>
+<script>
+const BEATS=[{id:'s0',dur:14.19},{id:'s1',dur:15.36},{id:'s2',dur:13.56},{id:'s3',dur:17.81},{id:'s4',dur:18.08},{id:'s5',dur:13.28},{id:'s6',dur:14.6},{id:'s7',dur:14.69},{id:'s8',dur:14.19},{id:'s9',dur:17.86},{id:'s10',dur:13.25},{id:'s11',dur:15.24},{id:'s12',dur:14.33},{id:'s13',dur:14.79},{id:'s14',dur:15.6},{id:'s15',dur:14.52},{id:'s16',dur:13.61},{id:'s17',dur:13.61},{id:'s18',dur:18.7}];
+const TOTAL=BEATS.reduce((a,b)=>a+b.dur,0);
+const Q=new URLSearchParams(location.search);
+const RENDER=Q.has('render'),ONLY=Q.get('scene');
+const scenes=[...document.querySelectorAll('.scene')];
+function show(i,local){
+  scenes.forEach((s,k)=>s.classList.toggle('on',k===i));
+  document.getAnimations().forEach(a=>{a.pause();a.currentTime=Math.max(0,local);});
+}
+window.__seek=(ms)=>{
+  let acc=0,i=0,local=ms;
+  for(;i<BEATS.length;i++){const d=BEATS[i].dur*1000;if(ms<acc+d){local=ms-acc;break;}acc+=d;}
+  if(i>=BEATS.length){i=BEATS.length-1;local=BEATS[i].dur*1000-1;}
+  show(i,local);
+};
+window.TOTAL=TOTAL;
+window.__ready=false;
+document.fonts.ready.then(()=>{
+  if(RENDER)document.body.classList.add('render');
+  if(ONLY){const k=Math.max(0,BEATS.findIndex(b=>b.id===ONLY));show(k,0);if(!RENDER)setTimeout(()=>document.getAnimations().forEach(a=>a.play()),40);}
+  else if(RENDER){show(0,0);}
+  else{let t0=performance.now();const tick=()=>{const ms=performance.now()-t0;window.__seek(ms%(TOTAL*1000));requestAnimationFrame(tick);};tick();}
+  requestAnimationFrame(()=>window.__ready=true);
+});
+</script>
+</body>
+</html>

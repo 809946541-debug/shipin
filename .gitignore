@@ -9,5 +9,11 @@ output/
 *.png
 *.aiff
 
+# 视频工坊：任务产物与本地密钥
+studio/data/
+
+# 打包产物（可用 deploy 脚本重新生成）
+dist/
+
 # 系统文件
 .DS_Store

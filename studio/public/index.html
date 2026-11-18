@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>手绘财经视频工坊</title>
+<style>
+:root{
+  --paper:#f6f1e6;--ink:#2d2822;--ink2:#6b5d4b;--line:#d8cdb8;
+  --red:#b23a2a;--blue:#33506f;--gold:#b08a3e;--ok:#3f6b45;
+  --hand:"Songti SC","STSong","Hiragino Sans GB","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#efe9dc;color:var(--ink);font-family:var(--sans);font-size:15px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(80,60,30,.02) 0 1px,transparent 1px 5px);z-index:0}
+a{color:var(--blue)}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 24px 60px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+h1{font-family:var(--hand);font-size:30px;margin:0;letter-spacing:.02em}
+h1 span{font-size:14px;font-weight:400;color:var(--ink2);margin-left:10px;letter-spacing:.1em}
+.pill{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--ink2);background:#fff7}
+.grid{display:grid;grid-template-columns:minmax(340px,420px) 1fr;gap:22px;align-items:start}
+.grid > *{min-width:0}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.card{background:#fffdf7;border:1px solid var(--line);border-radius:12px;padding:18px 18px 20px;box-shadow:0 1px 0 #fff inset,0 8px 24px rgba(80,60,30,.05)}
+.card h2{font-family:var(--hand);font-size:19px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between}
+.card h2 small{font-family:var(--sans);font-size:12px;color:var(--ink2);font-weight:400}
+label{display:block;font-size:13px;color:var(--ink2);margin:0 0 6px}
+input,textarea,select{width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--ink2);box-shadow:0 0 0 3px rgba(45,40,34,.06)}
+textarea{resize:vertical;line-height:1.65}
+.field{margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:9px;padding:11px 18px;font-size:15px;cursor:pointer;font-family:var(--sans);transition:.15s}
+.btn.primary{background:var(--red);color:#fff;width:100%}
+.btn.primary:hover{background:#9c3023}
+.btn.primary:disabled{background:#c9b9a9;cursor:not-allowed}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--ink2)}
+.btn.small{padding:7px 12px;font-size:13px}
+.hint{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:10px}
+details.settings{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+details.settings summary{cursor:pointer;font-size:13px;color:var(--ink2);list-style:none}
+details.settings summary::-webkit-details-marker{display:none}
+details.settings summary::before{content:"⚙ ";}
+.badge{display:inline-block;font-size:12px;border-radius:999px;padding:2px 9px;border:1px solid var(--line);color:var(--ink2);background:#fff}
+.badge.ok{color:var(--ok);border-color:#bcd0bd;background:#f2f8f2}
+.badge.err{color:var(--red);border-color:#e2c2bc;background:#fdf3f1}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.status .step{font-family:var(--hand);font-size:17px}
+.bar{height:9px;background:#eadfcc;border-radius:999px;overflow:hidden;margin:10px 0 14px}
+.bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .4s}
+pre.log{background:#211d18;color:#e8dfd0;border-radius:9px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65;height:230px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+.video-wrap{margin-top:16px;display:none}
+.video-wrap video{width:100%;max-height:70vh;background:#000;border-radius:10px}
+.video-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.empty{color:var(--ink2);font-size:13px;padding:8px 0}
+ul.jobs{list-style:none;margin:0;padding:0}
+ul.jobs li{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px dashed var(--line);cursor:pointer}
+ul.jobs li:last-child{border-bottom:0}
+ul.jobs li:hover{background:#fff9ec}
+ul.jobs .t{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.jobs .m{font-size:11px;color:var(--ink2);white-space:nowrap}
+.news-tools{display:flex;gap:8px;margin-bottom:8px}
+.news-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.news-tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-size:12px;color:var(--ink2);cursor:pointer}
+.news-tabs button.on{background:var(--ink);border-color:var(--ink);color:#fdf7ea}
+.news-tools input{flex:1}
+.news-tools .btn{flex:0 0 auto}
+ul.news{list-style:none;margin:0;padding:0;max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:9px;background:#fff}
+ul.news li{display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border-bottom:1px dashed var(--line);cursor:pointer}
+ul.news li:last-child{border-bottom:0}
+ul.news li:hover{background:#fff9ec}
+ul.news li.on{background:#fdf4ee;box-shadow:inset 3px 0 0 var(--red)}
+ul.news input[type=checkbox]{width:auto;margin:3px 0 0;accent-color:var(--red);flex:0 0 auto}
+ul.news .txt{flex:1;min-width:0}
+ul.news .t{font-size:13px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+ul.news .meta{font-size:11px;color:var(--ink2);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+ul.news .meta a{text-decoration:none}
+.news-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:12px;color:var(--ink2)}
+.dot{width:8px;height:8px;border-radius:50%;background:#c9b9a9;flex:0 0 auto}
+.dot.running{background:var(--gold);animation:pulse 1.2s infinite}
+.dot.done{background:var(--ok)}
+.dot.error{background:var(--red)}
+@keyframes pulse{50%{opacity:.35}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>手绘财经视频工坊<span>HAND-DRAWN FINANCE STUDIO</span></h1>
+    <div class="pill">1080×1920 · 30fps · 上下 96px 黑边</div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="card" style="margin-bottom:18px">
+        <h2>快讯 / 热点<small id="newsTime">抓取中…</small></h2>
+        <div class="news-tools">
+          <input id="newsQ" placeholder="搜索关键词，如 俄乌 / 美伊 / 英伟达 / 关税">
+          <button class="btn ghost small" id="newsReload">刷新</button>
+        </div>
+        <div class="news-tabs" id="newsTabs">
+          <button data-cat="全部" class="on">全部</button>
+          <button data-cat="财经">财经</button>
+          <button data-cat="A股">A股</button>
+          <button data-cat="国际">国际</button>
+        </div>
+        <ul class="news" id="newsList"><li class="empty">抓取中…</li></ul>
+        <div class="news-foot">
+          <span id="newsPicked">已选 0 条</span>
+          <button class="btn ghost small" id="newsGen" disabled>用 AI 生成选题</button>
+        </div>
+        <div class="hint">快讯来自新浪财经、华尔街见闻、中新网国际。勾选 1-4 条（可跨分类），AI 会提炼标题、一句话介绍和目标时长，自动填进下面的表单。</div>
+      </div>
+
+      <div class="card">
+        <h2>新建视频<small>填标题与一句话介绍即可</small></h2>
+        <div class="field">
+          <label>标题</label>
+          <input id="title" placeholder="例如：美国打伊朗、压委内瑞拉、搅俄乌：如果它都成功了，中国会怎样？">
+        </div>
+        <div class="field">
+          <label>一句话介绍</label>
+          <textarea id="summary" rows="5" placeholder="把选题的核心逻辑写清楚：现象、深层动因、对中国的三层影响、缓冲条件。"></textarea>
+        </div>
+        <div class="field">
+          <label>补充要求（可选）</label>
+          <textarea id="requirements" rows="3" placeholder="例如：内容客观，不要有审核违规的文字；结尾注明不构成投资建议。"></textarea>
+        </div>
+        <div class="row2 field">
+          <div>
+            <label>目标时长</label>
+            <select id="minutes">
+              <option value="4">约 4 分钟</option>
+              <option value="5" selected>约 5 分钟</option>
+              <option value="6">约 6 分钟</option>
+              <option value="7">约 7 分钟</option>
+            </select>
+          </div>
+          <div>
+            <label>画面风格</label>
+            <input value="手绘纸感（固定模板）" disabled>
+          </div>
+        </div>
+        <button class="btn primary" id="go">开始生成</button>
+        <div class="hint">生成流程：大模型写分镜 → 逐句配音 → 套用手绘模板合成页面 → 渲染约 <b id="frameHint">9000</b> 帧 → 编码成片。全程串行，页面可实时看进度。</div>
+
+        <details class="settings" id="settingsBox">
+          <summary>大模型接口设置 <span id="cfgState" class="badge">未配置</span></summary>
+          <div class="field" style="margin-top:12px">
+            <label>接口地址（OpenAI 兼容，含 /v1）</label>
+            <input id="baseUrl" placeholder="https://api.deepseek.com/v1">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>模型名</label>
+              <input id="model" placeholder="deepseek-chat">
+            </div>
+            <div class="field">
+              <label>API Key</label>
+              <input id="apiKey" type="password" placeholder="sk-...">
+            </div>
+          </div>
+          <button class="btn ghost small" id="saveCfg">保存设置</button>
+          <div class="hint" id="cfgHint">密钥只保存在本机 studio/data/config.json，不会上传。</div>
+        </details>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>历史任务<small id="jobCount"></small></h2>
+        <ul class="jobs" id="jobs"><li class="empty">暂无任务</li></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span>当前任务</span><small id="jobId"></small></h2>
+      <div class="status">
+        <span class="dot" id="dot"></span>
+        <span class="step" id="step">等待开始</span>
+        <span class="badge" id="durBadge" style="display:none"></span>
+        <button class="btn ghost small" id="retryBtn" style="display:none">重试本任务</button>
+      </div>
+      <div class="bar"><i id="bar"></i></div>
+      <pre class="log" id="log">填好左侧信息，点「开始生成」。</pre>
+
+      <div class="video-wrap" id="videoWrap">
+        <video id="video" controls playsinline preload="metadata"></video>
+        <div class="video-actions">
+          <a class="btn primary" id="dl" style="width:auto" href="#">下载成片</a>
+          <a class="btn ghost" id="scriptLink" target="_blank" href="#">查看脚本</a>
+          <a class="btn ghost" id="boardLink" target="_blank" href="#">查看分镜 JSON</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let currentId = null;
+let timer = null;
+
+function fmtTime(ts){
+  const d = new Date(ts);
+  return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+/* ---------------- 财经快讯 ---------------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MAX_PICK = 4;
+let newsItems = [];
+let newsCat = '全部';
+const picked = new Set();
+
+function updateFoot(){
+  $('#newsPicked').textContent = '已选 ' + picked.size + ' 条';
+  $('#newsGen').disabled = picked.size === 0;
+}
+
+function renderNews(){
+  const q = $('#newsQ').value.trim().toLowerCase();
+  const ul = $('#newsList');
+  if (!newsItems.length) { ul.innerHTML = '<li class="empty">暂时没抓到快讯，点「刷新」重试</li>'; updateFoot(); return; }
+  const list = newsItems.filter(x =>
+    (newsCat === '全部' || x.cat === newsCat) &&
+    (!q || (x.title + ' ' + x.summary).toLowerCase().includes(q)));
+  if (!list.length) { ul.innerHTML = '<li class="empty">这个分类下没有匹配的快讯</li>'; updateFoot(); return; }
+  ul.innerHTML = list.map(x => `<li data-id="${x.id}" class="${picked.has(x.id) ? 'on' : ''}">
+    <input type="checkbox" ${picked.has(x.id) ? 'checked' : ''}>
+    <span class="txt">
+      <span class="t">${esc(x.title)}</span>
+      <span class="meta"><span>${esc(x.source)}</span><span>${fmtTime(x.time)}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noreferrer">原文</a>` : ''}</span>
+    </span>
+  </li>`).join('');
+
+  [...ul.querySelectorAll('li[data-id]')].forEach(li => {
+    const id = li.dataset.id;
+    const box = li.querySelector('input');
+    const toggle = () => {
+      if (picked.has(id)) picked.delete(id);
+      else if (picked.size >= MAX_PICK) { box.checked = false; alert('最多选 ' + MAX_PICK + ' 条'); return; }
+      else picked.add(id);
+      box.checked = picked.has(id);
+      li.classList.toggle('on', picked.has(id));
+      updateFoot();
+    };
+    box.onclick = e => { e.stopPropagation(); toggle(); };
+    li.onclick = e => { if (e.target.tagName !== 'A') toggle(); };
+  });
+  updateFoot();
+}
+
+async function loadNews(force){
+  const btn = $('#newsReload');
+  btn.disabled = true;
+  $('#newsTime').textContent = '抓取中…';
+  try {
+    const r = await fetch('/api/news' + (force ? '?refresh=1' : ''));
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '抓取失败');
+    newsItems = d.items || [];
+    picked.clear();
+    $('#newsTime').textContent = newsItems.length
+      ? fmtTime(d.updatedAt) + ' · ' + newsItems.length + ' 条' + ((d.errors && d.errors.length) ? '（部分源失败）' : '')
+      : '暂无数据';
+    renderNews();
+  } catch (e) {
+    newsItems = [];
+    $('#newsTime').textContent = '抓取失败';
+    $('#newsList').innerHTML = '<li class="empty">' + esc(e.message) + '</li>';
+    updateFoot();
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('#newsQ').oninput = renderNews;
+$('#newsReload').onclick = () => loadNews(true);
+$('#newsTabs').onclick = e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  newsCat = b.dataset.cat;
+  [...$('#newsTabs').children].forEach(x => x.classList.toggle('on', x === b));
+  renderNews();
+};
+
+$('#newsGen').onclick = async () => {
+  const items = newsItems.filter(x => picked.has(x.id))
+    .map(x => ({ title: x.title, summary: x.summary, source: x.source, time: x.time }));
+  if (!items.length) return;
+  const btn = $('#newsGen');
+  btn.disabled = true;
+  btn.textContent = '生成中…';
+  try {
+    const r = await fetch('/api/news/topic', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '生成失败');
+    $('#title').value = d.title || '';
+    $('#summary').value = d.intro || '';
+    if (d.requirements) $('#requirements').value = d.requirements;
+    if (d.minutes) { $('#minutes').value = String(d.minutes); $('#minutes').onchange(); }
+    $('#title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    btn.textContent = '用 AI 生成选题';
+    btn.disabled = picked.size === 0;
+  }
+};
+
+async function loadConfig(){
+  const c = await (await fetch('/api/config')).json();
+  $('#baseUrl').value = c.baseUrl || '';
+  $('#model').value = c.model || '';
+  const s = $('#cfgState');
+  if (c.hasKey && c.model) { s.textContent = '已配置 ' + c.model; s.className = 'badge ok'; }
+  else if (c.hasKey) { s.textContent = '缺少模型名'; s.className = 'badge err'; }
+  else { s.textContent = '未配置'; s.className = 'badge err'; }
+  if (!c.hasKey) $('#settingsBox').open = true;
+  return c;
+}
+
+$('#saveCfg').onclick = async () => {
+  const body = { baseUrl: $('#baseUrl').value.trim(), model: $('#model').value.trim() };
+  const k = $('#apiKey').value.trim();
+  if (k && !k.includes('****')) body.apiKey = k;
+  const r = await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const c = await r.json();
+  $('#apiKey').value = '';
+  $('#cfgHint').textContent = c.hasKey ? ('已保存，密钥 ' + c.keyMask) : '已保存，但还没有密钥';
+  loadConfig();
+};
+
+$('#minutes').onchange = () => {
+  const m = Number($('#minutes').value);
+  $('#frameHint').textContent = Math.round(m * 60 * 30);
+};
+
+$('#go').onclick = async () => {
+  const title = $('#title').value.trim();
+  const summary = $('#summary').value.trim();
+  if (!title) { alert('请填写标题'); return; }
+  if (!summary) { alert('请填写一句话介绍'); return; }
+  const cfg = await loadConfig();
+  if (!cfg.hasKey) { alert('请先在「大模型接口设置」里填写 API Key'); return; }
+  $('#go').disabled = true;
+  $('#go').textContent = '提交中…';
+  try {
+    const r = await fetch('/api/jobs', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ title, summary, requirements: $('#requirements').value.trim(), minutes: Number($('#minutes').value) })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || '提交失败');
+    currentId = data.id;
+    $('#videoWrap').style.display = 'none';
+    $('#log').textContent = '任务已提交，等待开始…';
+    poll(data.id);
+    loadJobs();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    $('#go').disabled = false;
+    $('#go').textContent = '开始生成';
+  }
+};
+
+$('#retryBtn').onclick = async () => {
+  if (!currentId) return;
+  const r = await fetch('/api/jobs/' + currentId + '/retry', { method: 'POST' });
+  const data = await r.json();
+  if (!r.ok) { alert(data.error || '重试失败'); return; }
+  poll(currentId);
+  loadJobs();
+};
+
+function setDot(status){
+  const d = $('#dot');
+  d.className = 'dot' + (status === 'running' ? ' running' : status === 'done' ? ' done' : status === 'error' ? ' error' : '');
+}
+
+function render(job){
+  setDot(job.status);
+  $('#jobId').textContent = job.id;
+  $('#step').textContent = job.status === 'error' ? ('失败：' + (job.error || '')) : (job.status === 'done' ? '已完成' : job.step);
+  $('#bar').style.width = (job.progress || 0) + '%';
+  $('#retryBtn').style.display = job.status === 'error' ? 'inline-flex' : 'none';
+  if (job.duration) {
+    const b = $('#durBadge');
+    b.style.display = 'inline-block';
+    b.textContent = `时长 ${Math.floor(job.duration/60)}:${String(Math.round(job.duration%60)).padStart(2,'0')}`;
+  }
+  const logEl = $('#log');
+  const atBottom = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 24;
+  logEl.textContent = (job.log || []).map(l => l.msg).join('\n') || '…';
+  if (atBottom) logEl.scrollTop = logEl.scrollHeight;
+
+  if (job.hasVideo) {
+    $('#videoWrap').style.display = 'block';
+    const v = $('#video');
+    const src = '/media/' + job.id + '/output.mp4';
+    if (!v.src.endsWith(src)) v.src = src;
+    $('#dl').href = '/api/jobs/' + job.id + '/download';
+    $('#scriptLink').href = '/api/jobs/' + job.id + '/script';
+    $('#boardLink').href = '/api/jobs/' + job.id + '/storyboard';
+  } else {
+    $('#videoWrap').style.display = 'none';
+  }
+}
+
+async function poll(id){
+  currentId = id;
+  clearInterval(timer);
+  const tick = async () => {
+    try {
+      const r = await fetch('/api/jobs/' + id);
+      if (!r.ok) return;
+      const job = await r.json();
+      render(job);
+      if (job.status === 'done' || job.status === 'error') {
+        clearInterval(timer);
+        loadJobs();
+      }
+    } catch {}
+  };
+  await tick();
+  timer = setInterval(tick, 1500);
+}
+
+async function loadJobs(){
+  const list = await (await fetch('/api/jobs')).json();
+  $('#jobCount').textContent = list.length ? list.length + ' 个' : '';
+  const ul = $('#jobs');
+  if (!list.length) { ul.innerHTML = '<li class="empty">暂无任务</li>'; return; }
+  ul.innerHTML = list.map(j => `<li data-id="${j.id}">
+    <span class="dot ${j.status}"></span>
+    <span class="t">${(j.brief && j.brief.title) || '(未命名)'}</span>
+    <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : (j.progress||0) + '%'}</span>
+    <span class="m">${fmtTime(j.createdAt)}</span>
+  </li>`).join('');
+  [...ul.querySelectorAll('li[data-id]')].forEach(li => {
+    li.onclick = () => {
+      const id = li.dataset.id;
+      const job = list.find(x => x.id === id);
+      $('#videoWrap').style.display = 'none';
+      poll(id);
+      if (job && job.status === 'done') {
+        // 已完成任务直接展示成片
+        setTimeout(() => {
+          $('#videoWrap').style.display = 'block';
+          $('#video').src = '/media/' + id + '/output.mp4';
+          $('#dl').href = '/api/jobs/' + id + '/download';
+          $('#scriptLink').href = '/api/jobs/' + id + '/script';
+          $('#boardLink').href = '/api/jobs/' + id + '/storyboard';
+        }, 300);
+      }
+    };
+  });
+}
+
+loadConfig();
+loadJobs();
+loadNews(false);
+</script>
+</body>
+</html>

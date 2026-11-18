@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>千元科技股集体退潮：业绩没崩，估值先崩了？</title>
+<style>
+:root{--paper:#f4efe2;--ink:#2d2822;--ink2:#5c4e3d;--red:#b23a2a;--blue:#33506f;--gold:#b08a3e;--hand:"Songti SC","STSong","Hiragino Sans GB",serif;--num:"Baskerville","Songti SC",serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1728px;overflow:hidden;background:var(--paper);font-family:var(--hand);color:var(--ink)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 8%,rgba(90,60,20,.06),transparent 42%),radial-gradient(circle at 82% 92%,rgba(90,60,20,.05),transparent 40%),repeating-linear-gradient(0deg,rgba(80,60,30,.022) 0 1px,transparent 1px 5px);mix-blend-mode:multiply}
+#stage{position:relative;width:1080px;height:1728px;overflow:hidden}
+.scene{position:absolute;inset:0;visibility:hidden;opacity:0}
+.scene.on{visibility:visible;opacity:1}
+.art{position:absolute;inset:0;width:1080px;height:1920px;overflow:visible}
+.f{opacity:0;animation:fade .85s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes fade{to{opacity:1}}
+.rise{opacity:0;transform:translateY(18px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+.draw{stroke-dasharray:2200;stroke-dashoffset:2200;opacity:0;animation:draw 2.4s ease-out forwards;animation-delay:var(--d,0s)}
+@keyframes draw{0%{opacity:0}12%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+.grow{opacity:0;transform:scaleY(0);transform-origin:bottom;transform-box:fill-box;animation:grow 1s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes grow{to{opacity:1;transform:scaleY(1)}}
+.render .f,.render .rise,.render .draw,.render .grow{animation-play-state:paused}
+.k{position:absolute;left:104px;top:236px;font-size:27px;letter-spacing:.34em;color:var(--ink2)}
+.h1{position:absolute;left:100px;top:292px;width:890px;font-size:86px;line-height:1.16;font-weight:700;letter-spacing:.01em}
+.h1.sm{font-size:72px}
+.h2{position:absolute;left:104px;top:424px;width:870px;font-size:41px;line-height:1.5;color:var(--ink2)}
+.body{position:absolute;left:104px;font-size:37px;line-height:1.78}
+.s{font-size:30px;line-height:1.7;color:var(--ink2)}
+.s[style^="top:"]{position:absolute;left:104px}
+.red{color:var(--red)}.blue{color:var(--blue)}.gold{color:var(--gold)}.b{font-weight:700}
+.num{font-family:var(--num);font-weight:700}
+.big{font-family:var(--num);font-weight:700;font-size:82px;line-height:1.1}
+.foot{position:absolute;left:104px;bottom:24px;font-size:25px;letter-spacing:.08em;color:var(--ink2)}
+.rule{position:absolute;height:3px;background:var(--ink);opacity:.45}
+.tag{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:6px 15px;margin:0 8px 10px 0;font-size:26px;background:rgba(255,255,255,.22)}
+.card{position:absolute;border:3px solid var(--ink);border-radius:10px;background:rgba(255,255,255,.22);padding:16px 18px}
+.card h3{font-size:39px;line-height:1.2;margin-bottom:6px}
+.card p{font-size:26px;line-height:1.6;color:var(--ink2)}
+.stat{position:absolute;border:3px solid var(--ink);border-radius:9px;background:rgba(255,255,255,.24);padding:10px 14px}
+.stat .v{font-family:var(--num);font-weight:700;font-size:51px;line-height:1.12}
+.stat .l{font-size:25px;color:var(--ink2);margin-top:4px}
+.tbl{position:absolute;left:96px;top:520px;width:888px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.2)}
+.tr{display:grid;grid-template-columns:1.25fr 1fr 1fr;border-bottom:2px solid rgba(45,40,34,.32)}
+.tr:last-child{border-bottom:none}
+.td{padding:14px 8px;font-size:28px;text-align:center;border-right:2px solid rgba(45,40,34,.22)}
+.td:first-child{text-align:left;padding-left:16px;color:var(--ink2)}
+.tr.head .td{font-weight:700;background:rgba(45,40,34,.06);font-size:27px}
+.tr.head .td:first-child{color:var(--ink)}
+.cover-k{left:0;width:1080px;text-align:center;top:238px}
+.cover-h{left:0;width:1080px;text-align:center;top:300px;font-size:112px;letter-spacing:.04em}
+.cover-sub{position:absolute;left:0;width:1080px;text-align:center;top:604px;font-size:44px;color:var(--ink2)}
+.cover-tag{position:absolute;left:0;width:1080px;text-align:center;top:690px;font-size:32px;letter-spacing:.14em}
+.ghost{position:absolute;font-family:var(--num);font-weight:700;color:var(--ink);opacity:.055;font-size:520px;line-height:1;pointer-events:none}
+.stamp{position:absolute;border:4px solid var(--red);border-radius:10px;color:var(--red);font-size:36px;font-weight:700;letter-spacing:.12em;padding:10px 18px;transform:rotate(-9deg);opacity:.85;background:rgba(255,255,255,.1)}
+.chip{display:inline-block;border:2px solid var(--ink);border-radius:8px;background:rgba(255,255,255,.28);padding:8px 14px;margin:0 10px 12px 0;font-size:27px}
+.note{position:absolute;left:104px;font-size:26px;line-height:1.65;color:var(--ink2)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#2d2822"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#b23a2a"/></marker>
+<g id="mod">
+<rect x="0" y="0" width="210" height="82" rx="9" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<rect x="12" y="12" width="150" height="58" rx="5" fill="none" stroke="#2d2822" stroke-width="2.4"/>
+<line x1="12" y1="31" x2="162" y2="31" stroke="#2d2822" stroke-width="2" opacity=".5"/>
+<line x1="12" y1="51" x2="162" y2="51" stroke="#2d2822" stroke-width="2" opacity=".5"/>
+<circle cx="181" cy="23" r="3.5" fill="#b23a2a"/><circle cx="181" cy="59" r="3.5" fill="#33506f"/>
+<path d="M210 26 C248 2 268 70 312 42" fill="none" stroke="#33506f" stroke-width="4" stroke-linecap="round"/>
+<path d="M210 56 C248 32 268 96 312 68" fill="none" stroke="#b23a2a" stroke-width="4" stroke-linecap="round"/>
+</g>
+<g id="chip">
+<rect x="0" y="0" width="150" height="150" rx="12" fill="#f4efe2" stroke="#2d2822" stroke-width="4"/>
+<rect x="30" y="30" width="90" height="90" rx="6" fill="none" stroke="#2d2822" stroke-width="3"/>
+<text x="75" y="91" text-anchor="middle" font-size="30" font-family="Baskerville,serif" fill="#2d2822">AI</text>
+<path d="M18 0 V-16 M42 0 V-16 M66 0 V-16 M90 0 V-16 M114 0 V-16 M138 0 V-16" stroke="#2d2822" stroke-width="3"/>
+<path d="M18 150 V166 M42 150 V166 M66 150 V166 M90 150 V166 M114 150 V166 M138 150 V166" stroke="#2d2822" stroke-width="3"/>
+<path d="M0 18 H-16 M0 42 H-16 M0 66 H-16 M0 90 H-16 M0 114 H-16 M0 138 H-16" stroke="#2d2822" stroke-width="3"/>
+<path d="M150 18 H166 M150 42 H166 M150 66 H166 M150 90 H166 M150 114 H166 M150 138 H166" stroke="#2d2822" stroke-width="3"/>
+</g>
+<g id="flag">
+<line x1="0" y1="0" x2="0" y2="128" stroke="#2d2822" stroke-width="4"/>
+<path d="M0 0 L74 21 L0 46 Z" fill="#b23a2a" opacity=".9"/>
+</g>
+<g id="person">
+<circle cx="0" cy="-26" r="10" fill="none" stroke="#2d2822" stroke-width="3"/>
+<line x1="0" y1="-16" x2="0" y2="18" stroke="#2d2822" stroke-width="3"/>
+<line x1="0" y1="18" x2="-12" y2="40" stroke="#2d2822" stroke-width="3"/>
+<line x1="0" y1="18" x2="12" y2="40" stroke="#2d2822" stroke-width="3"/>
+<line x1="0" y1="-6" x2="-16" y2="8" stroke="#2d2822" stroke-width="3"/>
+<line x1="0" y1="-6" x2="16" y2="8" stroke="#2d2822" stroke-width="3"/>
+</g>
+</defs></svg>
+<div id="stage">
+
+<section class="scene" id="s0">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M150 820 L300 900 L440 860 L600 1010 L750 1120 L900 1290" fill="none" stroke="#b23a2a" stroke-width="6" stroke-linecap="round" class="draw" style="--d:.3s"/>
+<path d="M900 1290 L930 1330" stroke="#b23a2a" stroke-width="6" marker-end="url(#ahr)" class="f" style="--d:1.9s"/>
+<g class="f" style="--d:.5s" transform="translate(190,700) rotate(-14)"><rect width="190" height="96" rx="8" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/><text x="16" y="36" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">联讯仪器</text><text x="16" y="76" font-size="31" fill="#b23a2a" font-family="Baskerville,serif">2777 → 657</text></g>
+<g class="f" style="--d:.7s" transform="translate(430,790) rotate(-9)"><rect width="190" height="96" rx="8" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/><text x="16" y="36" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">源杰科技</text><text x="16" y="76" font-size="31" fill="#b23a2a" font-family="Baskerville,serif">1967 → 643</text></g>
+<g class="f" style="--d:.9s" transform="translate(650,930) rotate(-5)"><rect width="190" height="96" rx="8" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/><text x="16" y="36" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">寒武纪</text><text x="16" y="76" font-size="31" fill="#b23a2a" font-family="Baskerville,serif">1966 → 915</text></g>
+<g class="f" style="--d:1.1s" transform="translate(810,1080) rotate(4)"><rect width="190" height="96" rx="8" fill="#f4efe2" stroke="#2d2822" stroke-width="3"/><text x="16" y="36" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">中际旭创</text><text x="16" y="76" font-size="31" fill="#b23a2a" font-family="Baskerville,serif">1416 → 426</text></g>
+<g class="f" style="--d:1.3s" transform="translate(740,1350)"><rect width="230" height="116" rx="10" fill="rgba(176,138,62,.12)" stroke="#b08a3e" stroke-width="4"/><text x="18" y="42" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">贵州茅台</text><text x="18" y="88" font-size="40" fill="#2d2822" font-family="Baskerville,serif">1453.90</text></g>
+</svg>
+<div class="k f cover-k" style="--d:.05s">手绘财经 · 2026.11</div>
+<h1 class="h1 rise cover-h" style="--d:.15s">千元科技股<br>集体退潮</h1>
+<div class="f cover-sub" style="--d:.35s">业绩没崩，估值先崩了？</div>
+<div class="f cover-tag red" style="--d:1.4s;top:1545px">四家公司 · 一张估值表</div>
+<div class="foot f" style="--d:1.6s">公开数据复盘 · 不构成投资建议</div>
+</section>
+
+<section class="scene" id="s1">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="110" y1="1080" x2="980" y2="1080" stroke="#2d2822" stroke-width="4"/>
+<path d="M170 700 L360 820 L590 980 L830 1060" fill="none" stroke="#2d2822" stroke-width="5" class="draw" style="--d:.3s"/>
+<circle cx="170" cy="700" r="11" fill="#33506f" class="f" style="--d:.5s"/>
+<circle cx="360" cy="820" r="11" fill="#33506f" class="f" style="--d:.7s"/>
+<circle cx="590" cy="980" r="11" fill="#33506f" class="f" style="--d:.9s"/>
+<circle cx="830" cy="1060" r="13" fill="#b08a3e" class="f" style="--d:1.1s"/>
+<text x="142" y="655" font-size="54" fill="#33506f" font-family="Baskerville,serif">6</text>
+<text x="332" y="775" font-size="54" fill="#33506f" font-family="Baskerville,serif">4</text>
+<text x="562" y="935" font-size="54" fill="#33506f" font-family="Baskerville,serif">3</text>
+<text x="805" y="1015" font-size="54" fill="#b08a3e" font-family="Baskerville,serif">1</text>
+<text x="130" y="1135" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">7/13</text>
+<text x="320" y="1135" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">7/17</text>
+<text x="550" y="1135" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">10/16</text>
+<text x="790" y="1135" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">10/29</text>
+<g class="f" style="--d:1.2s" transform="translate(820,790)"><rect width="150" height="84" rx="8" fill="rgba(176,138,62,.12)" stroke="#b08a3e" stroke-width="3"/><text x="14" y="34" font-size="24" fill="#5c4e3d" font-family="Songti SC,serif">只 剩</text><text x="14" y="70" font-size="30" fill="#2d2822" font-family="Songti SC,serif">茅 台</text></g>
+</svg>
+<div class="k f" style="--d:.05s">01 / 千元股俱乐部</div>
+<h1 class="h1 rise" style="--d:.12s">从六只，到一只</h1>
+<div class="h2 f" style="--d:.3s">四个月，千元股只剩茅台</div>
+<div class="body f" style="top:1230px">7 月 13 日：<span class="b blue">6 只</span></div>
+<div class="body f" style="top:1330px">10 月 29 日：<span class="b gold">1 只</span></div>
+<div class="s f" style="top:1460px">联讯、源杰、寒武纪、中际，先后跌破千元。</div>
+<div class="foot f" style="--d:1.5s">数据：公开行情与报道，截至 2026.11.16</div>
+</section>
+
+<section class="scene" id="s2">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="300" y1="560" x2="300" y2="1080" stroke="#2d2822" stroke-width="3" opacity=".5"/>
+<rect x="300" y="590" width="590" height="52" fill="rgba(178,58,42,.22)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.3s"/>
+<rect x="300" y="710" width="520" height="52" fill="rgba(178,58,42,.22)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.45s"/>
+<rect x="300" y="830" width="540" height="52" fill="rgba(178,58,42,.22)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.6s"/>
+<rect x="300" y="950" width="410" height="52" fill="rgba(178,58,42,.22)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.75s"/>
+<text x="910" y="632" font-size="38" fill="#b23a2a" font-family="Baskerville,serif">−76%</text>
+<text x="840" y="752" font-size="38" fill="#b23a2a" font-family="Baskerville,serif">−67%</text>
+<text x="860" y="872" font-size="38" fill="#b23a2a" font-family="Baskerville,serif">−70%</text>
+<text x="730" y="992" font-size="38" fill="#b23a2a" font-family="Baskerville,serif">−53%</text>
+<text x="110" y="628" font-size="31" font-family="Songti SC,serif">联讯仪器</text>
+<text x="110" y="748" font-size="31" font-family="Songti SC,serif">源杰科技</text>
+<text x="110" y="868" font-size="31" font-family="Songti SC,serif">中际旭创</text>
+<text x="110" y="988" font-size="31" font-family="Songti SC,serif">寒武纪</text>
+<text x="110" y="672" font-size="23" fill="#5c4e3d" font-family="Baskerville,serif">2777 → 657</text>
+<text x="110" y="792" font-size="23" fill="#5c4e3d" font-family="Baskerville,serif">1967 → 643</text>
+<text x="110" y="912" font-size="23" fill="#5c4e3d" font-family="Baskerville,serif">1416 → 426</text>
+<text x="110" y="1032" font-size="23" fill="#5c4e3d" font-family="Baskerville,serif">1966 → 915</text>
+</svg>
+<div class="k f" style="--d:.05s">02 / 退潮幅度</div>
+<h1 class="h1 rise" style="--d:.12s">高点回撤：四到七成</h1>
+<div class="h2 f" style="--d:.3s">按年内高点计算，不复权</div>
+<div class="body f" style="top:1200px;font-size:38px">跌得最狠的，<span class="b red">正是涨得最猛的</span>。</div>
+<div class="s f" style="top:1320px">高价股的回撤，不是线性的。</div>
+<div class="s f" style="top:1420px">涨的时候按“未来”定价，跌的时候也按“未来”打折。</div>
+<div class="foot f" style="--d:1.4s">价格：2026 年内高点 → 11 月 16 日收盘</div>
+</section>
+
+<section class="scene" id="s3">
+<div class="k f" style="--d:.05s">03 / 三季报</div>
+<h1 class="h1 rise" style="--d:.12s">业绩，没崩</h1>
+<div class="h2 f" style="--d:.3s">收入、利润，仍在增长</div>
+<div class="tbl f" style="--d:.45s;top:500px">
+<div class="tr head"><div class="td">公司</div><div class="td">指标</div><div class="td">同比</div></div>
+<div class="tr"><div class="td">联讯仪器</div><div class="td">Q3 净利</div><div class="td red b">+3488%</div></div>
+<div class="tr"><div class="td">中际旭创</div><div class="td">Q3 净利</div><div class="td red b">+174%</div></div>
+<div class="tr"><div class="td">源杰科技</div><div class="td">前三季净利</div><div class="td red b">+867%</div></div>
+<div class="tr"><div class="td">寒武纪</div><div class="td">前三季净利</div><div class="td red b">+131%</div></div>
+</div>
+<div class="stamp f" style="--d:1s;left:770px;top:930px">业绩没崩</div>
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M120 1090 L260 1040 L400 1070 L540 980" fill="none" stroke="#33506f" stroke-width="4" class="draw" style="--d:.7s"/>
+<text x="120" y="1160" font-size="27" fill="#5c4e3d" font-family="Songti SC,serif">利润还在往上走</text>
+</svg>
+<div class="body f" style="top:1200px;font-size:36px">四家公司，三季报全部增长。</div>
+<div class="s f" style="top:1310px">联讯的增速最快，中际的体量最大。</div>
+<div class="s f" style="top:1410px">至少这个季度，基本面没有“崩”。</div>
+<div class="foot f" style="--d:1.4s">数据：各公司 2026 年三季报</div>
+</section>
+
+<section class="scene" id="s4">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="130" y1="640" x2="960" y2="640" stroke="#2d2822" stroke-width="4"/>
+<rect x="120" y="690" width="230" height="230" rx="10" fill="rgba(255,255,255,.2)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.25s"/>
+<rect x="430" y="690" width="230" height="230" rx="10" fill="rgba(255,255,255,.24)" stroke="#33506f" stroke-width="5" class="f" style="--d:.4s"/>
+<rect x="740" y="690" width="230" height="230" rx="10" fill="rgba(255,255,255,.2)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<text x="235" y="660" font-size="40" text-anchor="middle" font-family="Baskerville,serif">2026</text>
+<text x="545" y="660" font-size="40" text-anchor="middle" fill="#33506f" font-family="Baskerville,serif">2027</text>
+<text x="855" y="660" font-size="40" text-anchor="middle" font-family="Baskerville,serif">2028</text>
+<text x="235" y="770" font-size="34" text-anchor="middle" font-family="Songti SC,serif">Q4 交付</text>
+<text x="235" y="820" font-size="25" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">1.6T 放量</text>
+<text x="545" y="770" font-size="34" text-anchor="middle" fill="#33506f" font-family="Songti SC,serif">订单覆盖</text>
+<text x="545" y="820" font-size="25" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">全年可见</text>
+<text x="855" y="770" font-size="34" text-anchor="middle" font-family="Songti SC,serif">部分指引</text>
+<text x="855" y="820" font-size="25" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">能见度初现</text>
+<path d="M350 805 H420" stroke="#2d2822" stroke-width="4" marker-end="url(#ah)" class="draw" style="--d:.8s"/>
+<path d="M660 805 H730" stroke="#2d2822" stroke-width="4" marker-end="url(#ah)" class="draw" style="--d:.95s"/>
+<g class="f" style="--d:1.1s" transform="translate(480,960)"><use href="#flag" transform="scale(.75)"/></g>
+</svg>
+<div class="k f" style="--d:.05s">04 / 订单</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:74px">订单，排到了 2027</h1>
+<div class="h2 f" style="--d:.3s">需求端，暂时没有看到砍单</div>
+<div class="body f" style="top:1060px;font-size:34px">中际：2027 覆盖 · 部分客户给 2028 指引</div>
+<div class="body f" style="top:1150px;font-size:34px">源杰：17.44 亿元大单</div>
+<div class="body f" style="top:1240px;font-size:34px">联讯：在手订单充足</div>
+<div class="body f" style="top:1330px;font-size:34px">寒武纪：147 亿备货</div>
+<div class="s f" style="top:1440px">订单能见度，是这轮下跌里最硬的一块支撑。</div>
+<div class="foot f" style="--d:1.5s">数据：公司公告、三季报与公开报道</div>
+</section>
+
+<section class="scene" id="s5">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="110" y="610" width="240" height="180" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/>
+<text x="230" y="680" font-size="42" text-anchor="middle" font-family="Songti SC,serif">业绩</text>
+<text x="230" y="755" font-size="54" text-anchor="middle" fill="#b23a2a" font-family="Baskerville,serif">↑</text>
+<text x="395" y="715" font-size="56" text-anchor="middle" fill="#5c4e3d" font-family="Baskerville,serif">+</text>
+<rect x="450" y="610" width="240" height="180" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/>
+<text x="570" y="680" font-size="42" text-anchor="middle" font-family="Songti SC,serif">估值</text>
+<text x="570" y="755" font-size="54" text-anchor="middle" fill="#b08a3e" font-family="Baskerville,serif">↓↓</text>
+<text x="735" y="715" font-size="56" text-anchor="middle" fill="#5c4e3d" font-family="Baskerville,serif">=</text>
+<rect x="790" y="610" width="190" height="180" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/>
+<text x="885" y="680" font-size="42" text-anchor="middle" font-family="Songti SC,serif">股价</text>
+<text x="885" y="755" font-size="54" text-anchor="middle" fill="#33506f" font-family="Baskerville,serif">↓</text>
+<path d="M230 1030 L230 850" stroke="#b23a2a" stroke-width="5" marker-end="url(#ahr)" class="draw" style="--d:.6s"/>
+<path d="M570 850 L570 1030" stroke="#b08a3e" stroke-width="5" marker-end="url(#ah)" class="draw" style="--d:.8s"/>
+<text x="120" y="1100" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">利润表：向上</text>
+<text x="640" y="1100" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">估值表：向下</text>
+</svg>
+<div class="k f" style="--d:.05s">05 / 第一层</div>
+<h1 class="h1 rise" style="--d:.12s">不是杀业绩</h1>
+<div class="h2 f" style="--d:.3s">至少这个季度，基本面还在向上</div>
+<div class="body f" style="top:1200px;font-size:40px">矛盾，<span class="b red">不在利润表</span>。</div>
+<div class="s f" style="top:1300px">业绩增长、股价下跌，说明市场在压估值。</div>
+<div class="s f" style="top:1400px">“业绩没崩”与“股价大跌”，可以同时成立。</div>
+<div class="foot f" style="--d:1.4s">仅讨论定价结构，不评价公司经营</div>
+</section>
+
+<section class="scene" id="s6">
+<div class="k f" style="--d:.05s">06 / 第二层</div>
+<h1 class="h1 rise" style="--d:.12s">杀估值：倍数被压扁</h1>
+<div class="h2 f" style="--d:.3s">同一份利润，市场愿意给的倍数变了</div>
+<div class="tbl f" style="--d:.45s;top:500px">
+<div class="tr head" style="grid-template-columns:1.3fr 1fr 1fr 1fr"><div class="td">公司</div><div class="td">峰值 PE</div><div class="td">现在 PE</div><div class="td">压缩</div></div>
+<div class="tr" style="grid-template-columns:1.3fr 1fr 1fr 1fr"><div class="td">源杰科技</div><div class="td">659×</div><div class="td">59×</div><div class="td red b">−91%</div></div>
+<div class="tr" style="grid-template-columns:1.3fr 1fr 1fr 1fr"><div class="td">寒武纪</div><div class="td">173×</div><div class="td">116×</div><div class="td red b">−33%</div></div>
+<div class="tr" style="grid-template-columns:1.3fr 1fr 1fr 1fr"><div class="td">中际旭创</div><div class="td">63×</div><div class="td">17×</div><div class="td red b">−73%</div></div>
+<div class="tr" style="grid-template-columns:1.3fr 1fr 1fr 1fr"><div class="td">联讯仪器</div><div class="td">—</div><div class="td">37×</div><div class="td">新股高波动</div></div>
+</div>
+<div class="big f red" style="--d:1.1s;position:absolute;left:104px;top:1000px;font-size:72px">估值，先崩了</div>
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M760 1010 L910 1110" stroke="#b23a2a" stroke-width="5" marker-end="url(#ahr)" class="draw" style="--d:1.2s"/>
+<circle cx="900" cy="1030" r="56" fill="none" stroke="#b23a2a" stroke-width="4" class="f" style="--d:1.3s"/>
+<text x="900" y="1046" text-anchor="middle" font-size="34" fill="#b23a2a" font-family="Baskerville,serif">PE</text>
+</svg>
+<div class="body f" style="top:1200px;font-size:36px">利润在涨，倍数在跌。</div>
+<div class="s f" style="top:1300px">中际为 2025 年末 PE 对比当前；其余为区间峰值 PE。</div>
+<div class="s f" style="top:1390px">PE 是结果，不是原因；真正变的，是市场愿意给多少。</div>
+<div class="foot f" style="--d:1.5s">PE 口径：滚动市盈率，数据截至 2026.11.16</div>
+</section>
+
+<section class="scene" id="s7">
+<svg class="art" viewBox="0 0 1080 1920">
+<path d="M100 1280 L300 1060 L460 790 L620 1010 L780 870 L980 1280 Z" fill="rgba(51,80,111,.07)" stroke="#2d2822" stroke-width="4" class="draw" style="--d:.3s"/>
+<line x1="100" y1="1280" x2="980" y2="1280" stroke="#2d2822" stroke-width="3" stroke-dasharray="10 12" class="f" style="--d:.8s"/>
+<g class="f" style="--d:.7s" transform="translate(300,980) scale(.55)"><use href="#flag"/></g>
+<g class="f" style="--d:.85s" transform="translate(460,710) scale(.55)"><use href="#flag"/></g>
+<g class="f" style="--d:1s" transform="translate(620,930) scale(.55)"><use href="#flag"/></g>
+<g class="f" style="--d:1.15s" transform="translate(780,790) scale(.55)"><use href="#flag"/></g>
+<text x="325" y="970" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">联讯 2777</text>
+<text x="485" y="700" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">源杰 1967</text>
+<text x="645" y="920" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">寒武纪 1966</text>
+<text x="805" y="780" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">中际 1416</text>
+<text x="120" y="1330" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">当前：657 / 643 / 915 / 426</text>
+</svg>
+<div class="k f" style="--d:.05s">07 / 为什么</div>
+<h1 class="h1 rise" style="--d:.12s">因为起点，太高</h1>
+<div class="h2 f" style="--d:.3s">高估值，把未来的好消息提前写进了价格</div>
+<div class="body f" style="top:1420px;font-size:34px">联讯六月盘中到过 2777 元。</div>
+<div class="body f" style="top:1510px;font-size:34px">源杰四月盘中一度超过茅台。</div>
+<div class="s f" style="top:1610px">涨得越远，回撤时也越疼。</div>
+<div class="foot f" style="--d:1.6s">价格为不复权盘中/收盘高点，仅作复盘</div>
+</section>
+
+<section class="scene" id="s8">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.25s">
+<path d="M280 940 L180 1180 M280 940 L300 1180 M280 940 L390 1180" stroke="#2d2822" stroke-width="5" stroke-linecap="round"/>
+<circle cx="280" cy="930" r="16" fill="#2d2822"/>
+<rect x="255" y="820" width="320" height="80" rx="16" fill="#f4efe2" stroke="#2d2822" stroke-width="5" transform="rotate(-10 415 860)"/>
+<rect x="540" y="760" width="90" height="120" rx="12" fill="#f4efe2" stroke="#2d2822" stroke-width="5" transform="rotate(-10 585 820)"/>
+</g>
+<circle cx="800" cy="720" r="150" fill="rgba(255,255,255,.16)" stroke="#b23a2a" stroke-width="4" stroke-dasharray="10 12" class="f" style="--d:.8s"/>
+<text x="800" y="700" text-anchor="middle" font-size="66" fill="#b23a2a" font-family="Baskerville,serif">2028</text>
+<text x="800" y="780" text-anchor="middle" font-size="72" fill="#b23a2a" font-family="Baskerville,serif">?</text>
+<path d="M650 640 C700 610 740 630 770 660" fill="none" stroke="#5c4e3d" stroke-width="3" stroke-dasharray="6 10" class="f" style="--d:1s"/>
+<path d="M870 850 C920 820 950 840 980 870" fill="none" stroke="#5c4e3d" stroke-width="3" stroke-dasharray="6 10" class="f" style="--d:1.1s"/>
+</svg>
+<div class="k f" style="--d:.05s">08 / 第三层</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:68px">杀预期：交易的是 2027</h1>
+<div class="h2 f" style="--d:.3s">市场看的不是三季报，是明后年的斜率</div>
+<div class="body f" style="top:1210px;font-size:38px">报表越好，越要追问：<span class="b red">明年还能不能更好？</span></div>
+<div class="body f" style="top:1320px;font-size:34px">增速能不能延续？订单能不能续？估值谁来接？</div>
+<div class="s f" style="top:1440px">这三个问题，三季报回答不了。</div>
+<div class="foot f" style="--d:1.5s">预期无法证实或证伪时，波动本身就会放大</div>
+</section>
+
+<section class="scene" id="s9">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="150" y1="1060" x2="560" y2="1060" stroke="#2d2822" stroke-width="4"/>
+<line x1="150" y1="1060" x2="150" y2="600" stroke="#2d2822" stroke-width="4"/>
+<rect x="210" y="760" width="120" height="300" fill="#33506f" fill-opacity=".65" class="grow" style="--d:.3s"/>
+<rect x="400" y="520" width="120" height="540" fill="#b23a2a" fill-opacity=".72" class="grow" style="--d:.5s"/>
+<text x="270" y="735" text-anchor="middle" font-size="30" fill="#33506f" font-family="Baskerville,serif">4100</text>
+<text x="535" y="570" font-size="30" fill="#b23a2a" font-family="Baskerville,serif">7200+</text>
+<text x="270" y="1110" text-anchor="middle" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">2025</text>
+<text x="460" y="1110" text-anchor="middle" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">2026E</text>
+<text x="120" y="620" font-size="25" fill="#5c4e3d" font-family="Songti SC,serif">亿美元</text>
+<rect x="660" y="620" width="330" height="330" rx="10" fill="rgba(178,58,42,.06)" stroke="#b23a2a" stroke-width="4" class="f" style="--d:.8s"/>
+<text x="690" y="690" font-size="31" fill="#b23a2a" font-family="Songti SC,serif">三家现金流</text>
+<text x="690" y="740" font-size="31" fill="#b23a2a" font-family="Songti SC,serif">已经转负</text>
+<line x1="690" y1="770" x2="950" y2="770" stroke="#b23a2a" stroke-width="2" opacity=".5"/>
+<text x="690" y="835" font-size="31" fill="#2d2822" font-family="Songti SC,serif">下一财年缺口</text>
+<text x="690" y="905" font-size="56" fill="#b23a2a" font-family="Baskerville,serif">700 亿+</text>
+</svg>
+<div class="k f" style="--d:.05s">09 / 担心一</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:68px">AI 资本开支，见顶了吗</h1>
+<div class="h2 f" style="--d:.3s">需求是真的，账单也是真的</div>
+<div class="body f" style="top:1180px;font-size:34px">四大云厂商 2026 年开支约 7200–7450 亿美元。</div>
+<div class="body f" style="top:1270px;font-size:34px">同比增近八成，但三家现金流已经转负。</div>
+<div class="s f" style="top:1390px">市场担心的不是今年，是 2027 年还能不能继续加。</div>
+<div class="foot f" style="--d:1.5s">数据：公开财报与媒体报道，单位美元</div>
+</section>
+
+<section class="scene" id="s10">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="130" y1="690" x2="950" y2="690" stroke="#33506f" stroke-width="5" marker-end="url(#ah)" class="draw" style="--d:.3s"/>
+<line x1="130" y1="850" x2="950" y2="850" stroke="#b08a3e" stroke-width="5" marker-end="url(#ah)" class="draw" style="--d:.45s"/>
+<line x1="130" y1="1010" x2="950" y2="1010" stroke="#b23a2a" stroke-width="5" marker-end="url(#ahr)" class="draw" style="--d:.6s"/>
+<text x="140" y="660" font-size="34" fill="#33506f" font-family="Songti SC,serif">可插拔</text>
+<text x="350" y="660" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2026 主力方案</text>
+<text x="140" y="820" font-size="34" fill="#b08a3e" font-family="Songti SC,serif">NPO</text>
+<text x="350" y="820" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2027H2 放量 · 2028 大规模</text>
+<text x="140" y="980" font-size="34" fill="#b23a2a" font-family="Songti SC,serif">CPO</text>
+<text x="350" y="980" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">2027 中产能 ×15 · 2028 加速</text>
+<g class="f" style="--d:1s" transform="translate(760,1060)"><use href="#chip" transform="scale(.55)"/></g>
+<g class="f" style="--d:1.1s" transform="translate(500,1060)"><use href="#chip" transform="scale(.45)"/></g>
+</svg>
+<div class="k f" style="--d:.05s">10 / 担心二</div>
+<h1 class="h1 rise" style="--d:.12s">技术路线，分叉了</h1>
+<div class="h2 f" style="--d:.3s">可插拔、NPO、CPO 并行</div>
+<div class="body f" style="top:1200px;font-size:36px">可插拔不会消失，<span class="b red">但利润可能重新分配</span>。</div>
+<div class="s f" style="top:1310px">CPO 把光引擎搬到交换芯片旁边，功耗更低，封装更难。</div>
+<div class="s f" style="top:1410px">路线变化，先杀估值，再谈业绩。</div>
+<div class="foot f" style="--d:1.6s">技术路线仅作产业梳理，不构成对公司的评价</div>
+</section>
+
+<section class="scene" id="s11">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.2s" transform="rotate(8 200 900)"><rect x="150" y="780" width="70" height="260" rx="7" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/><circle cx="185" cy="820" r="5" fill="#b23a2a"/></g>
+<g class="f" style="--d:.35s" transform="rotate(22 330 900)"><rect x="300" y="780" width="70" height="260" rx="7" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/><circle cx="335" cy="820" r="5" fill="#b23a2a"/></g>
+<g class="f" style="--d:.5s" transform="rotate(38 460 900)"><rect x="430" y="780" width="70" height="260" rx="7" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4"/><circle cx="465" cy="820" r="5" fill="#b23a2a"/></g>
+<g class="f" style="--d:.65s" transform="rotate(56 590 900)"><rect x="560" y="780" width="70" height="260" rx="7" fill="rgba(178,58,42,.18)" stroke="#b23a2a" stroke-width="4"/><circle cx="595" cy="820" r="5" fill="#b23a2a"/></g>
+<g class="f" style="--d:.8s" transform="rotate(74 720 900)"><rect x="690" y="780" width="70" height="260" rx="7" fill="rgba(178,58,42,.24)" stroke="#b23a2a" stroke-width="4"/><circle cx="725" cy="820" r="5" fill="#b23a2a"/></g>
+<text x="185" y="740" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">高估值</text>
+<text x="335" y="740" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">止损</text>
+<text x="465" y="740" font-size="27" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">融资盘</text>
+<text x="595" y="740" font-size="27" text-anchor="middle" fill="#b23a2a" font-family="Songti SC,serif">踩踏</text>
+<text x="830" y="980" font-size="58" fill="#b23a2a" font-family="Baskerville,serif">−8%</text>
+<text x="830" y="1040" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">11/16 联讯</text>
+<text x="830" y="1100" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">中际同步重挫</text>
+</svg>
+<div class="k f" style="--d:.05s">11 / 担心三</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:66px">高估值 + 杠杆 = 踩踏</h1>
+<div class="h2 f" style="--d:.3s">下跌触发止损，止损又放大下跌</div>
+<div class="body f" style="--d:.9s;top:1200px;font-size:36px">11 月 16 日，四家公司再度大跌。</div>
+<div class="body f" style="--d:1s;top:1290px;font-size:36px">联讯、中际都跌超 <span class="b red">8%</span>。</div>
+<div class="s f" style="top:1410px">情绪负循环里，基本面解释不了当天的跌幅。</div>
+<div class="foot f" style="--d:1.6s">行情数据截至 2026.11.16 收盘</div>
+</section>
+
+<section class="scene" id="s12">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="110" y="560" width="250" height="170" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.25s"/>
+<rect x="415" y="560" width="250" height="170" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>
+<rect x="720" y="560" width="250" height="170" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<text x="235" y="620" font-size="38" text-anchor="middle" font-family="Songti SC,serif">业绩</text>
+<text x="235" y="695" font-size="50" text-anchor="middle" fill="#b23a2a" font-family="Baskerville,serif">↑</text>
+<text x="540" y="620" font-size="38" text-anchor="middle" font-family="Songti SC,serif">估值</text>
+<text x="540" y="695" font-size="50" text-anchor="middle" fill="#b08a3e" font-family="Baskerville,serif">↓↓</text>
+<text x="845" y="620" font-size="38" text-anchor="middle" font-family="Songti SC,serif">预期</text>
+<text x="845" y="695" font-size="50" text-anchor="middle" fill="#33506f" font-family="Baskerville,serif">?</text>
+<path d="M230 900 L850 900" stroke="#2d2822" stroke-width="4" marker-end="url(#ah)" class="draw" style="--d:.8s"/>
+<text x="230" y="870" font-size="28" fill="#5c4e3d" font-family="Songti SC,serif">线性外推</text>
+<text x="750" y="870" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">周期定价</text>
+<line x1="540" y1="800" x2="540" y2="1000" stroke="#b23a2a" stroke-width="3" stroke-dasharray="8 10" class="f" style="--d:1s"/>
+</svg>
+<div class="k f" style="--d:.05s">12 / 结论</div>
+<h1 class="h1 rise" style="--d:.12s">业绩没崩，估值先崩</h1>
+<div class="h2 f" style="--d:.3s">三层拆解，一句话总结</div>
+<div class="body f" style="top:1080px;font-size:36px">从“线性外推”，切回“周期定价”。</div>
+<div class="body f" style="top:1180px;font-size:33px">业绩：还在增长，但增速有高有低。</div>
+<div class="body f" style="top:1265px;font-size:33px">估值：先被压扁，因为起点太高。</div>
+<div class="body f" style="top:1350px;font-size:33px">预期：从“明年更好”，变成“明年再说”。</div>
+<div class="s f" style="top:1460px">三件事同时发生，股价就跌得又快又深。</div>
+<div class="foot f" style="--d:1.5s">仅作定价结构复盘，不预测涨跌</div>
+</section>
+
+<section class="scene" id="s13">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="330" y1="560" x2="330" y2="1080" stroke="#2d2822" stroke-width="3" opacity=".5"/>
+<rect x="330" y="590" width="76" height="44" fill="rgba(178,58,42,.25)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.25s"/>
+<rect x="330" y="730" width="166" height="44" fill="rgba(178,58,42,.25)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.4s"/>
+<rect x="330" y="870" width="264" height="44" fill="rgba(178,58,42,.25)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.55s"/>
+<rect x="330" y="1010" width="520" height="44" fill="rgba(178,58,42,.25)" stroke="#b23a2a" stroke-width="3" class="f" style="--d:.7s"/>
+<text x="430" y="624" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">17×</text>
+<text x="520" y="764" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">37×</text>
+<text x="620" y="904" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">59×</text>
+<text x="875" y="1044" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">116×</text>
+<text x="110" y="624" font-size="31" font-family="Songti SC,serif">中际旭创</text>
+<text x="110" y="764" font-size="31" font-family="Songti SC,serif">联讯仪器</text>
+<text x="110" y="904" font-size="31" font-family="Songti SC,serif">源杰科技</text>
+<text x="110" y="1044" font-size="31" font-family="Songti SC,serif">寒武纪</text>
+<rect x="110" y="1120" width="860" height="110" rx="10" fill="rgba(178,58,42,.06)" stroke="#b23a2a" stroke-width="4" class="f" style="--d:.9s"/>
+<text x="140" y="1188" font-size="36" fill="#b23a2a" font-family="Songti SC,serif">周期股低 PE，可能是利润高点</text>
+</svg>
+<div class="k f" style="--d:.05s">13 / 估值位置</div>
+<h1 class="h1 rise" style="--d:.12s">便宜了吗？</h1>
+<div class="h2 f" style="--d:.3s">PE 降了，但便宜不等于见底</div>
+<div class="body f" style="top:1290px;font-size:36px">中际 17 倍，联讯 37 倍，<br>源杰 59 倍，寒武纪 116 倍。</div>
+<div class="s f" style="top:1460px">降了不少，但分母是利润，利润会波动。</div>
+<div class="foot f" style="--d:1.5s">PE 为滚动市盈率，数据截至 2026.11.16</div>
+</section>
+
+<section class="scene" id="s14">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="110" y="560" width="400" height="280" rx="10" fill="rgba(255,255,255,.22)" stroke="#33506f" stroke-width="5" class="f" style="--d:.25s"/>
+<rect x="570" y="560" width="400" height="280" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>
+<text x="140" y="620" font-size="34" fill="#33506f" font-family="Songti SC,serif">中际旭创 · 2027E</text>
+<text x="140" y="710" font-size="76" fill="#33506f" font-family="Baskerville,serif">≈ 6×</text>
+<text x="140" y="780" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">券商预测净利 818 亿</text>
+<text x="600" y="620" font-size="34" font-family="Songti SC,serif">寒武纪 · 2027E</text>
+<text x="600" y="710" font-size="76" fill="#b23a2a" font-family="Baskerville,serif">≈ 50×</text>
+<text x="600" y="780" font-size="26" fill="#5c4e3d" font-family="Songti SC,serif">券商预测净利 118 亿</text>
+<line x1="110" y1="930" x2="970" y2="930" stroke="#2d2822" stroke-width="3" stroke-dasharray="8 10" class="f" style="--d:.6s"/>
+<text x="110" y="990" font-size="30" fill="#5c4e3d" font-family="Songti SC,serif">联讯 / 源杰：还要看产能爬坡和订单兑现</text>
+<path d="M190 1080 C330 1030 460 1050 540 1120" fill="none" stroke="#b23a2a" stroke-width="4" stroke-dasharray="8 10" class="f" style="--d:.8s"/>
+<text x="560" y="1130" font-size="32" fill="#b23a2a" font-family="Songti SC,serif">预测会变</text>
+</svg>
+<div class="k f" style="--d:.05s">14 / 往前看</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:72px">低 PE，不等于低风险</h1>
+<div class="h2 f" style="--d:.3s">分母是预测，预测会变</div>
+<div class="body f" style="top:1200px;font-size:36px">中际的 2027E 只有 6 倍，但前提是 818 亿净利。</div>
+<div class="body f" style="top:1300px;font-size:36px">寒武纪约 50 倍，前提是 118 亿净利。</div>
+<div class="s f" style="top:1420px">只要预测下修，低 PE 会立刻变贵。</div>
+<div class="foot f" style="--d:1.5s">预测来自公开券商研报，仅作情景参考</div>
+</section>
+
+<section class="scene" id="s15">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="540" y1="820" x2="540" y2="1160" stroke="#2d2822" stroke-width="6"/>
+<path d="M540 1160 L430 1260 M540 1160 L650 1260" stroke="#2d2822" stroke-width="6" stroke-linecap="round"/>
+<line x1="200" y1="860" x2="880" y2="860" stroke="#2d2822" stroke-width="5"/>
+<circle cx="540" cy="860" r="12" fill="#2d2822"/>
+<line x1="200" y1="860" x2="200" y2="960" stroke="#2d2822" stroke-width="3"/>
+<line x1="880" y1="860" x2="880" y2="960" stroke="#2d2822" stroke-width="3"/>
+<path d="M120 960 Q200 1080 280 960 Z" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<path d="M800 960 Q880 1080 960 960 Z" fill="rgba(255,255,255,.25)" stroke="#2d2822" stroke-width="4"/>
+<text x="200" y="1035" font-size="29" text-anchor="middle" font-family="Songti SC,serif">业绩的钱</text>
+<text x="880" y="1035" font-size="29" text-anchor="middle" font-family="Songti SC,serif">估值的钱</text>
+<circle cx="200" cy="930" r="18" fill="rgba(178,58,42,.25)" stroke="#b23a2a" stroke-width="3"/>
+<circle cx="880" cy="930" r="28" fill="rgba(176,138,62,.25)" stroke="#b08a3e" stroke-width="3"/>
+<text x="540" y="1320" text-anchor="middle" font-size="30" fill="#5c4e3d" font-family="Songti SC,serif">时间，只帮其中一边</text>
+</svg>
+<div class="k f" style="--d:.05s">15 / 持有</div>
+<h1 class="h1 rise" style="--d:.12s;font-size:72px">先问：你赚的是什么钱</h1>
+<div class="h2 f" style="--d:.3s">持有，不等于盲目等待</div>
+<div class="body f" style="top:1400px;font-size:35px">订单、毛利率、现金流没坏，时间才能消化估值。</div>
+<div class="s f" style="top:1510px">增速一旦掉档，再低的 PE 也会重新变贵。</div>
+<div class="foot f" style="--d:1.5s">不构成持有或卖出建议</div>
+</section>
+
+<section class="scene" id="s16">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="90" y="550" width="280" height="360" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.25s"/>
+<rect x="400" y="550" width="280" height="360" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>
+<rect x="710" y="550" width="280" height="360" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<text x="120" y="630" font-size="60" fill="#33506f" font-family="Baskerville,serif">1</text>
+<text x="430" y="630" font-size="60" fill="#33506f" font-family="Baskerville,serif">2</text>
+<text x="740" y="630" font-size="60" fill="#33506f" font-family="Baskerville,serif">3</text>
+<text x="120" y="720" font-size="32" font-family="Songti SC,serif">估值回到</text>
+<text x="120" y="770" font-size="32" font-family="Songti SC,serif">你能解释的区间</text>
+<text x="430" y="720" font-size="32" font-family="Songti SC,serif">订单和盈利</text>
+<text x="430" y="770" font-size="32" font-family="Songti SC,serif">没有恶化</text>
+<text x="740" y="720" font-size="32" font-family="Songti SC,serif">仓位可控</text>
+<text x="740" y="770" font-size="32" font-family="Songti SC,serif">分批，不一把梭</text>
+<path d="M160 850 L210 900 L300 800" fill="none" stroke="#33506f" stroke-width="5" class="draw" style="--d:.9s"/>
+<path d="M470 850 L520 900 L610 800" fill="none" stroke="#33506f" stroke-width="5" class="draw" style="--d:1s"/>
+<path d="M780 850 L830 900 L920 800" fill="none" stroke="#33506f" stroke-width="5" class="draw" style="--d:1.1s"/>
+</svg>
+<div class="k f" style="--d:.05s">16 / 加仓</div>
+<h1 class="h1 rise" style="--d:.12s">加仓的三个前提</h1>
+<div class="h2 f" style="--d:.3s">缺一个，都叫赌</div>
+<div class="body f" style="top:1020px;font-size:36px">不是去猜底，而是先想清楚：<br>如果继续跌，你靠什么拿住？</div>
+<div class="body f" style="top:1200px;font-size:33px">估值：用 2027E 还是 TTM，要能自洽。</div>
+<div class="body f" style="top:1285px;font-size:33px">基本面：订单、毛利、现金流，至少两个没坏。</div>
+<div class="body f" style="top:1370px;font-size:33px">仓位：分批、留余量，别把波动当机会。</div>
+<div class="s f" style="top:1480px">以上是决策框架，不是买卖指令。</div>
+<div class="foot f" style="--d:1.6s">不构成投资建议</div>
+</section>
+
+<section class="scene" id="s17">
+<svg class="art" viewBox="0 0 1080 1920">
+<line x1="110" y1="850" x2="970" y2="850" stroke="#2d2822" stroke-width="4" marker-end="url(#ah)" class="draw" style="--d:.3s"/>
+<circle cx="180" cy="850" r="13" fill="#33506f" class="f" style="--d:.5s"/>
+<circle cx="410" cy="850" r="13" fill="#33506f" class="f" style="--d:.65s"/>
+<circle cx="640" cy="850" r="13" fill="#b08a3e" class="f" style="--d:.8s"/>
+<circle cx="870" cy="850" r="13" fill="#b23a2a" class="f" style="--d:.95s"/>
+<text x="180" y="800" font-size="30" text-anchor="middle" fill="#33506f" font-family="Songti SC,serif">2026Q4</text>
+<text x="410" y="800" font-size="30" text-anchor="middle" fill="#33506f" font-family="Songti SC,serif">2027</text>
+<text x="640" y="800" font-size="30" text-anchor="middle" fill="#b08a3e" font-family="Songti SC,serif">2027 初</text>
+<text x="870" y="800" font-size="30" text-anchor="middle" fill="#b23a2a" font-family="Songti SC,serif">2027H2</text>
+<text x="180" y="915" font-size="26" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">订单交付</text>
+<text x="410" y="915" font-size="26" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">覆盖情况</text>
+<text x="640" y="915" font-size="26" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">云厂商 capex</text>
+<text x="870" y="915" font-size="26" text-anchor="middle" fill="#5c4e3d" font-family="Songti SC,serif">1.6T / NPO 放量</text>
+<rect x="150" y="960" width="60" height="60" rx="30" fill="#33506f" class="f" style="--d:1.1s"/>
+<rect x="380" y="960" width="60" height="60" rx="30" fill="#33506f" class="f" style="--d:1.2s"/>
+<rect x="610" y="960" width="60" height="60" rx="30" fill="#b08a3e" class="f" style="--d:1.3s"/>
+<rect x="840" y="960" width="60" height="60" rx="30" fill="#b23a2a" class="f" style="--d:1.4s"/>
+<text x="180" y="1004" text-anchor="middle" font-size="26" fill="#fff" font-family="Songti SC,serif">灯</text>
+<text x="410" y="1004" text-anchor="middle" font-size="26" fill="#fff" font-family="Songti SC,serif">灯</text>
+<text x="640" y="1004" text-anchor="middle" font-size="26" fill="#fff" font-family="Songti SC,serif">灯</text>
+<text x="870" y="1004" text-anchor="middle" font-size="26" fill="#fff" font-family="Songti SC,serif">灯</text>
+</svg>
+<div class="k f" style="--d:.05s">17 / 观察信号</div>
+<h1 class="h1 rise" style="--d:.12s">先盯订单和指引</h1>
+<div class="h2 f" style="--d:.3s">第一组信号：需求能不能续</div>
+<div class="body f" style="top:1120px;font-size:36px">订单能见度，比股价反弹更重要。</div>
+<div class="body f" style="top:1220px;font-size:32px">重点看：2027 年覆盖、2028 年指引、<br>1.6T 与 NPO 的放量节奏。</div>
+<div class="s f" style="top:1390px">如果订单还在，估值杀过头会有修复；<br>如果订单转弱，低 PE 也撑不住。</div>
+<div class="foot f" style="--d:1.6s">仅列观察指标，不预测结果</div>
+</section>
+
+<section class="scene" id="s18">
+<svg class="art" viewBox="0 0 1080 1920">
+<rect x="110" y="560" width="430" height="470" rx="10" fill="rgba(255,255,255,.26)" stroke="#2d2822" stroke-width="4" class="f" style="--d:.25s"/>
+<text x="140" y="625" font-size="33" font-family="Songti SC,serif">三季报 · 质量检查</text>
+<line x1="140" y1="660" x2="510" y2="660" stroke="#2d2822" stroke-width="2" opacity=".5"/>
+<line x1="140" y1="720" x2="470" y2="720" stroke="#5c4e3d" stroke-width="3" opacity=".55"/>
+<line x1="140" y1="775" x2="500" y2="775" stroke="#5c4e3d" stroke-width="3" opacity=".55"/>
+<line x1="140" y1="830" x2="440" y2="830" stroke="#5c4e3d" stroke-width="3" opacity=".55"/>
+<line x1="140" y1="885" x2="490" y2="885" stroke="#5c4e3d" stroke-width="3" opacity=".55"/>
+<line x1="140" y1="940" x2="410" y2="940" stroke="#5c4e3d" stroke-width="3" opacity=".55"/>
+<circle cx="470" cy="820" r="105" fill="rgba(244,239,226,.55)" stroke="#b23a2a" stroke-width="5" class="f" style="--d:.7s"/>
+<line x1="545" y1="895" x2="620" y2="970" stroke="#b23a2a" stroke-width="7" stroke-linecap="round" class="f" style="--d:.8s"/>
+<text x="610" y="640" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">存货 / 预付款</text>
+<text x="610" y="710" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">经营现金流</text>
+<text x="610" y="780" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">毛利率</text>
+<text x="610" y="850" font-size="28" fill="#b23a2a" font-family="Songti SC,serif">应收账款</text>
+<rect x="610" y="930" width="330" height="100" rx="10" fill="rgba(255,255,255,.22)" stroke="#2d2822" stroke-width="3" class="f" style="--d:1s"/>
+<text x="635" y="990" font-size="27" font-family="Songti SC,serif">筹码：回购 / 融资 / 解禁</text>
+</svg>
+<div class="k f" style="--d:.05s">18 / 观察信号</div>
+<h1 class="h1 rise" style="--d:.12s">再盯报表和筹码</h1>
+<div class="h2 f" style="--d:.3s">第二组信号：增长有没有变成现金</div>
+<div class="body f" style="top:1120px;font-size:35px">高增长有没有变成真现金，比增速更重要。</div>
+<div class="body f" style="top:1220px;font-size:32px">存货和预付款大幅上升，可能是在备货，<br>也可能是需求判断出错。</div>
+<div class="s f" style="top:1390px">回购、融资余额、解禁和减持，决定短期筹码。</div>
+<div class="foot f" style="--d:1.6s">仅列观察指标，不构成投资建议</div>
+</section>
+
+<section class="scene" id="s19">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.25s">
+<text x="120" y="640" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="170" y="640" font-size="32" font-family="Songti SC,serif">AI 资本开支不及预期</text>
+<text x="120" y="740" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="170" y="740" font-size="32" font-family="Songti SC,serif">CPO / NPO 路线变化</text>
+<text x="120" y="840" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="170" y="840" font-size="32" font-family="Songti SC,serif">产品年降，毛利承压</text>
+</g>
+<g class="f" style="--d:.55s">
+<text x="570" y="640" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="620" y="640" font-size="32" font-family="Songti SC,serif">客户集中度高</text>
+<text x="570" y="740" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="620" y="740" font-size="32" font-family="Songti SC,serif">存货减值风险</text>
+<text x="570" y="840" font-size="32" fill="#b23a2a" font-family="Baskerville,serif">✕</text><text x="620" y="840" font-size="32" font-family="Songti SC,serif">高估值 + 杠杆踩踏</text>
+</g>
+<line x1="110" y1="900" x2="970" y2="900" stroke="#2d2822" stroke-width="3" stroke-dasharray="8 10" class="f" style="--d:.8s"/>
+<rect x="110" y="960" width="860" height="120" rx="10" fill="rgba(178,58,42,.06)" stroke="#b23a2a" stroke-width="4" class="f" style="--d:.9s"/>
+<text x="540" y="1036" text-anchor="middle" font-size="38" fill="#b23a2a" font-family="Songti SC,serif">风险不是“会不会”，而是“什么时候”</text>
+</svg>
+<div class="k f" style="--d:.05s">19 / 风险</div>
+<h1 class="h1 rise" style="--d:.12s">风险，不止一个</h1>
+<div class="h2 f" style="--d:.3s">每一个，都能让估值再下一个台阶</div>
+<div class="body f" style="top:1160px;font-size:35px">下跌之后，风险不是消失了，而是被重新定价。</div>
+<div class="s f" style="top:1270px">最怕的不是利空本身，而是利空还没被写进盈利预测。</div>
+<div class="s f" style="top:1370px">所以，先看风险，再看收益。</div>
+<div class="foot f" style="--d:1.6s">仅作风险提示，不构成投资建议</div>
+</section>
+
+<section class="scene" id="s20">
+<svg class="art" viewBox="0 0 1080 1920">
+<g class="f" style="--d:.25s">
+<circle cx="300" cy="940" r="38" fill="none" stroke="#33506f" stroke-width="7"/>
+<line x1="300" y1="978" x2="300" y2="1160" stroke="#33506f" stroke-width="7"/>
+<line x1="220" y1="1060" x2="380" y2="1060" stroke="#33506f" stroke-width="7"/>
+<path d="M300 1160 C240 1180 200 1230 190 1290" fill="none" stroke="#33506f" stroke-width="7"/>
+<path d="M300 1160 C360 1180 400 1230 410 1290" fill="none" stroke="#33506f" stroke-width="7"/>
+<path d="M190 1290 L160 1240 M190 1290 L235 1260" stroke="#33506f" stroke-width="7" stroke-linecap="round"/>
+<path d="M410 1290 L440 1240 M410 1290 L365 1260" stroke="#33506f" stroke-width="7" stroke-linecap="round"/>
+</g>
+<path d="M300 900 C480 760 650 700 850 680" fill="none" stroke="#b08a3e" stroke-width="5" stroke-dasharray="10 10" class="draw" style="--d:.5s"/>
+<path d="M760 560 C820 530 880 540 930 580" fill="none" stroke="#5c4e3d" stroke-width="3" class="f" style="--d:.8s"/>
+<path d="M790 620 C850 590 900 600 950 640" fill="none" stroke="#5c4e3d" stroke-width="3" class="f" style="--d:.9s"/>
+<path d="M820 680 C870 660 910 670 950 700" fill="none" stroke="#5c4e3d" stroke-width="3" class="f" style="--d:1s"/>
+<text x="700" y="780" font-size="34" fill="#b08a3e" font-family="Songti SC,serif">锚 · 绳 · 风</text>
+</svg>
+<div class="k f" style="--d:.05s">20 / 结尾</div>
+<h1 class="h1 rise" style="--d:.12s">业绩是锚，估值是绳</h1>
+<div class="h2 f" style="--d:.3s">预期，是风</div>
+<div class="body f" style="top:1330px;font-size:38px">跌了很多，<span class="b red">不等于可以无脑加仓</span>。</div>
+<div class="body f" style="top:1435px;font-size:34px">先看业绩能不能兑现，再看估值能不能解释，<br>最后看仓位能不能承受。</div>
+<div class="f" style="--d:1.1s;position:absolute;left:104px;top:1550px;font-size:30px;color:#5c4e3d;border-top:3px solid #2d2822;padding-top:18px;width:850px">以上只是公开数据复盘，不构成投资建议。</div>
+<div class="foot f" style="--d:1.6s">数据截至 2026.11.16 · 手绘财经</div>
+</section>
+
+</div>
+<script>
+const BEATS=[{id:'s0',dur:12.15},{id:'s1',dur:12.75},{id:'s2',dur:11.84},{id:'s3',dur:12.48},{id:'s4',dur:14.48},{id:'s5',dur:10.06},{id:'s6',dur:10.9},{id:'s7',dur:13.3},{id:'s8',dur:13.16},{id:'s9',dur:15.29},{id:'s10',dur:15.58},{id:'s11',dur:15.05},{id:'s12',dur:10.76},{id:'s13',dur:14.5},{id:'s14',dur:13.49},{id:'s15',dur:13.06},{id:'s16',dur:12.65},{id:'s17',dur:13.11},{id:'s18',dur:15.05},{id:'s19',dur:14.6},{id:'s20',dur:12.34}];
+const TOTAL=BEATS.reduce((a,b)=>a+b.dur,0);
+window.BEATS=BEATS;
+const Q=new URLSearchParams(location.search);
+const RENDER=Q.has('render'),ONLY=Q.get('scene');
+const scenes=[...document.querySelectorAll('.scene')];
+function show(i,local){
+  scenes.forEach((s,k)=>s.classList.toggle('on',k===i));
+  document.getAnimations().forEach(a=>{a.pause();a.currentTime=Math.max(0,local);});
+}
+window.__seek=(ms)=>{
+  let acc=0,i=0,local=ms;
+  for(;i<BEATS.length;i++){const d=BEATS[i].dur*1000;if(ms<acc+d){local=ms-acc;break;}acc+=d;}
+  if(i>=BEATS.length){i=BEATS.length-1;local=BEATS[i].dur*1000-1;}
+  show(i,local);
+};
+window.TOTAL=TOTAL;
+window.__ready=false;
+document.fonts.ready.then(()=>{
+  if(RENDER)document.body.classList.add('render');
+  if(ONLY){const k=Math.max(0,BEATS.findIndex(b=>b.id===ONLY));show(k,0);if(!RENDER)setTimeout(()=>document.getAnimations().forEach(a=>a.play()),40);}
+  else if(RENDER){show(0,0);}
+  else{let t0=performance.now();const tick=()=>{const ms=performance.now()-t0;window.__seek(ms%(TOTAL*1000));requestAnimationFrame(tick);};tick();}
+  requestAnimationFrame(()=>window.__ready=true);
+});
+</script>
+</body>
+</html>
