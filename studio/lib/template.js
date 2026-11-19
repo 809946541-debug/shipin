@@ -28,10 +28,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background:rad
 .red{color:var(--red)}.blue{color:var(--blue)}.sea{color:var(--sea)}.gold{color:var(--gold)}.b{font-weight:700}
 .num{font-family:var(--num);font-weight:700}
 .foot{position:absolute;left:104px;bottom:24px;font-size:25px;letter-spacing:.08em;color:var(--ink2)}
-.cover-k{left:0;width:1080px;text-align:center;top:238px}
-.cover-h{left:0;width:1080px;text-align:center;top:300px;font-size:76px;letter-spacing:.03em}
-.cover-sub{position:absolute;left:0;width:1080px;text-align:center;top:626px;font-size:40px;color:var(--ink2)}
 .cover-tag{position:absolute;left:0;width:1080px;text-align:center;top:1500px;font-size:30px;letter-spacing:.12em}
+.cover-title{text-wrap:balance}
 .stamp{position:absolute;border:4px solid var(--red);border-radius:10px;color:var(--red);font-size:34px;font-weight:700;letter-spacing:.1em;padding:10px 18px;transform:rotate(-8deg);opacity:.85;background:rgba(255,255,255,.1)}
 .pt{position:absolute;left:104px;width:872px;display:grid;grid-template-columns:70px 1fr;column-gap:18px}
 .pt .n{width:56px;height:56px;border:3px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-weight:700;font-size:26px}
@@ -119,6 +117,142 @@ function titleFS(title, base = 84) {
   return Math.max(48, Math.min(base, Math.floor(884 / u)));
 }
 
+/* ---------- 封面：按题材选插画与版式，避免每条片子封面雷同 ---------- */
+function hash(str) {
+  let h = 2166136261;
+  for (const ch of String(str)) {
+    h ^= ch.codePointAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+const COVER_THEMES = [
+  { id: 'energy', re: /油|能源|伊朗|中东|霍尔木兹|俄|乌|战争|冲突|制裁|海峡|天然气|地缘|军/ },
+  { id: 'chip', re: /芯片|算力|人工?智能|AI|半导体|大模型|GPU|数据中心|机器人|服务器|光刻|智能/ },
+  { id: 'chart', re: /股|指数|市值|板块|行情|估值|财报|营收|利润|份额|价格|市场|基金|债|涨|跌/ },
+  { id: 'policy', re: /政策|改革|监管|国资|国企|规划|法案|会议|央行|利率|关税|目标|制度|补贴/ },
+];
+
+const COVER_ACCENT = { energy: '#2b6b85', chip: '#33506f', chart: '#b23a2a', policy: '#b08a3e', idea: '#b23a2a' };
+const COVER_CLASS = { energy: 'sea', chip: 'blue', chart: 'red', policy: 'gold', idea: 'red' };
+const COVER_KICKER = {
+  energy: '手绘财经 · 地缘观察', chip: '手绘财经 · 产业拆解',
+  chart: '手绘财经 · 数据复盘', policy: '手绘财经 · 政策解读', idea: '手绘财经 · 情景推演',
+};
+
+const COVER_ART_H = { chart: 350, energy: 400, chip: 420, policy: 430, idea: 400 };
+
+function coverArt(theme, top, accent, seed) {
+  const n = i => (hash(seed + '#' + i) % 1000) / 1000;
+  if (theme === 'chart') {
+    const yb = top + 330;
+    const bars = Array.from({ length: 6 }, (_, i) => ({ x: 208 + i * 108, h: 110 + Math.round(n(i) * 150) }));
+    const trend = bars.map(b => `${b.x + 31},${yb - b.h - 34}`).join(' ');
+    return bars.map((b, i) => `<rect x="${b.x}" y="${yb - b.h}" width="62" height="${b.h}" fill="none" stroke="#2d2822" stroke-width="4" class="grow" style="--d:${(0.45 + i * 0.1).toFixed(2)}s"/>`).join('') +
+      `<line x1="176" y1="${yb}" x2="920" y2="${yb}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.35s"/>
+<polyline points="${trend}" fill="none" stroke="${accent}" stroke-width="5" stroke-dasharray="10 8" class="draw" style="--d:.9s"/>`;
+  }
+  if (theme === 'energy') {
+    return `<path d="M300 ${top + 50} Q540 ${top - 40} 780 ${top + 50}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 11" class="draw" style="--d:.5s"/>
+<circle cx="300" cy="${top + 50}" r="9" fill="${accent}" class="f" style="--d:.95s"/>
+<circle cx="780" cy="${top + 50}" r="9" fill="${accent}" class="f" style="--d:.95s"/>
+<g class="f" style="--d:.3s" transform="translate(540,${top + 190}) scale(1.15)"><use href="#globe"/></g>
+<g class="f" style="--d:.9s" transform="translate(236,${top + 312}) scale(.85)"><use href="#tanker"/></g>
+<g class="f" style="--d:1.05s" transform="translate(706,${top + 300}) scale(.7)"><use href="#barrel"/></g>`;
+  }
+  if (theme === 'chip') {
+    const cx = 540, cy = top + 180, s = 150;
+    let pins = '';
+    for (let i = 0; i < 5; i++) {
+      const p = cx - s + 46 + i * 52;
+      const q = cy - s + 46 + i * 52;
+      pins += `<line x1="${p}" y1="${cy - s}" x2="${p}" y2="${cy - s - 30}" stroke="#2d2822" stroke-width="4"/>
+<line x1="${p}" y1="${cy + s}" x2="${p}" y2="${cy + s + 30}" stroke="#2d2822" stroke-width="4"/>
+<line x1="${cx - s}" y1="${q}" x2="${cx - s - 30}" y2="${q}" stroke="#2d2822" stroke-width="4"/>
+<line x1="${cx + s}" y1="${q}" x2="${cx + s + 30}" y2="${q}" stroke="#2d2822" stroke-width="4"/>`;
+    }
+    let inner = '';
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+      inner += `<rect x="${cx - 66 + c * 46}" y="${cy - 66 + r * 46}" width="30" height="30" fill="none" stroke="#2d2822" stroke-width="3" opacity=".55"/>`;
+    }
+    return `<rect x="${cx - s}" y="${cy - s}" width="${s * 2}" height="${s * 2}" rx="20" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>${pins}${inner}
+<path d="M${cx + s + 30} ${cy + 30} H${cx + s + 96} V${cy + 120}" fill="none" stroke="${accent}" stroke-width="4" class="draw" style="--d:1s"/>
+<circle cx="${cx + s + 96}" cy="${cy + 120}" r="9" fill="${accent}" class="f" style="--d:1.4s"/>`;
+  }
+  if (theme === 'policy') {
+    return `<rect x="392" y="${top + 20}" width="300" height="400" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M632 ${top + 20} L692 ${top + 80} L632 ${top + 80} Z" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (i === 3 ? 90 : 0)}" y2="${top + 110 + i * 62}" stroke="#5c4e3d" stroke-width="4" opacity=".7" class="f" style="--d:${(0.55 + i * 0.1).toFixed(2)}s"/>`).join('')}
+<circle cx="700" cy="${top + 330}" r="58" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:1.1s"/>
+<text x="700" y="${top + 344}" text-anchor="middle" font-size="38" fill="${accent}" font-family="Songti SC,SimSun,serif" class="f" style="--d:1.3s">政</text>
+<path d="M196 ${top + 380} H196 V${top + 150}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:.9s"/>
+<path d="M180 ${top + 176} L196 ${top + 144} L212 ${top + 176}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
+  }
+  const cx = 540, cy = top + 170;
+  let rays = '';
+  for (let i = 0; i < 8; i++) {
+    const a = (Math.PI / 4) * i;
+    rays += `<line x1="${cx + Math.cos(a) * 168}" y1="${cy + Math.sin(a) * 168}" x2="${cx + Math.cos(a) * 206}" y2="${cy + Math.sin(a) * 206}" stroke="#2d2822" stroke-width="4" opacity=".55" class="f" style="--d:${(0.6 + i * 0.06).toFixed(2)}s"/>`;
+  }
+  return `<circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<circle cx="${cx}" cy="${cy}" r="108" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 10" class="draw" style="--d:.75s"/>${rays}
+<circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:1.3s"/>`;
+}
+
+function coverTheme(title, sub) {
+  const text = title + ' ' + sub;
+  const hit = COVER_THEMES.find(t => t.re.test(text));
+  if (hit) return hit.id;
+  return ['chart', 'energy', 'chip', 'policy', 'idea'][hash(title + sub) % 5];
+}
+
+function coverScene(scene, meta) {
+  const title = meta.title || scene.title || '';
+  const sub = meta.subtitle || scene.sub || '';
+  const seed = title + '|' + sub;
+  const h = hash(seed);
+  const theme = coverTheme(title, sub);
+  const accent = COVER_ACCENT[theme];
+  const fs = titleFS(title, 76);
+  const lines = Math.max(1, Math.ceil(units(title) / (856 / fs)));
+  const titleH = lines * fs * 1.18;
+  const layout = h % 3; // 0 居中/插图在下，1 居中/插图在上，2 左对齐/插图在下
+  const kicker = meta.kicker || COVER_KICKER[theme];
+
+  let kickerStyle, titleStyle, subTop, artTop;
+  if (layout === 1) {
+    artTop = 290;
+    const kickerTop = artTop + COVER_ART_H[theme] + 40;
+    kickerStyle = `left:0;width:1080px;text-align:center;top:${kickerTop}px`;
+    titleStyle = `left:100px;top:${kickerTop + 62}px;width:880px;text-align:center;font-size:${fs}px`;
+    subTop = kickerTop + 62 + titleH + 26;
+  } else if (layout === 2) {
+    kickerStyle = 'left:104px;top:236px';
+    titleStyle = `left:104px;top:292px;width:872px;font-size:${fs}px`;
+    subTop = 292 + titleH + 30;
+    artTop = Math.min(1040, Math.max(940, subTop + 110));
+  } else {
+    kickerStyle = 'left:0;width:1080px;text-align:center;top:238px';
+    titleStyle = `left:100px;top:300px;width:880px;text-align:center;font-size:${fs}px`;
+    subTop = 300 + titleH + 28;
+    artTop = Math.min(1040, Math.max(940, subTop + 110));
+  }
+  const subAlign = layout === 2 ? 'left' : 'center';
+  const subLeft = 104;
+  const subWidth = 872;
+
+  return `<section class="scene" id="s0">
+<svg class="art" viewBox="0 0 1080 1920">
+${coverArt(theme, artTop, accent, seed)}
+</svg>
+<div class="k f" style="--d:.05s;${kickerStyle}">${esc(kicker)}</div>
+<h1 class="h1 rise cover-title" style="--d:.15s;${titleStyle}">${esc(title)}</h1>
+<div class="f" style="position:absolute;left:${subLeft}px;width:${subWidth}px;text-align:${subAlign};top:${Math.round(subTop)}px;font-size:38px;line-height:1.5;color:var(--ink2);--d:.4s">${esc(sub)}</div>
+<div class="f cover-tag ${COVER_CLASS[theme]}" style="--d:1.5s">${esc(meta.disclaimer || '公开信息梳理 · 不构成投资建议')}</div>
+</section>`;
+}
+
 function kickerOf(scene, idx) {
   const tag = (scene.kicker || '').trim();
   const no = String(idx).padStart(2, '0');
@@ -142,27 +276,6 @@ function header(scene, idx, title, sub) {
   return `<div class="k f" style="--d:.05s">${esc(kickerOf(scene, idx))}</div>
 <h1 class="h1 rise" style="--d:.12s;font-size:${fs}px">${esc(title)}</h1>
 ${sub ? `<div class="h2 f" style="--d:.25s">${esc(sub)}</div>` : ''}`;
-}
-
-function coverScene(scene, meta) {
-  const title = meta.title || scene.title || '';
-  const sub = meta.subtitle || scene.sub || '';
-  const fs = titleFS(title, 76);
-  return `<section class="scene" id="s0">
-<svg class="art" viewBox="0 0 1080 1920">
-<g class="f" style="--d:.35s" transform="translate(540,1040) scale(1.3)"><use href="#globe"/></g>
-<path d="M330 960 C470 880 610 880 750 960" fill="none" stroke="#b23a2a" stroke-width="4" stroke-dasharray="8 10" class="draw" style="--d:1s"/>
-<circle cx="330" cy="960" r="9" fill="#b23a2a" class="f" style="--d:1.2s"/>
-<circle cx="750" cy="960" r="9" fill="#b23a2a" class="f" style="--d:1.2s"/>
-<g class="f" style="--d:1.1s" transform="translate(430,1120)"><use href="#tanker" transform="scale(.9)"/></g>
-<g class="f" style="--d:1.25s" transform="translate(760,1140)"><use href="#barrel" transform="scale(.8)"/></g>
-<g class="f" style="--d:1.4s" transform="translate(200,1150)"><use href="#barrel" transform="scale(.7)"/></g>
-</svg>
-<div class="k f cover-k" style="--d:.05s">${esc(meta.kicker || '手绘财经 · 情景推演')}</div>
-<h1 class="h1 rise cover-h" style="--d:.15s;font-size:${fs}px">${esc(title)}</h1>
-<div class="f cover-sub" style="--d:.35s">${esc(sub)}</div>
-<div class="f cover-tag red" style="--d:1.5s">${esc(meta.disclaimer || '公开信息梳理 · 不构成投资建议')}</div>
-</section>`;
 }
 
 function bulletsScene(scene, idx) {
