@@ -296,6 +296,21 @@ function jobView(job, withLog = true) {
   };
 }
 
+function deleteJob(id) {
+  const job = jobs.get(id);
+  if (!job) return { ok: false, code: 404, error: '任务不存在' };
+  if (job.status === 'running' || job.status === 'queued') {
+    return { ok: false, code: 409, error: '任务正在生成，暂时不能删除' };
+  }
+  try {
+    fs.rmSync(jobDir(id), { recursive: true, force: true });
+  } catch (e) {
+    return { ok: false, code: 500, error: '删除文件失败：' + e.message };
+  }
+  jobs.delete(id);
+  return { ok: true };
+}
+
 function listJobs() {
   return [...jobs.values()]
     .sort((a, b) => b.createdAt - a.createdAt)
@@ -309,5 +324,5 @@ function getJob(id) {
 }
 
 module.exports = {
-  createJob, retryJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
+  createJob, retryJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
 };

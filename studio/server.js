@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createJob, retryJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir } = require('./lib/pipeline');
+const { createJob, retryJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir } = require('./lib/pipeline');
 const { listNews, generateTopic } = require('./lib/news');
 
 const PORT = Number(process.env.PORT || 4180);
@@ -127,6 +127,13 @@ const server = http.createServer(async (req, res) => {
       const j = retryJob(rt[1]);
       if (!j) return json(res, 404, { error: '任务不存在' });
       return json(res, 200, { id: j.id });
+    }
+
+    const delJob = p.match(/^\/api\/jobs\/([\w-]+)$/);
+    if (delJob && req.method === 'DELETE') {
+      const r = deleteJob(delJob[1]);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, { ok: true });
     }
 
     const m = p.match(/^\/api\/jobs\/([\w-]+)(?:\/(script|storyboard))?$/);
