@@ -132,16 +132,24 @@ const COVER_THEMES = [
   { id: 'chip', re: /芯片|算力|人工?智能|AI|半导体|大模型|GPU|数据中心|机器人|服务器|光刻|智能/ },
   { id: 'chart', re: /股|指数|市值|板块|行情|估值|财报|营收|利润|份额|价格|市场|基金|债|涨|跌/ },
   { id: 'policy', re: /政策|改革|监管|国资|国企|规划|法案|会议|央行|利率|关税|目标|制度|补贴/ },
+  { id: 'factory', re: /工厂|制造|产能|投产|产线|出口|订单|供应|扩产|基地/ },
+  { id: 'cart', re: /消费|零售|电商|购物|品牌|客单|渠道|门店|直播带货/ },
+  { id: 'pill', re: /医药|药|医疗|疫苗|临床|器械|医院|健康/ },
+  { id: 'house', re: /房|地产|楼|土地|物业|租|家居/ },
+  { id: 'car', re: /汽车|新能源车|整车|车企|电池|充电|智驾|车型/ },
+  { id: 'people', re: /人口|就业|工资|社保|养老|教育|收入|劳动者|人才/ },
 ];
 
-const COVER_ACCENT = { energy: '#2b6b85', chip: '#33506f', chart: '#b23a2a', policy: '#b08a3e', idea: '#b23a2a' };
-const COVER_CLASS = { energy: 'sea', chip: 'blue', chart: 'red', policy: 'gold', idea: 'red' };
+const COVER_ACCENT = { energy: '#2b6b85', chip: '#33506f', chart: '#b23a2a', policy: '#b08a3e', idea: '#b23a2a', factory: '#b08a3e', cart: '#b23a2a', pill: '#2b6b85', house: '#b08a3e', car: '#33506f', people: '#b23a2a' };
+const COVER_CLASS = { energy: 'sea', chip: 'blue', chart: 'red', policy: 'gold', idea: 'red', factory: 'gold', cart: 'red', pill: 'sea', house: 'gold', car: 'blue', people: 'red' };
 const COVER_KICKER = {
   energy: '手绘财经 · 地缘观察', chip: '手绘财经 · 产业拆解',
   chart: '手绘财经 · 数据复盘', policy: '手绘财经 · 政策解读', idea: '手绘财经 · 情景推演',
+  factory: '手绘财经 · 产能观察', cart: '手绘财经 · 消费观察', pill: '手绘财经 · 医药观察',
+  house: '手绘财经 · 资产观察', car: '手绘财经 · 产业观察', people: '手绘财经 · 社会观察',
 };
 
-const COVER_ART_H = { chart: 350, energy: 400, chip: 420, policy: 430, idea: 400 };
+const COVER_ART_H = { chart: 350, energy: 400, chip: 420, policy: 430, idea: 400, factory: 430, cart: 380, pill: 400, house: 420, car: 380, people: 400 };
 
 function coverArt(theme, top, accent, seed) {
   const n = i => (hash(seed + '#' + i) % 1000) / 1000;
@@ -189,6 +197,68 @@ ${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (
 <path d="M196 ${top + 380} H196 V${top + 150}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:.9s"/>
 <path d="M180 ${top + 176} L196 ${top + 144} L212 ${top + 176}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
   }
+  if (theme === 'factory') {
+    const b = top + 340;
+    return `<line x1="170" y1="${b + 10}" x2="910" y2="${b + 10}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+<path d="M300 ${b} V${b - 150} L380 ${b - 190} V${b - 150} L460 ${b - 190} V${b - 150} L540 ${b - 190} V${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.4s"/>
+<rect x="600" y="${b - 250}" width="54" height="250" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<rect x="690" y="${b - 190}" width="54" height="190" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.6s"/>
+<rect x="340" y="${b - 90}" width="66" height="90" fill="none" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<rect x="440" y="${b - 90}" width="66" height="90" fill="none" stroke="#2d2822" stroke-width="3" class="f" style="--d:.75s"/>
+<circle cx="627" cy="${b - 290}" r="17" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1s"/>
+<circle cx="676" cy="${b - 320}" r="12" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.15s"/>
+<path d="M780 ${b} V${b - 120}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="8 8" class="draw" style="--d:.9s"/>`;
+  }
+  if (theme === 'cart') {
+    return `<path d="M348 ${top + 100} L732 ${top + 100} L764 ${top + 330} L316 ${top + 330} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M458 ${top + 100} Q540 ${top + 16} 622 ${top + 100}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<line x1="392" y1="${top + 148}" x2="688" y2="${top + 148}" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.7s"/>
+<g class="f" style="--d:1s" transform="translate(646,${top + 186}) rotate(14)">
+<path d="M0 0 H74 L100 26 L74 52 H0 Z" fill="none" stroke="${accent}" stroke-width="4"/>
+<circle cx="14" cy="26" r="7" fill="none" stroke="${accent}" stroke-width="3"/>
+<line x1="40" y1="18" x2="72" y2="18" stroke="${accent}" stroke-width="3"/>
+<line x1="40" y1="34" x2="62" y2="34" stroke="${accent}" stroke-width="3"/>
+</g>`;
+  }
+  if (theme === 'pill') {
+    return `<g transform="translate(540,${top + 175}) rotate(-28)">
+<rect x="-160" y="-64" width="320" height="128" rx="64" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M0 -64 H96 A64 64 0 0 1 96 64 H0 Z" fill="${accent}" fill-opacity=".16" stroke="${accent}" stroke-width="4" class="f" style="--d:.8s"/>
+<line x1="0" y1="-64" x2="0" y2="64" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<circle cx="-90" cy="0" r="9" fill="${accent}" class="f" style="--d:1s"/>
+</g>
+<g class="f" style="--d:.95s" transform="translate(800,${top + 300})">
+<line x1="-24" y1="0" x2="24" y2="0" stroke="${accent}" stroke-width="9"/>
+<line x1="0" y1="-24" x2="0" y2="24" stroke="${accent}" stroke-width="9"/>
+</g>`;
+  }
+  if (theme === 'house') {
+    const b = top + 330;
+    return `<path d="M356 ${top + 150} L540 ${top + 36} L724 ${top + 150}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M388 ${top + 150} V${b} H692 V${top + 150}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+<rect x="500" y="${b - 96}" width="80" height="96" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.65s"/>
+<rect x="416" y="${top + 200}" width="64" height="64" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
+<rect x="600" y="${top + 200}" width="64" height="64" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.75s"/>
+<path d="M760 ${b} V${top + 190}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:.9s"/>
+<path d="M742 ${top + 214} L760 ${top + 182} L778 ${top + 214}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.3s"/>`;
+  }
+  if (theme === 'car') {
+    const b = top + 280;
+    return `<path d="M300 ${b} L322 ${b - 66} L432 ${b - 78} L506 ${b - 138} L648 ${b - 138} L706 ${b - 78} L772 ${b - 60} L784 ${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<circle cx="404" cy="${b + 6}" r="42" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
+<circle cx="688" cy="${b + 6}" r="42" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
+<line x1="506" y1="${b - 138}" x2="506" y2="${b - 78}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
+<line x1="648" y1="${b - 138}" x2="648" y2="${b - 78}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
+<line x1="180" y1="${b + 64}" x2="900" y2="${b + 64}" stroke="${accent}" stroke-width="4" stroke-dasharray="14 14" class="draw" style="--d:.85s"/>
+<circle cx="748" cy="${b - 48}" r="10" fill="${accent}" class="f" style="--d:1.2s"/>`;
+  }
+  if (theme === 'people') {
+    const head = (x, y) => `<circle cx="${x}" cy="${y}" r="34" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>
+<path d="M${x - 52} ${y + 108} Q${x} ${y + 40} ${x + 52} ${y + 108}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>`;
+    return head(410, top + 150) + head(540, top + 120) + head(670, top + 150) +
+      `<path d="M462 ${top + 300} H616" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:1s"/>
+<path d="M600 ${top + 284} L620 ${top + 300} L600 ${top + 316}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
+  }
   const cx = 540, cy = top + 170;
   let rays = '';
   for (let i = 0; i < 8; i++) {
@@ -200,11 +270,10 @@ ${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (
 <circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:1.3s"/>`;
 }
 
-function coverTheme(title, sub) {
-  const text = title + ' ' + sub;
-  const hit = COVER_THEMES.find(t => t.re.test(text));
-  if (hit) return hit.id;
-  return ['chart', 'energy', 'chip', 'policy', 'idea'][hash(title + sub) % 5];
+function coverTheme(title, sub, prefer) {
+  if (prefer && COVER_ACCENT[prefer]) return prefer;
+  const hit = COVER_THEMES.find(t => t.re.test(title + ' ' + sub));
+  return hit ? hit.id : 'idea';
 }
 
 function coverScene(scene, meta) {
@@ -212,7 +281,7 @@ function coverScene(scene, meta) {
   const sub = meta.subtitle || scene.sub || '';
   const seed = title + '|' + sub;
   const h = hash(seed);
-  const theme = coverTheme(title, sub);
+  const theme = coverTheme(title, sub, meta.cover);
   const accent = COVER_ACCENT[theme];
   const fs = titleFS(title, 76);
   const lines = Math.max(1, Math.ceil(units(title) / (856 / fs)));
