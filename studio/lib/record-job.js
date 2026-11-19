@@ -1,8 +1,14 @@
 'use strict';
 // 渲染任务帧序列：环境变量 HTML / DIR / TOTAL / FPS / START / COUNT / PREFIX
-const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
+let puppeteer;
+try {
+  puppeteer = require('puppeteer-core');
+} catch {
+  console.error('缺少依赖 puppeteer-core：请在项目根目录执行 npm install（或双击 install.bat）');
+  process.exit(2);
+}
 const { findChrome, fileUrl } = require('./platform');
 
 const FPS = Number(process.env.FPS || 30);
