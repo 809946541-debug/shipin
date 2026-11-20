@@ -73,6 +73,13 @@ const DEFS = `
 <ellipse cx="0" cy="0" rx="60" ry="120" fill="none" stroke="#2d2822" stroke-width="3" opacity=".45"/>
 <ellipse cx="0" cy="0" rx="110" ry="46" fill="none" stroke="#2d2822" stroke-width="3" opacity=".35"/>
 </g>
+<filter id="rough" x="-15%" y="-15%" width="130%" height="130%">
+<feTurbulence type="fractalNoise" baseFrequency="0.014 0.021" numOctaves="2" seed="9" result="n"/>
+<feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+<line x1="0" y1="0" x2="0" y2="9" stroke="#3a3228" stroke-width="1.2"/>
+</pattern>
 `;
 
 const SEEK = `
@@ -236,7 +243,7 @@ const COVER_STYLES = COVER_ART_IDS.flatMap(id =>
     label: COVER_LABEL[id] || id, layoutName: COVER_LAYOUT_NAME[layout],
   })));
 
-function coverArt(theme, top, accent, seed) {
+function coverArtRaw(theme, top, accent, seed) {
   const n = i => (hash(seed + '#' + i) % 1000) / 1000;
   if (theme === 'chart') {
     const yb = top + 330;
@@ -302,11 +309,11 @@ ${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (
 <line x1="196" y1="${b + 46}" x2="360" y2="${b + 46}" stroke="${accent}" stroke-width="4" stroke-dasharray="8 8" class="draw" style="--d:1.1s"/>`;
   }
   if (theme === 'ship') {
-    return `<g class="f" style="--d:.35s" transform="translate(180,${top + 140}) scale(1.75)"><use href="#tanker"/></g>
+    return `<g class="f" style="--d:.35s" transform="translate(540,${top + 196}) scale(2.05) translate(-105,-33)"><use href="#tanker"/></g>
 <path d="M150 ${top + 300} Q210 ${top + 282} 270 ${top + 300} T390 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:.9s"/>
 <path d="M470 ${top + 330} Q530 ${top + 312} 590 ${top + 330} T710 ${top + 330}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1s"/>
 <path d="M760 ${top + 300} Q820 ${top + 282} 880 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1.1s"/>
-<line x1="180" y1="${top + 230}" x2="86" y2="${top + 230}" stroke="#2d2822" stroke-width="3" stroke-dasharray="12 10" opacity=".45" class="f" style="--d:.7s"/>`;
+<line x1="300" y1="${top + 250}" x2="180" y2="${top + 250}" stroke="#2d2822" stroke-width="3" stroke-dasharray="12 10" opacity=".4" class="f" style="--d:.7s"/>`;
   }
   if (theme === 'train') {
     const b = top + 330;
@@ -598,11 +605,14 @@ ${hangers}
 <circle cx="540" cy="${top + 78}" r="9" fill="${accent}" class="f" style="--d:1.2s"/>`;
   }
   if (theme === 'leaf') {
-    return `<path d="M700 ${top + 70} Q420 ${top + 90} 330 ${top + 330} Q600 ${top + 330} 700 ${top + 70} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
-<path d="M330 ${top + 330} Q500 ${top + 230} 680 ${top + 96}" fill="none" stroke="${accent}" stroke-width="4" class="draw" style="--d:.6s"/>
-<path d="M470 ${top + 226} L440 ${top + 160} M540 ${top + 186} L540 ${top + 120} M600 ${top + 148} L630 ${top + 92}" fill="none" stroke="${accent}" stroke-width="3" opacity=".55" class="f" style="--d:.85s"/>
-<path d="M300 ${top + 380} A190 190 0 1 1 470 ${top + 210}" fill="none" stroke="#2d2822" stroke-width="4" stroke-dasharray="12 10" class="draw" style="--d:.9s"/>
-<path d="M452 ${top + 238} L468 ${top + 206} L436 ${top + 208}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1.25s"/>`;
+    const b = top + 350;
+    return `<path d="M250 ${b} C372 ${b - 40} 596 ${b - 128} 762 ${b - 268} C620 ${b - 300} 396 ${b - 250} 250 ${b} Z" fill="none" stroke="#2d2822" stroke-width="5" stroke-linejoin="round" class="f" style="--d:.35s"/>
+<path d="M250 ${b} Q520 ${b - 170} 762 ${b - 268}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="draw" style="--d:.6s"/>
+<path d="M356 ${b - 68} L318 ${b - 96} M438 ${b - 120} L404 ${b - 168} M520 ${b - 164} L496 ${b - 218} M600 ${b - 206} L586 ${b - 252}" fill="none" stroke="${accent}" stroke-width="3" stroke-linecap="round" opacity=".55" class="f" style="--d:.85s"/>
+<path d="M356 ${b - 68} L392 ${b - 30} M438 ${b - 120} L480 ${b - 86} M520 ${b - 164} L566 ${b - 136} M600 ${b - 206} L648 ${b - 184}" fill="none" stroke="${accent}" stroke-width="3" stroke-linecap="round" opacity=".4" class="f" style="--d:.95s"/>
+<path d="M762 ${b - 268} q46 6 74 40" fill="none" stroke="#2d2822" stroke-width="4" stroke-linecap="round" class="f" style="--d:1.05s"/>
+<path d="M208 ${b - 96} C292 ${b - 130} 342 ${b - 196} 344 ${b - 262} C286 ${b - 232} 236 ${b - 186} 208 ${b - 96} Z" fill="none" stroke="#2d2822" stroke-width="3.4" stroke-linejoin="round" opacity=".55" class="f" style="--d:1.2s"/>
+<circle cx="700" cy="${b - 48}" r="8" fill="${accent}" class="f" style="--d:1.35s"/>`;
   }
   if (theme === 'factory') {
     const b = top + 340;
@@ -683,6 +693,37 @@ function coverTheme(title, sub, prefer) {
   return hit ? hit.id : 'idea';
 }
 
+/* 封面画笔：纸色填充 + 手抖滤镜 + 星芒点缀，让配图接近定制插画的笔触 */
+const PAPER_FILL = 'rgba(246,238,220,.74)';
+
+function paperFill(markup) {
+  return markup
+    .replace(/<rect\b([^>]*?)fill="none"/g, `<rect$1fill="${PAPER_FILL}"`)
+    .replace(/<path\b([^>]*?)fill="none"/g, (m, attrs) => /[Zz]/.test(attrs) ? `<path${attrs}fill="${PAPER_FILL}"` : m)
+    .replace(/<circle\b([^>]*?)r="(\d+(?:\.\d+)?)"([^>]*?)fill="none"/g,
+      (m, a, r, b) => Number(r) >= 36 ? `<circle${a}r="${r}"${b}fill="${PAPER_FILL}"` : m);
+}
+
+function coverSparkle(x, y, r, color, op) {
+  const k = r * 0.22;
+  return `<path d="M${x} ${y - r} L${x + k} ${y - k} L${x + r} ${y} L${x + k} ${y + k} L${x} ${y + r} L${x - k} ${y + k} L${x - r} ${y} L${x - k} ${y - k} Z" fill="${color}" opacity="${op}"/>`;
+}
+
+function coverDeco(theme, top, accent, seed) {
+  const n = i => (hash(seed + '$' + i) % 1000) / 1000;
+  const h = COVER_ART_H[theme] || 400;
+  const base = top + h - 6;
+  return coverSparkle(178 + Math.round(n(1) * 110), top + 26 + Math.round(n(2) * 54), 17, accent, .55) +
+    coverSparkle(786 + Math.round(n(3) * 104), top + 12 + Math.round(n(4) * 64), 11, '#2d2822', .36) +
+    `<path d="M146 ${base} Q540 ${base + 34} 934 ${base - 6}" fill="none" stroke="${accent}" stroke-width="2.2" stroke-dasharray="10 13" opacity=".26"/>`;
+}
+
+function coverArt(theme, top, accent, seed, scale = 1) {
+  const cy = top + (COVER_ART_H[theme] || 400) / 2;
+  const zoom = scale === 1 ? '' : ` transform="translate(540 ${cy}) scale(${scale}) translate(-540 -${cy})"`;
+  return `<g filter="url(#rough)"${zoom}>${paperFill(coverArtRaw(theme, top, accent, seed))}${coverDeco(theme, top, accent, seed)}</g>`;
+}
+
 function coverScene(scene, meta) {
   const title = meta.title || scene.title || '';
   const sub = meta.subtitle || scene.sub || '';
@@ -721,7 +762,7 @@ function coverScene(scene, meta) {
 
   return `<section class="scene" id="s0">
 <svg class="art" viewBox="0 0 1080 1920">
-${coverArt(theme, artTop, accent, seed)}
+${coverArt(theme, artTop, accent, seed, layout === 1 ? 1.14 : 1.3)}
 </svg>
 <div class="k f" style="--d:.05s;${kickerStyle}">${esc(kicker)}</div>
 <h1 class="h1 rise cover-title" style="--d:.15s;${titleStyle}">${esc(title)}</h1>
