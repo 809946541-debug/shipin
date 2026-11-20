@@ -262,32 +262,60 @@ function coverArtRaw(theme, top, accent, seed) {
 <g class="f" style="--d:1.05s" transform="translate(706,${top + 300}) scale(.7)"><use href="#barrel"/></g>`;
   }
   if (theme === 'chip') {
-    const cx = 540, cy = top + 180, s = 150;
+    const cx = 540, cy = top + 190, s = 138;
     let pins = '';
     for (let i = 0; i < 5; i++) {
-      const p = cx - s + 46 + i * 52;
-      const q = cy - s + 46 + i * 52;
-      pins += `<line x1="${p}" y1="${cy - s}" x2="${p}" y2="${cy - s - 30}" stroke="#2d2822" stroke-width="4"/>
-<line x1="${p}" y1="${cy + s}" x2="${p}" y2="${cy + s + 30}" stroke="#2d2822" stroke-width="4"/>
-<line x1="${cx - s}" y1="${q}" x2="${cx - s - 30}" y2="${q}" stroke="#2d2822" stroke-width="4"/>
-<line x1="${cx + s}" y1="${q}" x2="${cx + s + 30}" y2="${q}" stroke="#2d2822" stroke-width="4"/>`;
+      const p = cx - 96 + i * 48;
+      const q = cy - 96 + i * 48;
+      pins += `<line x1="${p}" y1="${cy - s}" x2="${p}" y2="${cy - s - 34}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+<line x1="${p}" y1="${cy + s}" x2="${p}" y2="${cy + s + 34}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+<line x1="${cx - s}" y1="${q}" x2="${cx - s - 34}" y2="${q}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+<line x1="${cx + s}" y1="${q}" x2="${cx + s + 34}" y2="${q}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>`;
     }
     let inner = '';
     for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
-      inner += `<rect x="${cx - 66 + c * 46}" y="${cy - 66 + r * 46}" width="30" height="30" fill="none" stroke="#2d2822" stroke-width="3" opacity=".55"/>`;
+      inner += `<rect x="${cx - 66 + c * 46}" y="${cy - 66 + r * 46}" width="30" height="30" fill="none" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:${(0.62 + (r + c) * 0.05).toFixed(2)}s"/>`;
     }
-    return `<rect x="${cx - s}" y="${cy - s}" width="${s * 2}" height="${s * 2}" rx="20" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>${pins}${inner}
-<path d="M${cx + s + 30} ${cy + 30} H${cx + s + 96} V${cy + 120}" fill="none" stroke="${accent}" stroke-width="4" class="draw" style="--d:1s"/>
-<circle cx="${cx + s + 96}" cy="${cy + 120}" r="9" fill="${accent}" class="f" style="--d:1.4s"/>`;
+    const traces = `<path d="M${cx + s + 34} ${cy - 48} H${cx + s + 104} V${cy + 30} H${cx + s + 176}" fill="none" stroke="${accent}" stroke-width="4" stroke-linejoin="round" class="draw" style="--d:.95s"/>
+<path d="M${cx + s + 34} ${cy + 56} H${cx + s + 76} V${cy + 152} H${cx + s + 176}" fill="none" stroke="${accent}" stroke-width="4" stroke-linejoin="round" class="draw" style="--d:1.05s"/>
+<path d="M${cx - s - 34} ${cy + 2} H${cx - s - 96} V${cy - 88}" fill="none" stroke="${accent}" stroke-width="4" stroke-linejoin="round" class="draw" style="--d:1.15s"/>
+<circle cx="${cx + s + 176}" cy="${cy + 30}" r="9" fill="${accent}" class="f" style="--d:1.25s"/>
+<circle cx="${cx + s + 176}" cy="${cy + 152}" r="9" fill="${accent}" class="f" style="--d:1.32s"/>
+<circle cx="${cx - s - 96}" cy="${cy - 88}" r="9" fill="${accent}" class="f" style="--d:1.4s"/>`;
+    return `<rect x="${cx - s}" y="${cy - s}" width="${s * 2}" height="${s * 2}" rx="22" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<rect x="${cx - s + 26}" y="${cy - s + 26}" width="${s * 2 - 52}" height="${s * 2 - 52}" rx="10" fill="none" stroke="#2d2822" stroke-width="2.6" opacity=".45" class="f" style="--d:.45s"/>
+<circle cx="${cx - s + 22}" cy="${cy - s + 22}" r="7" fill="${accent}" class="f" style="--d:.55s"/>
+${pins}${inner}${traces}
+<line x1="${cx - 96}" y1="${cy + 92}" x2="${cx - 96}" y2="${cy + 106}" stroke="#2d2822" stroke-width="2" opacity=".4"/>
+<line x1="${cx + 96}" y1="${cy + 92}" x2="${cx + 96}" y2="${cy + 106}" stroke="#2d2822" stroke-width="2" opacity=".4"/>`;
   }
   if (theme === 'policy') {
-    return `<rect x="392" y="${top + 20}" width="300" height="400" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
-<path d="M632 ${top + 20} L692 ${top + 80} L632 ${top + 80} Z" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
-${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (i === 3 ? 90 : 0)}" y2="${top + 110 + i * 62}" stroke="#5c4e3d" stroke-width="4" opacity=".7" class="f" style="--d:${(0.55 + i * 0.1).toFixed(2)}s"/>`).join('')}
-<circle cx="700" cy="${top + 330}" r="58" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:1.1s"/>
-<text x="700" y="${top + 344}" text-anchor="middle" font-size="38" fill="${accent}" font-family="Songti SC,SimSun,serif" class="f" style="--d:1.3s">政</text>
-<path d="M196 ${top + 380} H196 V${top + 150}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:.9s"/>
-<path d="M180 ${top + 176} L196 ${top + 144} L212 ${top + 176}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
+    const bx = 316, by = top + 30, bw = 448, bh = 386;
+    const sx = bx + bw - 96, sy = by + 298;
+    let star = '';
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const rr = i % 2 ? 10 : 24;
+      star += (i ? 'L' : 'M') + (sx + Math.cos(a) * rr).toFixed(1) + ' ' + (sy + Math.sin(a) * rr).toFixed(1);
+    }
+    star += ' Z';
+    return `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M${bx + bw - 72} ${by} L${bx + bw} ${by + 72} L${bx + bw - 72} ${by + 72} Z" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+<line x1="${bx + 42}" y1="${by + 48}" x2="${bx + 238}" y2="${by + 48}" stroke="#2d2822" stroke-width="8" class="f" style="--d:.62s"/>
+<line x1="${bx + 42}" y1="${by + 80}" x2="${bx + 162}" y2="${by + 80}" stroke="#2d2822" stroke-width="5" opacity=".5" class="f" style="--d:.7s"/>
+<line x1="${bx + 42}" y1="${by + 114}" x2="${bx + bw - 42}" y2="${by + 114}" stroke="#2d2822" stroke-width="2" opacity=".22" class="f" style="--d:.78s"/>
+${[0, 1, 2, 3, 4].map(i => `<line x1="${bx + 42}" y1="${by + 158 + i * 38}" x2="${bx + bw - 42 - (i === 4 ? 128 : i === 3 ? 46 : 0)}" y2="${by + 158 + i * 38}" stroke="#5c4e3d" stroke-width="3.4" opacity=".55" class="f" style="--d:${(0.85 + i * 0.07).toFixed(2)}s"/>`).join('')}
+<g class="f" style="--d:1.15s" transform="rotate(-9 ${sx} ${sy})">
+<circle cx="${sx}" cy="${sy}" r="56" fill="none" stroke="#b23a2a" stroke-width="4.6" opacity=".78"/>
+<circle cx="${sx}" cy="${sy}" r="43" fill="none" stroke="#b23a2a" stroke-width="2.2" opacity=".55"/>
+<path d="${star}" fill="#b23a2a" opacity=".72"/>
+</g>
+<g class="f" style="--d:1.35s" transform="translate(180,${top + 340}) rotate(-34)">
+<rect x="0" y="-12" width="188" height="24" rx="6" fill="none" stroke="#2d2822" stroke-width="4"/>
+<path d="M188 -12 L232 0 L188 12 Z" fill="none" stroke="#2d2822" stroke-width="4" stroke-linejoin="round"/>
+<line x1="16" y1="-4" x2="106" y2="-4" stroke="${accent}" stroke-width="2.4" opacity=".6"/>
+<line x1="232" y1="0" x2="252" y2="0" stroke="#2d2822" stroke-width="3"/>
+</g>`;
   }
   if (theme === 'globe') {
     return `<g class="f" style="--d:.35s" transform="translate(540,${top + 200}) scale(1.16)"><use href="#globe"/></g>
@@ -309,11 +337,29 @@ ${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (
 <line x1="196" y1="${b + 46}" x2="360" y2="${b + 46}" stroke="${accent}" stroke-width="4" stroke-dasharray="8 8" class="draw" style="--d:1.1s"/>`;
   }
   if (theme === 'ship') {
-    return `<g class="f" style="--d:.35s" transform="translate(540,${top + 196}) scale(2.05) translate(-105,-33)"><use href="#tanker"/></g>
-<path d="M150 ${top + 300} Q210 ${top + 282} 270 ${top + 300} T390 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:.9s"/>
-<path d="M470 ${top + 330} Q530 ${top + 312} 590 ${top + 330} T710 ${top + 330}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1s"/>
-<path d="M760 ${top + 300} Q820 ${top + 282} 880 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1.1s"/>
-<line x1="300" y1="${top + 250}" x2="180" y2="${top + 250}" stroke="#2d2822" stroke-width="3" stroke-dasharray="12 10" opacity=".4" class="f" style="--d:.7s"/>`;
+    const b = top + 282;
+    let boxes = '';
+    const boxAt = (x, y) => `<rect x="${x}" y="${y}" width="84" height="54" fill="none" stroke="#2d2822" stroke-width="3.4"/>
+<line x1="${x + 28}" y1="${y}" x2="${x + 28}" y2="${y + 54}" stroke="#2d2822" stroke-width="2.2" opacity=".4"/>
+<line x1="${x + 56}" y1="${y}" x2="${x + 56}" y2="${y + 54}" stroke="#2d2822" stroke-width="2.2" opacity=".4"/>`;
+    for (let i = 0; i < 4; i++) boxes += boxAt(340 + i * 90, b - 152);
+    for (let i = 0; i < 3; i++) boxes += boxAt(385 + i * 90, b - 208);
+    return `<path d="M238 ${b - 98} H796 Q858 ${b - 98} 874 ${b - 6} H230 Q238 ${b - 98} 238 ${b - 98} Z" fill="none" stroke="#2d2822" stroke-width="5" stroke-linejoin="round" class="f" style="--d:.35s"/>
+<line x1="236" y1="${b - 34}" x2="866" y2="${b - 34}" stroke="#b23a2a" stroke-width="4" opacity=".5" class="f" style="--d:.5s"/>
+<rect x="248" y="${b - 198}" width="84" height="102" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.45s"/>
+<line x1="248" y1="${b - 160}" x2="332" y2="${b - 160}" stroke="#2d2822" stroke-width="2.4" opacity=".45"/>
+${[266, 290, 314].map(x => `<circle cx="${x}" cy="${b - 178}" r="6" fill="none" stroke="#2d2822" stroke-width="2.6"/>`).join('')}
+<rect x="266" y="${b - 238}" width="28" height="40" fill="none" stroke="#2d2822" stroke-width="3.4" class="f" style="--d:.6s"/>
+<path d="M296 ${b - 230} q20 -18 36 -2 q14 -14 30 2" fill="none" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.75s"/>
+${boxes}
+<line x1="748" y1="${b - 98}" x2="748" y2="${b - 268}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.8s"/>
+<line x1="712" y1="${b - 236}" x2="784" y2="${b - 236}" stroke="#2d2822" stroke-width="3.4" class="f" style="--d:.9s"/>
+<circle cx="748" cy="${b - 272}" r="7" fill="${accent}" class="f" style="--d:1s"/>
+${[398, 476, 554, 632, 710].map(x => `<circle cx="${x}" cy="${b - 62}" r="7" fill="none" stroke="#2d2822" stroke-width="2.8" opacity=".7"/>`).join('')}
+<path d="M150 ${b + 14} Q216 ${b - 6} 282 ${b + 14} T414 ${b + 14} T546 ${b + 14} T678 ${b + 14} T810 ${b + 14} T942 ${b + 14}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="draw" style="--d:1s"/>
+<path d="M186 ${b + 52} Q252 ${b + 32} 318 ${b + 52} T450 ${b + 52} T582 ${b + 52} T714 ${b + 52} T846 ${b + 52}" fill="none" stroke="${accent}" stroke-width="3.6" stroke-linecap="round" opacity=".65" class="draw" style="--d:1.15s"/>
+<path d="M228 ${top + 52} q12 -14 24 0 q12 -14 24 0" fill="none" stroke="#2d2822" stroke-width="3" stroke-linecap="round" opacity=".6" class="f" style="--d:1.2s"/>
+<path d="M806 ${top + 92} q10 -12 20 0 q10 -12 20 0" fill="none" stroke="#2d2822" stroke-width="2.8" stroke-linecap="round" opacity=".5" class="f" style="--d:1.3s"/>`;
   }
   if (theme === 'train') {
     const b = top + 330;
@@ -660,21 +706,68 @@ ${hangers}
 <path d="M742 ${top + 214} L760 ${top + 182} L778 ${top + 214}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.3s"/>`;
   }
   if (theme === 'car') {
-    const b = top + 280;
-    return `<path d="M300 ${b} L322 ${b - 66} L432 ${b - 78} L506 ${b - 138} L648 ${b - 138} L706 ${b - 78} L772 ${b - 60} L784 ${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
-<circle cx="404" cy="${b + 6}" r="42" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
-<circle cx="688" cy="${b + 6}" r="42" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
-<line x1="506" y1="${b - 138}" x2="506" y2="${b - 78}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
-<line x1="648" y1="${b - 138}" x2="648" y2="${b - 78}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
-<line x1="180" y1="${b + 64}" x2="900" y2="${b + 64}" stroke="${accent}" stroke-width="4" stroke-dasharray="14 14" class="draw" style="--d:.85s"/>
-<circle cx="748" cy="${b - 48}" r="10" fill="${accent}" class="f" style="--d:1.2s"/>`;
+    const b = top + 300;
+    const wheel = x => {
+      let spokes = '';
+      for (let i = 0; i < 5; i++) {
+        const a = i * Math.PI * 2 / 5 - Math.PI / 2;
+        spokes += `<line x1="${(x + Math.cos(a) * 12).toFixed(1)}" y1="${(b - 2 + Math.sin(a) * 12).toFixed(1)}" x2="${(x + Math.cos(a) * 29).toFixed(1)}" y2="${(b - 2 + Math.sin(a) * 29).toFixed(1)}" stroke="#2d2822" stroke-width="2.6" opacity=".5"/>`;
+      }
+      return `<circle cx="${x}" cy="${b - 2}" r="58" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
+<circle cx="${x}" cy="${b - 2}" r="29" fill="none" stroke="#2d2822" stroke-width="3.6" class="f" style="--d:.75s"/>
+${spokes}`;
+    };
+    return `<path d="M264 ${b - 22} Q262 ${b - 86} 300 ${b - 98} L372 ${b - 106} L452 ${b - 188} Q476 ${b - 202} 520 ${b - 202} L636 ${b - 202} L714 ${b - 122} L782 ${b - 110} Q812 ${b - 102} 816 ${b - 42} L816 ${b - 18} L264 ${b - 18} Z" fill="none" stroke="#2d2822" stroke-width="5" stroke-linejoin="round" class="f" style="--d:.35s"/>
+<path d="M470 ${b - 190} L538 ${b - 190} L538 ${b - 126} L458 ${b - 126} Z" fill="none" stroke="#2d2822" stroke-width="3.4" stroke-linejoin="round" class="f" style="--d:.55s"/>
+<path d="M562 ${b - 190} L632 ${b - 190} L708 ${b - 128} L562 ${b - 128} Z" fill="none" stroke="#2d2822" stroke-width="3.4" stroke-linejoin="round" class="f" style="--d:.58s"/>
+<line x1="550" y1="${b - 194}" x2="550" y2="${b - 128}" stroke="#2d2822" stroke-width="3.4" class="f" style="--d:.62s"/>
+<line x1="550" y1="${b - 118}" x2="550" y2="${b - 30}" stroke="#2d2822" stroke-width="2.6" opacity=".45" class="f" style="--d:.66s"/>
+<line x1="574" y1="${b - 108}" x2="604" y2="${b - 108}" stroke="#2d2822" stroke-width="3.2" opacity=".6" class="f" style="--d:.7s"/>
+<path d="M700 ${b - 166} l18 -10" fill="none" stroke="#2d2822" stroke-width="3" stroke-linecap="round" class="f" style="--d:.72s"/>
+<rect x="712" y="${b - 190}" width="30" height="21" rx="8" fill="none" stroke="#2d2822" stroke-width="3.2" class="f" style="--d:.74s"/>
+<ellipse cx="802" cy="${b - 72}" rx="9" ry="14" fill="none" stroke="${accent}" stroke-width="3.6" opacity=".85" class="f" style="--d:.8s"/>
+<rect x="266" y="${b - 74}" width="11" height="18" rx="4" fill="#b23a2a" opacity=".6" class="f" style="--d:.82s"/>
+${wheel(388)}${wheel(700)}
+<path d="M320 ${b - 18} Q388 ${b - 92} 456 ${b - 18}" fill="none" stroke="#2d2822" stroke-width="2.6" opacity=".28"/>
+<path d="M632 ${b - 18} Q700 ${b - 92} 768 ${b - 18}" fill="none" stroke="#2d2822" stroke-width="2.6" opacity=".28"/>
+<line x1="210" y1="${b + 62}" x2="870" y2="${b + 62}" stroke="${accent}" stroke-width="4" stroke-dasharray="16 14" class="draw" style="--d:.95s"/>
+<line x1="150" y1="${b - 150}" x2="222" y2="${b - 150}" stroke="#2d2822" stroke-width="3.4" opacity=".35" stroke-linecap="round" class="f" style="--d:1.05s"/>
+<line x1="176" y1="${b - 118}" x2="234" y2="${b - 118}" stroke="#2d2822" stroke-width="3" opacity=".25" stroke-linecap="round" class="f" style="--d:1.12s"/>`;
   }
   if (theme === 'people') {
-    const head = (x, y) => `<circle cx="${x}" cy="${y}" r="34" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>
-<path d="M${x - 52} ${y + 108} Q${x} ${y + 40} ${x + 52} ${y + 108}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>`;
-    return head(410, top + 150) + head(540, top + 120) + head(670, top + 150) +
-      `<path d="M462 ${top + 300} H616" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:1s"/>
-<path d="M600 ${top + 284} L620 ${top + 300} L600 ${top + 316}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
+    const base = top + 396;
+    const figure = (x, k, opt) => {
+      const hy = base - 176 * k;
+      const hr = 42 * k;
+      const sh = base - 118 * k;
+      const hair = opt.long
+        ? `<path d="M${x - hr} ${hy - 10} Q${x - hr * 1.06} ${hy - hr - 14 * k} ${x} ${hy - hr - 14 * k} Q${x + hr * 1.06} ${hy - hr - 14 * k} ${x + hr} ${hy - 10}" fill="none" stroke="#2d2822" stroke-width="4.2" stroke-linecap="round"/>
+<path d="M${x - hr + 3} ${hy - 8} Q${x - hr - 17} ${hy + 26} ${x - hr - 8} ${hy + 58}" fill="none" stroke="#2d2822" stroke-width="4.2" stroke-linecap="round"/>
+<path d="M${x + hr - 3} ${hy - 8} Q${x + hr + 17} ${hy + 26} ${x + hr + 8} ${hy + 58}" fill="none" stroke="#2d2822" stroke-width="4.2" stroke-linecap="round"/>`
+        : `<path d="M${x - hr} ${hy - 8} Q${x - hr * 0.92} ${hy - hr - 12 * k} ${x} ${hy - hr - 12 * k} Q${x + hr * 0.92} ${hy - hr - 12 * k} ${x + hr} ${hy - 8}" fill="none" stroke="#2d2822" stroke-width="4.4" stroke-linecap="round"/>`;
+      const tie = opt.tie
+        ? `<path d="M${x} ${sh - 12 * k} L${x - 9 * k} ${sh + 6 * k} L${x} ${sh + 34 * k} L${x + 9 * k} ${sh + 6 * k} Z" fill="${accent}" opacity=".7"/>`
+        : `<circle cx="${x + hr * 0.94}" cy="${hy + 6}" r="${3.6 * k}" fill="${accent}" opacity=".85"/>`;
+      return `<g class="f" style="--d:${opt.d}s">
+<circle cx="${x}" cy="${hy}" r="${hr}" fill="none" stroke="#2d2822" stroke-width="4.4"/>
+${hair}
+<line x1="${x - 14 * k}" y1="${hy + hr - 4}" x2="${x - 14 * k}" y2="${sh + 6 * k}" stroke="#2d2822" stroke-width="3.6"/>
+<line x1="${x + 14 * k}" y1="${hy + hr - 4}" x2="${x + 14 * k}" y2="${sh + 6 * k}" stroke="#2d2822" stroke-width="3.6"/>
+<path d="M${x - 72 * k} ${base} L${x - 58 * k} ${sh} Q${x} ${sh - 30 * k} ${x + 58 * k} ${sh} L${x + 72 * k} ${base}" fill="none" stroke="#2d2822" stroke-width="4.6" stroke-linejoin="round"/>
+<path d="M${x - 20 * k} ${sh - 4 * k} L${x} ${sh + 24 * k} L${x + 20 * k} ${sh - 4 * k}" fill="none" stroke="#2d2822" stroke-width="3.4"/>
+${tie}
+</g>`;
+    };
+    const arm = `<path d="M${540 + 58 * 1.16} ${base - 118 * 1.16} L${540 + 108} ${base - 214} L${540 + 116} ${base - 282}" fill="none" stroke="#2d2822" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" class="f" style="--d:1s"/>
+<circle cx="${540 + 116}" cy="${base - 288}" r="11" fill="none" stroke="#2d2822" stroke-width="3.6" class="f" style="--d:1.1s"/>`;
+    const bubble = `<rect x="356" y="${top + 22}" width="196" height="96" rx="18" fill="none" stroke="#2d2822" stroke-width="3.6" class="f" style="--d:.8s"/>
+<path d="M392 ${top + 118} L378 ${top + 146} L418 ${top + 118}" fill="none" stroke="#2d2822" stroke-width="3.4" stroke-linejoin="round" class="f" style="--d:.9s"/>
+<line x1="386" y1="${top + 54}" x2="516" y2="${top + 54}" stroke="#2d2822" stroke-width="3" opacity=".55" class="f" style="--d:.95s"/>
+<line x1="386" y1="${top + 76}" x2="484" y2="${top + 76}" stroke="#2d2822" stroke-width="3" opacity=".4" class="f" style="--d:1s"/>
+<rect x="694" y="${top + 62}" width="136" height="84" rx="16" fill="none" stroke="${accent}" stroke-width="3.4" opacity=".85" class="f" style="--d:1.05s"/>
+<path d="M748 ${top + 126} L762 ${top + 92} L776 ${top + 126}" fill="none" stroke="${accent}" stroke-width="3.4" stroke-linecap="round" class="f" style="--d:1.25s"/>`;
+    return figure(330, 1.0, { tie: true, d: '.35' }) + figure(540, 1.16, { tie: false, d: '.45' }) + figure(752, 0.98, { tie: false, long: true, d: '.55' }) + arm + bubble +
+      `<line x1="204" y1="${base + 8}" x2="876" y2="${base + 8}" stroke="#2d2822" stroke-width="2.6" opacity=".3" class="draw" style="--d:1.3s"/>`;
   }
   const cx = 540, cy = top + 170;
   let rays = '';
@@ -762,7 +855,7 @@ function coverScene(scene, meta) {
 
   return `<section class="scene" id="s0">
 <svg class="art" viewBox="0 0 1080 1920">
-${coverArt(theme, artTop, accent, seed, layout === 1 ? 1.14 : 1.3)}
+${coverArt(theme, artTop, accent, seed, layout === 1 ? 1.06 : 1.3)}
 </svg>
 <div class="k f" style="--d:.05s;${kickerStyle}">${esc(kicker)}</div>
 <h1 class="h1 rise cover-title" style="--d:.15s;${titleStyle}">${esc(title)}</h1>
