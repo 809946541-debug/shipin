@@ -2,7 +2,12 @@
 // 分镜提示词与结果校验
 
 const KINDS = ['cover', 'bullets', 'list', 'flow', 'compare', 'bars', 'line', 'stats', 'end'];
-const COVER_ARTS = ['energy', 'chip', 'chart', 'policy', 'factory', 'cart', 'pill', 'house', 'car', 'people', 'idea'];
+const COVER_ARTS = [
+  'energy', 'chip', 'chart', 'policy', 'factory', 'cart', 'pill', 'house', 'car', 'people',
+  'globe', 'port', 'ship', 'train', 'plane', 'truck', 'container', 'pipeline', 'oilrig',
+  'battery', 'solar', 'wind', 'mine', 'wheat', 'water', 'bank', 'coin', 'scale', 'shield',
+  'lock', 'clock', 'network', 'phone', 'satellite', 'dna', 'flask', 'store', 'bridge', 'leaf', 'idea',
+];
 // 实测：YunjianNeural +12% 语速约 5.05 个汉字/秒
 const CHARS_PER_SEC = 5.05;
 const GAP_PER_SCENE = 1.3; // 句首 0.3s + 句尾 1.0s
@@ -21,9 +26,13 @@ const SYSTEM = `你是一名中文财经竖屏短视频的分镜编导。你把�
 5. 语言风格：口语、短句、克制，不用感叹号，不用“我们必须”“震惊”“内幕”等词。
 
 【结构】
-{"meta":{"title":"主标题，不超过 16 字","subtitle":"副标题，一句话，不超过 26 字","kicker":"手绘财经 · 情景推演 · 2026.11","cover":"封面插画，从 energy/chip/chart/policy/factory/cart/pill/house/car/people/idea 中选最贴合选题的一个","disclaimer":"公开信息梳理 · 不构成投资建议","source":"数据来源说明，不超过 22 字"},"scenes":[...]}
+{"meta":{"title":"主标题，不超过 16 字","subtitle":"副标题，一句话，不超过 26 字","kicker":"手绘财经 · 情景推演 · 2026.11","cover":"封面插画，见下方清单","disclaimer":"公开信息梳理 · 不构成投资建议","source":"数据来源说明，不超过 22 字"},"scenes":[...]}
 
-cover 是封面配图，必须按选题实质选择：能源地缘 energy、算力芯片 chip、行情财报 chart、政策制度 policy、制造产能 factory、消费零售 cart、医药医疗 pill、房产地产 house、汽车出行 car、人口就业 people，都不贴切时用 idea。
+cover 是封面配图，必须按选题实质从这些 id 中选一个：
+能源类 energy/oilrig/pipeline，航运物流 ship/port/container/train/plane/truck/globe，
+科技类 chip/battery/solar/wind/network/phone/satellite/flask，
+消费医药 pill/dna/store/cart，资产 house/bank/coin，政策监管 policy/scale/shield/lock，
+社会人口 people/clock，产业 factory/mine/wheat/water/bridge/leaf，行情报价 chart，都不贴切用 idea。
 
 scenes 第 1 屏固定 kind="cover"，最后一屏固定 kind="end"，中间每屏从下列类型中选最合适的一种：
 - bullets：3–4 条并列要点 {points:[{"t":"要点，不超过 16 字","d":"说明，不超过 28 字"}]}
@@ -91,6 +100,9 @@ function validate(raw) {
     disclaimer: clean(meta.disclaimer || '公开信息梳理 · 不构成投资建议', 40),
     source: clean(meta.source || '公开信息整理', 30),
   };
+  const lay = Number(meta.coverLayout);
+  if (lay === 0 || lay === 1 || lay === 2) board.meta.coverLayout = lay;
+  if (meta.coverConfirmed) board.meta.coverConfirmed = true;
 
   const src = board.scenes.slice(0, 40);
   board.scenes = src.map((s, i) => {

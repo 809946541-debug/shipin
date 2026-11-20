@@ -4,7 +4,8 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { generateStoryboard } = require('./llm');
 const { validate, CHARS_PER_SEC, GAP_PER_SCENE } = require('./prompt');
-const { renderHTML } = require('./template');
+const { renderHTML, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme } = require('./template');
+const covers = require('./covers');
 const { findFfmpeg, findPython, buildEnv } = require('./platform');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -85,6 +86,7 @@ function persist(job) {
   const state = {
     id: job.id, createdAt: job.createdAt, status: job.status, step: job.step,
     progress: job.progress, error: job.error || null,
+    coverAt: job.coverAt || null,
     brief: job.brief, title: job.brief.title, minutes: job.brief.minutes,
   };
   fs.writeFileSync(path.join(jobDir(job.id), 'state.json'), JSON.stringify(state, null, 2));
@@ -153,6 +155,7 @@ async function drain() {
     const job = queue.shift();
     try {
       await runJob(job);
+      if (job.status === 'preview') { persist(job); continue; }
       job.status = 'done'; job.step = '完成'; job.progress = 100;
       log(job, '成片完成');
     } catch (e) {
@@ -200,7 +203,32 @@ async function runJob(job) {
   job.progress = 10;
   persist(job);
 
-  /* 2. 配音 */
+  /* 2. 封面预览：等用户挑选确认后再继续 */
+  if (!board.meta.coverConfirmed) {
+    const motif = COVER_LABEL[board.meta.cover] ? board.meta.cover : coverTheme(board.meta.title, board.meta.subtitle);
+    const picked = Number(board.meta.coverLayout);
+    const layout = (picked === 0 || picked === 1 || picked === 2) ? picked : (board.meta.title.length + board.scenes.length) % 3;
+    board.meta.cover = motif;
+    board.meta.coverLayout = layout;
+    fs.writeFileSync(boardPath, JSON.stringify(board, null, 2));
+    setStep(job, '生成封面预览', 10);
+    try {
+      await covers.renderPreview(dir, board, motif, layout);
+    } catch (e) {
+      throw new Error('封面预览渲染失败：' + e.message);
+    }
+    log(job, `封面样式：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[layout]}（共 ${COVER_STYLES.length} 种可选）`);
+    job.status = 'preview';
+    job.step = '等待确认封面';
+    job.progress = 10;
+    job.coverAt = Date.now();
+    persist(job);
+    log(job, '请在上方挑一张封面，确认后开始配音与渲染');
+    return;
+  }
+  log(job, '封面已确认，继续生成');
+
+  /* 3. 配音 */
   setStep(job, '生成配音', 12);
   try {
     await run(findPython(), [path.join(__dirname, 'tts.py'), '--job', dir],
@@ -284,13 +312,95 @@ async function runJob(job) {
   } catch { }
 }
 
+function readBoard(dir) {
+  try { return JSON.parse(fs.readFileSync(path.join(dir, 'storyboard.json'), 'utf8')); } catch { return null; }
+}
+
+/* 列出某页封面样式缩略图（24 个/页，磁盘缓存） */
+async function listCovers(id, page = 0, size = 24) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜还没生成，暂时不能预览封面' };
+  const pages = Math.ceil(COVER_STYLES.length / size);
+  const pg = Math.min(Math.max(0, Number(page) || 0), pages - 1);
+  const slice = COVER_STYLES.slice(pg * size, pg * size + size);
+  try {
+    const files = await covers.renderThumbs(dir, board, slice);
+    return {
+      ok: true, total: COVER_STYLES.length, pages, page: pg,
+      items: slice.map((s, i) => ({ ...s, url: '/media/' + id + '/' + files[i] })),
+    };
+  } catch (e) {
+    return { code: 500, error: '封面缩略图渲染失败：' + e.message };
+  }
+}
+
+async function setCover(id, motif, layout) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以换封面' };
+  if (!COVER_LABEL[motif]) return { code: 400, error: '未知封面样式' };
+  const lay = Number(layout);
+  if (!(lay === 0 || lay === 1 || lay === 2)) return { code: 400, error: '封面版式无效' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜文件缺失' };
+  board.meta.cover = motif;
+  board.meta.coverLayout = lay;
+  fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+  try {
+    await covers.renderPreview(dir, board, motif, lay);
+  } catch (e) {
+    return { code: 500, error: '封面预览渲染失败：' + e.message };
+  }
+  job.coverAt = Date.now();
+  persist(job);
+  log(job, `封面改为：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[lay]}`);
+  return { ok: true, coverAt: job.coverAt };
+}
+
+function confirmCover(id) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'preview') return { code: 409, error: '任务当前不在等待封面确认' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜文件缺失' };
+  board.meta.coverConfirmed = true;
+  fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+  job.status = 'queued';
+  job.step = '排队中';
+  job.error = null;
+  log(job, '封面已确认，排队继续生成');
+  persist(job);
+  queue.push(job);
+  setImmediate(drain);
+  return { ok: true };
+}
+
 function jobView(job, withLog = true) {
+  const dir = jobDir(job.id);
+  let coverStyle = null;
+  const board = readBoard(dir);
+  if (board && board.meta && board.meta.cover) {
+    coverStyle = {
+      motif: board.meta.cover, layout: board.meta.coverLayout,
+      label: COVER_LABEL[board.meta.cover] || board.meta.cover,
+      layoutName: COVER_LAYOUT_NAME[board.meta.coverLayout] || '',
+    };
+  }
   return {
     id: job.id, createdAt: job.createdAt, status: job.status, step: job.step,
     progress: job.progress, error: job.error || null, brief: job.brief,
-    hasVideo: fs.existsSync(path.join(jobDir(job.id), 'output.mp4')),
+    preview: job.status === 'preview',
+    coverAt: job.coverAt || null,
+    hasCover: fs.existsSync(path.join(dir, 'covers', 'preview.png')),
+    coverStyle,
+    hasVideo: fs.existsSync(path.join(dir, 'output.mp4')),
     duration: (() => {
-      try { return JSON.parse(fs.readFileSync(path.join(jobDir(job.id), 'beats.json'), 'utf8')).total; } catch { return null; }
+      try { return JSON.parse(fs.readFileSync(path.join(dir, 'beats.json'), 'utf8')).total; } catch { return null; }
     })(),
     log: withLog ? job.log.slice(-120) : undefined,
   };
@@ -325,4 +435,5 @@ function getJob(id) {
 
 module.exports = {
   createJob, retryJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
+  listCovers, setCover, confirmCover,
 };

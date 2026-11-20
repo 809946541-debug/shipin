@@ -88,9 +88,19 @@ ul.news .meta a{text-decoration:none}
 .news-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:12px;color:var(--ink2)}
 .dot{width:8px;height:8px;border-radius:50%;background:#c9b9a9;flex:0 0 auto}
 .dot.running{background:var(--gold);animation:pulse 1.2s infinite}
+.dot.preview{background:var(--blue);animation:pulse 1.4s infinite}
 .dot.done{background:var(--ok)}
 .dot.error{background:var(--red)}
 @keyframes pulse{50%{opacity:.35}}
+.cover-box{margin:12px 0 14px;border:1px dashed var(--line);border-radius:10px;padding:12px;background:#fffdf7;display:none}
+.cover-main{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.cover-main img{width:210px;border-radius:8px;border:1px solid var(--line);background:#fff;flex:0 0 auto}
+.cover-info{font-size:12.5px;color:var(--ink2);line-height:1.7;flex:1;min-width:180px}
+.cover-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-top:10px;max-height:330px;overflow:auto}
+.cover-grid button{padding:0;border:2px solid transparent;border-radius:6px;background:none;cursor:pointer}
+.cover-grid button.on{border-color:var(--red)}
+.cover-grid img{width:100%;display:block;border-radius:4px;border:1px solid var(--line);background:#fff}
+.cover-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -195,6 +205,23 @@ ul.news .meta a{text-decoration:none}
         <button class="btn ghost small" id="retryBtn" style="display:none">重试本任务</button>
       </div>
       <div class="bar"><i id="bar"></i></div>
+
+      <div class="cover-box" id="coverBox">
+        <div class="cover-main">
+          <img id="coverImg" alt="封面预览">
+          <div class="cover-info">
+            <div><b>分镜已完成。</b>挑一张封面，确认后再开始配音、渲染和编码。</div>
+            <div id="coverMeta" style="margin-top:6px"></div>
+            <button class="btn ghost small" id="coverMore" style="margin-top:8px">换一批缩略图</button>
+          </div>
+        </div>
+        <div class="cover-grid" id="coverGrid"></div>
+        <div class="cover-actions">
+          <button class="btn primary" id="coverConfirm" style="width:auto">确认封面，开始生成视频</button>
+          <span class="hint" style="margin:0" id="coverTip">点缩略图可在大图预览中替换</span>
+        </div>
+      </div>
+
       <pre class="log" id="log">填好左侧信息，点「开始生成」。</pre>
 
       <div class="video-wrap" id="videoWrap">
@@ -213,6 +240,11 @@ ul.news .meta a{text-decoration:none}
 const $ = s => document.querySelector(s);
 let currentId = null;
 let timer = null;
+let lastJob = null;
+let coverJobId = null;
+let coverPage = 0;
+let coverPages = 1;
+let coverBusy = false;
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -446,8 +478,84 @@ $('#retryBtn').onclick = async () => {
 
 function setDot(status){
   const d = $('#dot');
-  d.className = 'dot' + (status === 'running' ? ' running' : status === 'done' ? ' done' : status === 'error' ? ' error' : '');
+  d.className = 'dot' + (status === 'running' ? ' running' : status === 'preview' ? ' preview' : status === 'done' ? ' done' : status === 'error' ? ' error' : '');
 }
+
+/* ---------------- 封面预览 ---------------- */
+function markCoverSelection(){
+  const s = lastJob && lastJob.coverStyle;
+  [...$('#coverGrid').children].forEach(b => {
+    const on = !!s && b.dataset && b.dataset.motif === s.motif && Number(b.dataset.layout) === Number(s.layout);
+    b.classList.toggle('on', on);
+  });
+}
+
+async function loadCoverGrid(page){
+  if (!currentId || coverBusy) return;
+  const id = currentId;
+  coverBusy = true;
+  const grid = $('#coverGrid');
+  grid.innerHTML = '<div class="cover-info">缩略图渲染中，约需几秒…</div>';
+  try {
+    const r = await fetch('/api/jobs/' + id + '/covers?page=' + page);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '加载封面样式失败');
+    if (id !== currentId) return;
+    coverPage = d.page;
+    coverPages = d.pages;
+    grid.innerHTML = d.items.map(it => `<button data-motif="${esc(it.motif)}" data-layout="${it.layout}" title="${esc(it.label)} · ${esc(it.layoutName)}"><img loading="lazy" src="${it.url}" alt="${esc(it.label)}"></button>`).join('');
+    [...grid.children].forEach(b => { b.onclick = () => pickCover(b.dataset.motif, Number(b.dataset.layout)); });
+    $('#coverTip').textContent = `第 ${d.page + 1}/${d.pages} 批 · 共 ${d.total} 种样式`;
+    markCoverSelection();
+  } catch (e) {
+    grid.innerHTML = '<div class="cover-info">' + esc(e.message) + '</div>';
+  } finally {
+    coverBusy = false;
+  }
+}
+
+async function pickCover(motif, layout){
+  if (!currentId || coverBusy) return;
+  coverBusy = true;
+  try {
+    const r = await fetch('/api/jobs/' + currentId + '/cover', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motif, layout }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '切换封面失败');
+    $('#coverImg').src = '/media/' + currentId + '/covers/preview.png?v=' + d.coverAt;
+    if (lastJob) lastJob.coverStyle = { motif, layout, label: '', layoutName: '' };
+    markCoverSelection();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    coverBusy = false;
+  }
+}
+
+$('#coverMore').onclick = () => loadCoverGrid((coverPage + 1) % Math.max(1, coverPages));
+
+$('#coverConfirm').onclick = async () => {
+  if (!currentId) return;
+  const btn = $('#coverConfirm');
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  try {
+    const r = await fetch('/api/jobs/' + currentId + '/confirm', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '确认失败');
+    $('#coverBox').style.display = 'none';
+    coverJobId = null;
+    poll(currentId);
+    loadJobs();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '确认封面，开始生成视频';
+  }
+};
 
 function render(job){
   setDot(job.status);
@@ -464,6 +572,27 @@ function render(job){
   const atBottom = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 24;
   logEl.textContent = (job.log || []).map(l => l.msg).join('\n') || '…';
   if (atBottom) logEl.scrollTop = logEl.scrollHeight;
+
+  lastJob = job;
+  if (job.preview) {
+    $('#coverBox').style.display = 'block';
+    const img = $('#coverImg');
+    const src = '/media/' + job.id + '/covers/preview.png?v=' + (job.coverAt || 0);
+    if (img.getAttribute('src') !== src) img.src = src;
+    if (job.coverStyle) {
+      $('#coverMeta').textContent = '当前封面：' + (job.coverStyle.label || job.coverStyle.motif) +
+        (job.coverStyle.layoutName ? ' · ' + job.coverStyle.layoutName : '');
+    }
+    if (coverJobId !== job.id) {
+      coverJobId = job.id;
+      coverPage = 0;
+      loadCoverGrid(0);
+    }
+    markCoverSelection();
+  } else {
+    $('#coverBox').style.display = 'none';
+    if (coverJobId) coverJobId = null;
+  }
 
   if (job.hasVideo) {
     $('#videoWrap').style.display = 'block';
@@ -510,6 +639,8 @@ function resetView(){
   $('#video').removeAttribute('src');
   $('#retryBtn').style.display = 'none';
   $('#durBadge').style.display = 'none';
+  $('#coverBox').style.display = 'none';
+  coverJobId = null;
 }
 
 async function loadJobs(){
@@ -520,9 +651,9 @@ async function loadJobs(){
   ul.innerHTML = list.map(j => `<li data-id="${j.id}">
     <span class="dot ${j.status}"></span>
     <span class="t">${(j.brief && j.brief.title) || '(未命名)'}</span>
-    <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : (j.progress||0) + '%'}</span>
+    <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : j.status === 'preview' ? '待选封面' : (j.progress||0) + '%'}</span>
     <span class="m">${fmtTime(j.createdAt)}</span>
-    ${(j.status === 'done' || j.status === 'error') ? `<button class="jdel" title="删除任务与成片">×</button>` : ''}
+    ${(j.status === 'done' || j.status === 'error' || j.status === 'preview') ? `<button class="jdel" title="删除任务与成片">×</button>` : ''}
   </li>`).join('');
   [...ul.querySelectorAll('li[data-id]')].forEach(li => {
     li.onclick = e => {

@@ -128,28 +128,113 @@ function hash(str) {
 }
 
 const COVER_THEMES = [
+  { id: 'oilrig', re: /钻井|采油|油田|油气开采/ },
+  { id: 'pipeline', re: /管道|输气|天然气管|输油/ },
   { id: 'energy', re: /油|能源|伊朗|中东|霍尔木兹|俄|乌|战争|冲突|制裁|海峡|天然气|地缘|军/ },
+  { id: 'ship', re: /航运|海运|货轮|船|运价|运费|苏伊士|红海/ },
+  { id: 'port', re: /港口|码头|吞吐|装卸|港区/ },
+  { id: 'container', re: /集装箱|外贸|报关|跨境|出口订单/ },
+  { id: 'train', re: /班列|铁路|高铁|轨交|中欧/ },
+  { id: 'plane', re: /航空|飞机|机场|航班/ },
+  { id: 'truck', re: /物流|卡车|货运|快递|冷链|配送/ },
   { id: 'chip', re: /芯片|算力|人工?智能|AI|半导体|大模型|GPU|数据中心|机器人|服务器|光刻|智能/ },
-  { id: 'chart', re: /股|指数|市值|板块|行情|估值|财报|营收|利润|份额|价格|市场|基金|债|涨|跌/ },
-  { id: 'policy', re: /政策|改革|监管|国资|国企|规划|法案|会议|央行|利率|关税|目标|制度|补贴/ },
-  { id: 'factory', re: /工厂|制造|产能|投产|产线|出口|订单|供应|扩产|基地/ },
-  { id: 'cart', re: /消费|零售|电商|购物|品牌|客单|渠道|门店|直播带货/ },
-  { id: 'pill', re: /医药|药|医疗|疫苗|临床|器械|医院|健康/ },
+  { id: 'battery', re: /电池|储能|锂|充电桩|电芯/ },
+  { id: 'solar', re: /光伏|太阳能|硅片|组件/ },
+  { id: 'wind', re: /风电|风机|海上风电/ },
+  { id: 'car', re: /汽车|新能源车|整车|车企|充电|智驾|车型/ },
+  { id: 'dna', re: /基因|生物|细胞|创新药|疫苗|临床/ },
+  { id: 'flask', re: /科研|实验|化工|材料|研发|实验室/ },
+  { id: 'pill', re: /医药|药|医疗|器械|医院|健康/ },
   { id: 'house', re: /房|地产|楼|土地|物业|租|家居/ },
-  { id: 'car', re: /汽车|新能源车|整车|车企|电池|充电|智驾|车型/ },
+  { id: 'store', re: /门店|商超|连锁|便利|shopping|商场/ },
+  { id: 'cart', re: /消费|零售|电商|购物|品牌|客单|渠道|直播带货/ },
+  { id: 'wheat', re: /农业|粮食|小麦|玉米|大豆|种植|农产品/ },
+  { id: 'mine', re: /矿|铜|铝|锂矿|稀土|煤炭|大宗|铁矿石/ },
+  { id: 'water', re: /水|水利|洪|干旱|水资源/ },
+  { id: 'bank', re: /银行|信贷|贷款|坏账|金融|保险/ },
+  { id: 'coin', re: /汇率|人民币|美元|货币|外储|结汇/ },
+  { id: 'scale', re: /监管|合规|反垄断|处罚|立法|听证/ },
+  { id: 'shield', re: /安全|防御|防务|军费|网络攻击/ },
+  { id: 'lock', re: /封锁|管制|禁令|限制出口|脱钩/ },
+  { id: 'clock', re: /周期|时间表|倒计时|窗口期|节奏/ },
+  { id: 'network', re: /互联网|平台|连接|网络|生态/ },
+  { id: 'phone', re: /手机|移动|App|终端|用户/ },
+  { id: 'satellite', re: /航天|卫星|火箭|太空|北斗/ },
   { id: 'people', re: /人口|就业|工资|社保|养老|教育|收入|劳动者|人才/ },
+  { id: 'policy', re: /政策|改革|国资|国企|规划|法案|会议|央行|利率|关税|目标|制度|补贴/ },
+  { id: 'factory', re: /工厂|制造|产能|投产|产线|订单|供应|扩产|基地/ },
+  { id: 'bridge', re: /基建|桥梁|公路|投资|工程/ },
+  { id: 'leaf', re: /碳|环保|绿色|减排|气候/ },
+  { id: 'chart', re: /股|指数|市值|板块|行情|估值|财报|营收|利润|份额|价格|市场|基金|债|涨|跌/ },
+  { id: 'globe', re: /全球|世界|出海|国际|贸易/ },
 ];
 
-const COVER_ACCENT = { energy: '#2b6b85', chip: '#33506f', chart: '#b23a2a', policy: '#b08a3e', idea: '#b23a2a', factory: '#b08a3e', cart: '#b23a2a', pill: '#2b6b85', house: '#b08a3e', car: '#33506f', people: '#b23a2a' };
-const COVER_CLASS = { energy: 'sea', chip: 'blue', chart: 'red', policy: 'gold', idea: 'red', factory: 'gold', cart: 'red', pill: 'sea', house: 'gold', car: 'blue', people: 'red' };
+const COVER_LABEL = {
+  energy: '能源地缘', chip: '芯片算力', chart: '行情财报', policy: '政策文件', idea: '抽象推演',
+  factory: '工厂产线', cart: '购物袋', pill: '胶囊医疗', house: '房子', car: '汽车', people: '人群',
+  globe: '地球航线', port: '港口吊机', ship: '货轮', train: '中欧班列', plane: '飞机', truck: '卡车',
+  container: '集装箱', pipeline: '油气管道', oilrig: '海上钻井', battery: '电池储能', solar: '光伏太阳',
+  wind: '风力发电机', mine: '矿山矿车', wheat: '麦穗', water: '水滴', bank: '银行建筑', coin: '汇率硬币',
+  scale: '监管天平', shield: '安全盾牌', lock: '封锁锁具', clock: '周期时钟', network: '网络节点',
+  phone: '手机终端', satellite: '卫星', dna: '双螺旋', flask: '实验瓶', store: '零售门店',
+  bridge: '基建大桥', leaf: '双碳叶子',
+};
+
+const COVER_ACCENT = {
+  energy: '#2b6b85', chip: '#33506f', chart: '#b23a2a', policy: '#b08a3e', idea: '#b23a2a',
+  factory: '#b08a3e', cart: '#b23a2a', pill: '#2b6b85', house: '#b08a3e', car: '#33506f', people: '#b23a2a',
+  globe: '#2b6b85', port: '#2b6b85', ship: '#2b6b85', train: '#b08a3e', plane: '#33506f', truck: '#b08a3e',
+  container: '#b08a3e', pipeline: '#2b6b85', oilrig: '#2b6b85', battery: '#33506f', solar: '#b08a3e',
+  wind: '#2b6b85', mine: '#b08a3e', wheat: '#b08a3e', water: '#2b6b85', bank: '#b08a3e', coin: '#b08a3e',
+  scale: '#b08a3e', shield: '#33506f', lock: '#33506f', clock: '#b23a2a', network: '#33506f',
+  phone: '#33506f', satellite: '#33506f', dna: '#2b6b85', flask: '#33506f', store: '#b23a2a',
+  bridge: '#b08a3e', leaf: '#2b6b85',
+};
+
+const COVER_CLASS = {
+  energy: 'sea', chip: 'blue', chart: 'red', policy: 'gold', idea: 'red',
+  factory: 'gold', cart: 'red', pill: 'sea', house: 'gold', car: 'blue', people: 'red',
+  globe: 'sea', port: 'sea', ship: 'sea', train: 'gold', plane: 'blue', truck: 'gold',
+  container: 'gold', pipeline: 'sea', oilrig: 'sea', battery: 'blue', solar: 'gold',
+  wind: 'sea', mine: 'gold', wheat: 'gold', water: 'sea', bank: 'gold', coin: 'gold',
+  scale: 'gold', shield: 'blue', lock: 'blue', clock: 'red', network: 'blue',
+  phone: 'blue', satellite: 'blue', dna: 'sea', flask: 'blue', store: 'red',
+  bridge: 'gold', leaf: 'sea',
+};
+
 const COVER_KICKER = {
   energy: '手绘财经 · 地缘观察', chip: '手绘财经 · 产业拆解',
   chart: '手绘财经 · 数据复盘', policy: '手绘财经 · 政策解读', idea: '手绘财经 · 情景推演',
   factory: '手绘财经 · 产能观察', cart: '手绘财经 · 消费观察', pill: '手绘财经 · 医药观察',
   house: '手绘财经 · 资产观察', car: '手绘财经 · 产业观察', people: '手绘财经 · 社会观察',
+  globe: '手绘财经 · 全球观察', port: '手绘财经 · 航运观察', ship: '手绘财经 · 航运观察',
+  train: '手绘财经 · 物流观察', plane: '手绘财经 · 物流观察', truck: '手绘财经 · 物流观察',
+  container: '手绘财经 · 外贸观察', pipeline: '手绘财经 · 能源观察', oilrig: '手绘财经 · 能源观察',
+  battery: '手绘财经 · 储能观察', solar: '手绘财经 · 新能源观察', wind: '手绘财经 · 新能源观察',
+  mine: '手绘财经 · 大宗观察', wheat: '手绘财经 · 农业观察', water: '手绘财经 · 资源观察',
+  bank: '手绘财经 · 金融观察', coin: '手绘财经 · 汇率观察', scale: '手绘财经 · 监管观察',
+  shield: '手绘财经 · 安全观察', lock: '手绘财经 · 管制观察', clock: '手绘财经 · 周期观察',
+  network: '手绘财经 · 连接观察', phone: '手绘财经 · 科技观察', satellite: '手绘财经 · 航天观察',
+  dna: '手绘财经 · 生物观察', flask: '手绘财经 · 科研观察', store: '手绘财经 · 零售观察',
+  bridge: '手绘财经 · 基建观察', leaf: '手绘财经 · 双碳观察',
 };
 
-const COVER_ART_H = { chart: 350, energy: 400, chip: 420, policy: 430, idea: 400, factory: 430, cart: 380, pill: 400, house: 420, car: 380, people: 400 };
+const COVER_ART_H = {
+  chart: 350, energy: 400, chip: 420, policy: 430, idea: 400, factory: 430, cart: 380,
+  pill: 400, house: 420, car: 380, people: 400, globe: 400, port: 380, ship: 360, train: 370,
+  plane: 380, truck: 390, container: 400, pipeline: 380, oilrig: 390, battery: 400, solar: 430,
+  wind: 400, mine: 380, wheat: 420, water: 420, bank: 400, coin: 400, scale: 400, shield: 440,
+  lock: 440, clock: 400, network: 420, phone: 440, satellite: 420, dna: 380, flask: 410,
+  store: 400, bridge: 400, leaf: 420,
+};
+
+const COVER_LAYOUT_NAME = ['居中 · 图在下', '居中 · 图在上', '左对齐 · 图在下'];
+const COVER_ART_IDS = Object.keys(COVER_ACCENT);
+const COVER_STYLES = COVER_ART_IDS.flatMap(id =>
+  [0, 1, 2].map(layout => ({
+    key: `${id}-${layout}`, motif: id, layout,
+    label: COVER_LABEL[id] || id, layoutName: COVER_LAYOUT_NAME[layout],
+  })));
 
 function coverArt(theme, top, accent, seed) {
   const n = i => (hash(seed + '#' + i) % 1000) / 1000;
@@ -196,6 +281,328 @@ ${[0, 1, 2, 3].map(i => `<line x1="424" y1="${top + 110 + i * 62}" x2="${660 - (
 <text x="700" y="${top + 344}" text-anchor="middle" font-size="38" fill="${accent}" font-family="Songti SC,SimSun,serif" class="f" style="--d:1.3s">政</text>
 <path d="M196 ${top + 380} H196 V${top + 150}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="9 9" class="draw" style="--d:.9s"/>
 <path d="M180 ${top + 176} L196 ${top + 144} L212 ${top + 176}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.35s"/>`;
+  }
+  if (theme === 'globe') {
+    return `<g class="f" style="--d:.35s" transform="translate(540,${top + 200}) scale(1.16)"><use href="#globe"/></g>
+<path d="M196 ${top + 120} Q330 ${top + 40} 470 ${top + 110}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 10" class="draw" style="--d:.8s"/>
+<path d="M610 ${top + 300} Q760 ${top + 370} 892 ${top + 290}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 10" class="draw" style="--d:.9s"/>
+<circle cx="196" cy="${top + 120}" r="8" fill="${accent}" class="f" style="--d:1.15s"/>
+<circle cx="892" cy="${top + 290}" r="8" fill="${accent}" class="f" style="--d:1.25s"/>`;
+  }
+  if (theme === 'port') {
+    const b = top + 330;
+    return `<line x1="150" y1="${b}" x2="930" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+<path d="M286 ${b} V${b - 300} H636" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.45s"/>
+<line x1="286" y1="${b - 258}" x2="386" y2="${b - 258}" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.6s"/>
+<line x1="520" y1="${b - 300}" x2="520" y2="${b - 196}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<rect x="462" y="${b - 196}" width="116" height="62" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.85s"/>
+<rect x="636" y="${b - 120}" width="130" height="120" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.9s"/>
+<rect x="766" y="${b - 120}" width="120" height="120" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.95s"/>
+<rect x="700" y="${b - 212}" width="120" height="92" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1.05s"/>
+<line x1="196" y1="${b + 46}" x2="360" y2="${b + 46}" stroke="${accent}" stroke-width="4" stroke-dasharray="8 8" class="draw" style="--d:1.1s"/>`;
+  }
+  if (theme === 'ship') {
+    return `<g class="f" style="--d:.35s" transform="translate(180,${top + 140}) scale(1.75)"><use href="#tanker"/></g>
+<path d="M150 ${top + 300} Q210 ${top + 282} 270 ${top + 300} T390 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:.9s"/>
+<path d="M470 ${top + 330} Q530 ${top + 312} 590 ${top + 330} T710 ${top + 330}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1s"/>
+<path d="M760 ${top + 300} Q820 ${top + 282} 880 ${top + 300}" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="f" style="--d:1.1s"/>
+<line x1="180" y1="${top + 230}" x2="86" y2="${top + 230}" stroke="#2d2822" stroke-width="3" stroke-dasharray="12 10" opacity=".45" class="f" style="--d:.7s"/>`;
+  }
+  if (theme === 'train') {
+    const b = top + 330;
+    let rail = `<line x1="150" y1="${b}" x2="930" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+<line x1="150" y1="${b + 22}" x2="930" y2="${b + 22}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.35s"/>`;
+    for (let i = 0; i < 11; i++) rail += `<line x1="${180 + i * 68}" y1="${b}" x2="${180 + i * 68}" y2="${b + 22}" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.4s"/>`;
+    return rail + `<path d="M250 ${b} V${b - 120} H392 V${b - 152} H460 V${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.55s"/>
+<rect x="274" y="${b - 104}" width="96" height="54" fill="none" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<rect x="484" y="${b - 152}" width="190" height="152" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.8s"/>
+<rect x="694" y="${b - 152}" width="170" height="152" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.9s"/>
+${[300, 370, 520, 600, 660, 740, 820].map(x => `<circle cx="${x}" cy="${b + 2}" r="16" fill="none" stroke="#2d2822" stroke-width="3"/>`).join('')}
+<line x1="700" y1="${b - 120}" x2="856" y2="${b - 120}" stroke="${accent}" stroke-width="3" opacity=".6" class="f" style="--d:1.05s"/>
+<line x1="700" y1="${b - 84}" x2="856" y2="${b - 84}" stroke="${accent}" stroke-width="3" opacity=".6" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'plane') {
+    return `<g class="f" style="--d:.35s" transform="translate(540,${top + 200}) scale(1.04) rotate(-12)">
+<path d="M-236 0 Q-196 -48 -6 -48 L206 -48 Q250 -42 262 2 L206 36 L-176 36 Q-220 32 -236 0 Z" fill="none" stroke="#2d2822" stroke-width="5"/>
+<path d="M-20 36 L-118 142 L-26 142 L74 36 Z" fill="none" stroke="#2d2822" stroke-width="5"/>
+<path d="M74 -48 L30 -142 L104 -142 L168 -48" fill="none" stroke="#2d2822" stroke-width="5"/>
+<circle cx="252" cy="-4" r="9" fill="${accent}"/>
+<circle cx="214" cy="-4" r="9" fill="${accent}"/>
+</g>
+<path d="M150 ${top + 330} Q420 ${top + 360} 700 ${top + 60}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="12 12" class="draw" style="--d:.9s"/>
+<circle cx="700" cy="${top + 60}" r="7" fill="${accent}" class="f" style="--d:1.3s"/>`;
+  }
+  if (theme === 'truck') {
+    const b = top + 290;
+    return `<rect x="236" y="${b - 160}" width="380" height="160" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M616 ${b} V${b - 132} H756 L816 ${b - 74} V${b} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+<rect x="648" y="${b - 112}" width="100" height="52" fill="none" stroke="#2d2822" stroke-width="3" class="f" style="--d:.65s"/>
+<circle cx="330" cy="${b + 6}" r="34" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.7s"/>
+<circle cx="452" cy="${b + 6}" r="34" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.7s"/>
+<circle cx="742" cy="${b + 6}" r="34" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.7s"/>
+<line x1="150" y1="${b + 84}" x2="930" y2="${b + 84}" stroke="${accent}" stroke-width="4" stroke-dasharray="16 14" class="draw" style="--d:.9s"/>
+<line x1="180" y1="${b - 160}" x2="180" y2="${b - 60}" stroke="${accent}" stroke-width="4" stroke-dasharray="8 8" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'container') {
+    const b = top + 340;
+    const box = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.75s"/>
+${[0, 1, 2, 3].map(i => `<line x1="${x + w * (i + 1) / 5}" y1="${y + 6}" x2="${x + w * (i + 1) / 5}" y2="${y + h - 6}" stroke="#2d2822" stroke-width="3" opacity=".45"/>`).join('')}`;
+    return `<line x1="640" y1="${top + 20}" x2="900" y2="${top + 20}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.3s"/>
+<line x1="760" y1="${top + 20}" x2="760" y2="${top + 96}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.45s"/>
+<rect x="716" y="${top + 96}" width="88" height="46" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.6s"/>
+${box(300, b - 110, 290, 110)}
+${box(320, b - 220, 290, 110)}
+${box(340, b - 330, 290, 110)}
+${box(640, b - 110, 220, 110)}
+<line x1="250" y1="${b}" x2="930" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.35s"/>`;
+  }
+  if (theme === 'pipeline') {
+    return `<line x1="170" y1="${top + 150}" x2="430" y2="${top + 150}" stroke="#2d2822" stroke-width="26" stroke-linecap="round" class="f" style="--d:.35s"/>
+<line x1="170" y1="${top + 150}" x2="430" y2="${top + 150}" stroke="#f4efe2" stroke-width="14" stroke-linecap="round" class="f" style="--d:.4s"/>
+<circle cx="492" cy="${top + 150}" r="52" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.55s"/>
+<line x1="492" y1="${top + 84}" x2="492" y2="${top + 216}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.7s"/>
+<line x1="438" y1="${top + 150}" x2="546" y2="${top + 150}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.7s"/>
+<line x1="554" y1="${top + 150}" x2="910" y2="${top + 150}" stroke="#2d2822" stroke-width="26" stroke-linecap="round" class="f" style="--d:.85s"/>
+<line x1="554" y1="${top + 150}" x2="910" y2="${top + 150}" stroke="#f4efe2" stroke-width="14" stroke-linecap="round" class="f" style="--d:.9s"/>
+<path d="M492 ${top + 216} V${top + 300} H860" fill="none" stroke="#2d2822" stroke-width="20" stroke-linecap="round" class="f" style="--d:1s"/>
+<path d="M492 ${top + 216} V${top + 300} H860" fill="none" stroke="#f4efe2" stroke-width="10" stroke-linecap="round" class="f" style="--d:1.05s"/>
+<path d="M700 ${top + 300} l40 0 m-14 -14 l14 14 l-14 14" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.2s"/>`;
+  }
+  if (theme === 'oilrig') {
+    const b = top + 300;
+    return `<path d="M150 ${b} Q210 ${b - 18} 270 ${b} T390 ${b} T510 ${b} T630 ${b} T750 ${b} T870 ${b} T930 ${b}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.3s"/>
+<line x1="380" y1="${b}" x2="410" y2="${b - 150}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.45s"/>
+<line x1="700" y1="${b}" x2="670" y2="${b - 150}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.45s"/>
+<line x1="420" y1="${b}" x2="440" y2="${b - 150}" stroke="#2d2822" stroke-width="4" opacity=".6" class="f" style="--d:.5s"/>
+<line x1="660" y1="${b}" x2="640" y2="${b - 150}" stroke="#2d2822" stroke-width="4" opacity=".6" class="f" style="--d:.5s"/>
+<rect x="360" y="${b - 186}" width="360" height="36" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.6s"/>
+<path d="M470 ${b - 186} L540 ${b - 336} L610 ${b - 186}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.7s"/>
+<line x1="505" y1="${b - 260}" x2="575" y2="${b - 260}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.8s"/>
+<line x1="490" y1="${b - 222}" x2="590" y2="${b - 222}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.85s"/>
+<circle cx="540" cy="${b - 344}" r="10" fill="${accent}" class="f" style="--d:1s"/>
+<circle cx="780" cy="${b - 30}" r="7" fill="${accent}" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'battery') {
+    return `<rect x="368" y="${top + 130}" width="330" height="212" rx="16" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<rect x="698" y="${top + 196}" width="34" height="80" rx="8" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.45s"/>
+<rect x="404" y="${top + 168}" width="72" height="136" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.55s"/>
+<rect x="496" y="${top + 168}" width="72" height="136" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.65s"/>
+<rect x="588" y="${top + 168}" width="72" height="136" fill="none" stroke="#2d2822" stroke-width="4" opacity=".35" class="f" style="--d:.75s"/>
+<path d="M548 ${top + 40} L488 ${top + 168} H548 L508 ${top + 250}" fill="none" stroke="${accent}" stroke-width="6" stroke-linejoin="round" class="f" style="--d:.95s"/>`;
+  }
+  if (theme === 'solar') {
+    const sun = `<circle cx="796" cy="${top + 78}" r="46" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:.3s"/>`;
+    let rays = '';
+    for (let i = 0; i < 8; i++) {
+      const a = Math.PI * 2 * i / 8;
+      rays += `<line x1="${796 + Math.cos(a) * 62}" y1="${top + 78 + Math.sin(a) * 62}" x2="${796 + Math.cos(a) * 88}" y2="${top + 78 + Math.sin(a) * 88}" stroke="${accent}" stroke-width="4" class="f" style="--d:.45s"/>`;
+    }
+    return sun + rays + `<path d="M236 ${top + 300} L604 ${top + 300} L648 ${top + 400} L280 ${top + 400} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.55s"/>
+<line x1="266" y1="${top + 350}" x2="628" y2="${top + 350}" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.7s"/>
+<line x1="418" y1="${top + 300}" x2="462" y2="${top + 400}" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.75s"/>
+<line x1="464" y1="${top + 400}" x2="464" y2="${top + 430}" stroke="${accent}" stroke-width="5" class="f" style="--d:1s"/>`;
+  }
+  if (theme === 'wind') {
+    const b = top + 360;
+    const one = (x, s) => {
+      const hubY = b - 250 * s;
+      let blades = '';
+      for (let i = 0; i < 3; i++) {
+        const a = -Math.PI / 2 + i * Math.PI * 2 / 3;
+        blades += `<line x1="${x}" y1="${hubY}" x2="${x + Math.cos(a) * 130 * s}" y2="${hubY + Math.sin(a) * 130 * s}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.75s"/>`;
+      }
+      return `<line x1="${x}" y1="${b}" x2="${x}" y2="${hubY}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+<circle cx="${x}" cy="${hubY}" r="9" fill="${accent}" class="f" style="--d:.7s"/>${blades}`;
+    };
+    return `<line x1="140" y1="${b}" x2="940" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+${one(300, .72)}${one(540, 1)}${one(796, .8)}
+<path d="M170 ${top + 150} q40 -16 80 0 t80 0" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 9" class="draw" style="--d:1s"/>
+<path d="M700 ${top + 120} q40 -16 80 0" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 9" class="draw" style="--d:1.1s"/>`;
+  }
+  if (theme === 'mine') {
+    const b = top + 340;
+    return `<path d="M190 ${b} L400 ${top + 110} L620 ${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M330 ${b} V${b - 70} H470 V${b}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.55s"/>
+<line x1="150" y1="${b}" x2="930" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+<line x1="700" y1="${b - 10}" x2="900" y2="${b - 10}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<rect x="700" y="${b - 96}" width="132" height="66" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.8s"/>
+<path d="M700 ${b - 96} L732 ${b - 130} H840 L864 ${b - 96}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.9s"/>
+<circle cx="740" cy="${b + 6}" r="20" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1s"/>
+<circle cx="800" cy="${b + 6}" r="20" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1s"/>
+<circle cx="376" cy="${top + 250}" r="10" fill="${accent}" class="f" style="--d:1.1s"/>
+<circle cx="436" cy="${top + 300}" r="8" fill="${accent}" class="f" style="--d:1.2s"/>`;
+  }
+  if (theme === 'wheat') {
+    const b = top + 360;
+    const stalk = (x, h, tilt) => {
+      let g = `<path d="M${x} ${b} Q${x + tilt} ${b - h * .6} ${x + tilt * 1.6} ${b - h}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>`;
+      for (let i = 0; i < 4; i++) {
+        const y = b - h + i * h * .16;
+        g += `<ellipse cx="${x + tilt * 1.6 - 15}" cy="${y}" rx="8" ry="17" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:${(0.7 + i * .07).toFixed(2)}s" transform="rotate(-18 ${x + tilt * 1.6 - 15} ${y})"/>
+<ellipse cx="${x + tilt * 1.6 + 15}" cy="${y + 10}" rx="8" ry="17" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:${(0.74 + i * .07).toFixed(2)}s" transform="rotate(18 ${x + tilt * 1.6 + 15} ${y + 10})"/>`;
+      }
+      return g;
+    };
+    return `<line x1="150" y1="${b}" x2="930" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.3s"/>
+${stalk(340, 250, 14)}${stalk(540, 300, 0)}${stalk(740, 230, -14)}
+<line x1="200" y1="${b + 46}" x2="880" y2="${b + 46}" stroke="${accent}" stroke-width="4" stroke-dasharray="14 12" class="draw" style="--d:1.1s"/>`;
+  }
+  if (theme === 'water') {
+    return `<path d="M540 ${top + 40} Q700 ${top + 220} 700 ${top + 292} A160 160 0 0 1 380 ${top + 292} Q380 ${top + 220} 540 ${top + 40} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M498 ${top + 210} Q474 ${top + 262} 480 ${top + 300}" fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" class="f" style="--d:.8s"/>
+<ellipse cx="540" cy="${top + 400}" rx="230" ry="26" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.95s"/>
+<ellipse cx="540" cy="${top + 400}" rx="140" ry="14" fill="none" stroke="${accent}" stroke-width="3" opacity=".6" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'bank') {
+    const b = top + 340;
+    let cols = '';
+    for (let i = 0; i < 4; i++) {
+      const x = 350 + i * 110;
+      cols += `<rect x="${x}" y="${b - 190}" width="54" height="170" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:${(0.6 + i * .06).toFixed(2)}s"/>`;
+    }
+    return `<path d="M300 ${b - 190} L540 ${b - 300} L780 ${b - 190} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+${cols}
+<rect x="300" y="${b - 190}" width="480" height="20" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.5s"/>
+<line x1="270" y1="${b}" x2="810" y2="${b}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.4s"/>
+<line x1="240" y1="${b + 26}" x2="840" y2="${b + 26}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.45s"/>
+<circle cx="540" cy="${b - 236}" r="20" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1s"/>`;
+  }
+  if (theme === 'coin') {
+    return `<circle cx="430" cy="${top + 190}" r="118" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<circle cx="430" cy="${top + 190}" r="88" fill="none" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.5s"/>
+<text x="430" y="${top + 228}" text-anchor="middle" font-size="96" fill="#2d2822" font-family="Songti SC,SimSun,serif" class="f" style="--d:.7s">¥</text>
+<circle cx="678" cy="${top + 268}" r="98" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:.6s"/>
+<text x="678" y="${top + 300}" text-anchor="middle" font-size="82" fill="${accent}" font-family="Baskerville,serif" class="f" style="--d:.85s">$</text>
+<path d="M300 ${top + 356} Q470 ${top + 420} 640 ${top + 384}" fill="none" stroke="#2d2822" stroke-width="4" stroke-dasharray="10 10" class="draw" style="--d:1s"/>
+<path d="M620 ${top + 370} L646 ${top + 384} L620 ${top + 398}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1.3s"/>`;
+  }
+  if (theme === 'scale') {
+    const b = top + 340;
+    return `<line x1="540" y1="${top + 60}" x2="540" y2="${b - 40}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<line x1="286" y1="${top + 130}" x2="794" y2="${top + 130}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+<circle cx="540" cy="${top + 60}" r="12" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.6s"/>
+<line x1="286" y1="${top + 130}" x2="286" y2="${top + 240}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<line x1="794" y1="${top + 130}" x2="794" y2="${top + 200}" stroke="#2d2822" stroke-width="3" class="f" style="--d:.7s"/>
+<path d="M206 ${top + 240} H366 L286 ${top + 306} Z" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.85s"/>
+<path d="M714 ${top + 200} H874 L794 ${top + 266} Z" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.9s"/>
+<line x1="410" y1="${b - 40}" x2="670" y2="${b - 40}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.75s"/>
+<line x1="380" y1="${b}" x2="700" y2="${b}" stroke="#2d2822" stroke-width="5" class="f" style="--d:.8s"/>`;
+  }
+  if (theme === 'shield') {
+    return `<path d="M540 ${top + 50} L780 ${top + 140} V${top + 270} Q780 ${top + 400} 540 ${top + 430} Q300 ${top + 400} 300 ${top + 270} V${top + 140} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<line x1="540" y1="${top + 50}" x2="540" y2="${top + 430}" stroke="#2d2822" stroke-width="3" opacity=".4" class="f" style="--d:.55s"/>
+<path d="M446 ${top + 240} L516 ${top + 312} L650 ${top + 176}" fill="none" stroke="${accent}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--d:.8s"/>`;
+  }
+  if (theme === 'lock') {
+    return `<rect x="374" y="${top + 190}" width="332" height="230" rx="18" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M436 ${top + 190} V${top + 140} A104 104 0 0 1 644 ${top + 140} V${top + 190}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+<circle cx="540" cy="${top + 282}" r="30" fill="none" stroke="${accent}" stroke-width="5" class="f" style="--d:.75s"/>
+<line x1="540" y1="${top + 312}" x2="540" y2="${top + 368}" stroke="${accent}" stroke-width="5" class="f" style="--d:.9s"/>
+<line x1="180" y1="${top + 430}" x2="900" y2="${top + 430}" stroke="#2d2822" stroke-width="4" stroke-dasharray="18 14" class="draw" style="--d:1s"/>`;
+  }
+  if (theme === 'clock') {
+    const cx = 540, cy = top + 210;
+    return `<circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => {
+      const a = Math.PI * 2 * i / 12;
+      return `<line x1="${cx + Math.cos(a) * 128}" y1="${cy + Math.sin(a) * 128}" x2="${cx + Math.cos(a) * 142}" y2="${cy + Math.sin(a) * 142}" stroke="#2d2822" stroke-width="3" opacity=".55"/>`;
+    }).join('')}
+<line x1="${cx}" y1="${cy}" x2="${cx + 66}" y2="${cy - 62}" stroke="${accent}" stroke-width="6" stroke-linecap="round" class="f" style="--d:.7s"/>
+<line x1="${cx}" y1="${cy}" x2="${cx - 12}" y2="${cy - 108}" stroke="#2d2822" stroke-width="6" stroke-linecap="round" class="f" style="--d:.6s"/>
+<circle cx="${cx}" cy="${cy}" r="10" fill="${accent}" class="f" style="--d:.8s"/>
+<path d="M300 ${top + 400} A170 170 0 0 0 780 ${top + 400}" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="10 10" class="draw" style="--d:1s"/>
+<path d="M304 ${top + 372} L298 ${top + 404} L330 ${top + 400}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.3s"/>`;
+  }
+  if (theme === 'network') {
+    const pts = [[330, top + 120], [740, top + 96], [250, top + 300], [540, top + 240], [820, top + 300], [420, top + 410], [700, top + 420]];
+    let edges = '';
+    const links = [[0, 3], [1, 3], [2, 3], [3, 4], [3, 5], [3, 6], [5, 6], [0, 1]];
+    for (const [a, b] of links) edges += `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="#2d2822" stroke-width="3" opacity=".45" class="f" style="--d:.5s"/>`;
+    let nodes = '';
+    pts.forEach((p, i) => {
+      nodes += `<circle cx="${p[0]}" cy="${p[1]}" r="${i === 3 ? 40 : 22}" fill="none" stroke="${i === 3 ? accent : '#2d2822'}" stroke-width="${i === 3 ? 5 : 4}" class="f" style="--d:${(0.6 + i * .05).toFixed(2)}s"/>`;
+    });
+    return edges + nodes + `<circle cx="540" cy="${top + 240}" r="9" fill="${accent}" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'phone') {
+    return `<rect x="410" y="${top + 40}" width="260" height="420" rx="34" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<rect x="440" y="${top + 90}" width="200" height="300" rx="12" fill="none" stroke="#2d2822" stroke-width="3" opacity=".5" class="f" style="--d:.5s"/>
+<circle cx="540" cy="${top + 424}" r="14" fill="none" stroke="#2d2822" stroke-width="3" class="f" style="--d:.6s"/>
+${[0, 1, 2].map(i => `<rect x="${458 + i * 62}" y="${top + 120}" width="48" height="48" rx="8" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:${(0.7 + i * .1).toFixed(2)}s"/>`).join('')}
+<line x1="458" y1="${top + 210}" x2="620" y2="${top + 210}" stroke="${accent}" stroke-width="4" class="f" style="--d:1s"/>
+<line x1="458" y1="${top + 244}" x2="586" y2="${top + 244}" stroke="${accent}" stroke-width="4" opacity=".6" class="f" style="--d:1.05s"/>
+<path d="M714 ${top + 150} q34 -16 68 0 M736 ${top + 192} q16 -8 32 0" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:1.1s"/>`;
+  }
+  if (theme === 'satellite') {
+    return `<path d="M180 ${top + 380} Q540 ${top - 20} 900 ${top + 380}" fill="none" stroke="#2d2822" stroke-width="3" stroke-dasharray="12 12" opacity=".45" class="draw" style="--d:.4s"/>
+<g class="f" style="--d:.6s" transform="translate(540,${top + 190}) rotate(-18)">
+<rect x="-70" y="-58" width="140" height="116" rx="10" fill="none" stroke="#2d2822" stroke-width="5"/>
+<rect x="-206" y="-44" width="118" height="88" fill="none" stroke="${accent}" stroke-width="4"/>
+<rect x="88" y="-44" width="118" height="88" fill="none" stroke="${accent}" stroke-width="4"/>
+<line x1="-152" y1="-44" x2="-152" y2="44" stroke="${accent}" stroke-width="3" opacity=".6"/>
+<line x1="-118" y1="-44" x2="-118" y2="44" stroke="${accent}" stroke-width="3" opacity=".6"/>
+<line x1="152" y1="-44" x2="152" y2="44" stroke="${accent}" stroke-width="3" opacity=".6"/>
+<path d="M0 -58 L0 -108 M-24 -108 A24 24 0 0 1 24 -108" fill="none" stroke="#2d2822" stroke-width="4"/>
+</g>
+<circle cx="300" cy="${top + 320}" r="8" fill="${accent}" class="f" style="--d:1.1s"/>
+<circle cx="810" cy="${top + 300}" r="8" fill="${accent}" class="f" style="--d:1.2s"/>`;
+  }
+  if (theme === 'dna') {
+    const N = 34;
+    let a = '', b = '', rungs = '';
+    for (let i = 0; i <= N; i++) {
+      const y = top + 40 + i * 9;
+      const dx = Math.sin(i * 0.24) * 86;
+      a += `${i ? 'L' : 'M'}${(540 - dx).toFixed(1)} ${y} `;
+      b += `${i ? 'L' : 'M'}${(540 + dx).toFixed(1)} ${y} `;
+      if (i % 4 === 0) rungs += `<line x1="${540 - dx}" y1="${y}" x2="${540 + dx}" y2="${y}" stroke="#2d2822" stroke-width="3" opacity=".45" class="f" style="--d:${(0.5 + i * .012).toFixed(2)}s"/>`;
+    }
+    return `<path d="${a}" fill="none" stroke="#2d2822" stroke-width="5" class="draw" style="--d:.4s"/>
+<path d="${b}" fill="none" stroke="${accent}" stroke-width="5" class="draw" style="--d:.5s"/>
+${rungs}`;
+  }
+  if (theme === 'flask') {
+    return `<path d="M486 ${top + 60} H594 M510 ${top + 60} V${top + 190} L406 ${top + 360} Q396 ${top + 386} 424 ${top + 386} H656 Q684 ${top + 386} 674 ${top + 360} L570 ${top + 190} V${top + 60}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M446 ${top + 300} Q540 ${top + 274} 634 ${top + 300} L674 ${top + 360} Q684 ${top + 386} 656 ${top + 386} H424 Q396 ${top + 386} 406 ${top + 360} Z" fill="${accent}" fill-opacity=".14" stroke="none" class="f" style="--d:.6s"/>
+<circle cx="500" cy="${top + 236}" r="12" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:.9s"/>
+<circle cx="574" cy="${top + 196}" r="9" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:1s"/>
+<circle cx="548" cy="${top + 268}" r="7" fill="none" stroke="${accent}" stroke-width="3" class="f" style="--d:1.1s"/>
+<line x1="700" y1="${top + 200}" x2="760" y2="${top + 360}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.8s"/>
+<rect x="748" y="${top + 150}" width="34" height="70" rx="8" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.9s"/>`;
+  }
+  if (theme === 'store') {
+    const b = top + 360;
+    return `<path d="M300 ${b} V${top + 180} H780 V${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M270 ${top + 180} L310 ${top + 90} H770 L810 ${top + 180} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.5s"/>
+${[0, 1, 2, 3].map(i => `<line x1="${340 + i * 118}" y1="${top + 92}" x2="${320 + i * 118}" y2="${top + 178}" stroke="${accent}" stroke-width="4" opacity=".7" class="f" style="--d:${(0.65 + i * .06).toFixed(2)}s"/>`).join('')}
+<rect x="340" y="${b - 120}" width="150" height="120" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.85s"/>
+<rect x="590" y="${b - 120}" width="140" height="120" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:.9s"/>
+<line x1="590" y1="${b - 60}" x2="730" y2="${b - 60}" stroke="#2d2822" stroke-width="3" opacity=".45" class="f" style="--d:1s"/>
+<line x1="540" y1="${b}" x2="540" y2="${b}" stroke="#2d2822"/>
+<line x1="240" y1="${b}" x2="840" y2="${b}" stroke="#2d2822" stroke-width="4" class="f" style="--d:.4s"/>`;
+  }
+  if (theme === 'bridge') {
+    const b = top + 300;
+    let hangers = '';
+    for (let i = 0; i < 8; i++) {
+      const x = 230 + i * 90;
+      const h = Math.sin(Math.PI * (x - 170) / 740) * 190;
+      hangers += `<line x1="${x}" y1="${b + 30}" x2="${x}" y2="${b + 30 - h}" stroke="#2d2822" stroke-width="3" opacity=".55" class="f" style="--d:.6s"/>`;
+    }
+    return `<path d="M170 ${b} Q540 ${top + 40} 910 ${b}" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<line x1="150" y1="${b + 30}" x2="930" y2="${b + 30}" stroke="#2d2822" stroke-width="6" class="f" style="--d:.45s"/>
+${hangers}
+<line x1="300" y1="${b + 30}" x2="300" y2="${b + 150}" stroke="#2d2822" stroke-width="6" class="f" style="--d:.8s"/>
+<line x1="780" y1="${b + 30}" x2="780" y2="${b + 150}" stroke="#2d2822" stroke-width="6" class="f" style="--d:.8s"/>
+<path d="M150 ${b + 150} Q210 ${b + 132} 270 ${b + 150} T390 ${b + 150} T510 ${b + 150} T630 ${b + 150} T750 ${b + 150} T870 ${b + 150} T930 ${b + 150}" fill="none" stroke="${accent}" stroke-width="4" class="f" style="--d:.95s"/>
+<circle cx="540" cy="${top + 78}" r="9" fill="${accent}" class="f" style="--d:1.2s"/>`;
+  }
+  if (theme === 'leaf') {
+    return `<path d="M700 ${top + 70} Q420 ${top + 90} 330 ${top + 330} Q600 ${top + 330} 700 ${top + 70} Z" fill="none" stroke="#2d2822" stroke-width="5" class="f" style="--d:.35s"/>
+<path d="M330 ${top + 330} Q500 ${top + 230} 680 ${top + 96}" fill="none" stroke="${accent}" stroke-width="4" class="draw" style="--d:.6s"/>
+<path d="M470 ${top + 226} L440 ${top + 160} M540 ${top + 186} L540 ${top + 120} M600 ${top + 148} L630 ${top + 92}" fill="none" stroke="${accent}" stroke-width="3" opacity=".55" class="f" style="--d:.85s"/>
+<path d="M300 ${top + 380} A190 190 0 1 1 470 ${top + 210}" fill="none" stroke="#2d2822" stroke-width="4" stroke-dasharray="12 10" class="draw" style="--d:.9s"/>
+<path d="M452 ${top + 238} L468 ${top + 206} L436 ${top + 208}" fill="none" stroke="#2d2822" stroke-width="4" class="f" style="--d:1.25s"/>`;
   }
   if (theme === 'factory') {
     const b = top + 340;
@@ -286,7 +693,8 @@ function coverScene(scene, meta) {
   const fs = titleFS(title, 76);
   const lines = Math.max(1, Math.ceil(units(title) / (856 / fs)));
   const titleH = lines * fs * 1.18;
-  const layout = h % 3; // 0 居中/插图在下，1 居中/插图在上，2 左对齐/插图在下
+  const picked = Number(meta.coverLayout);
+  const layout = (picked === 0 || picked === 1 || picked === 2) ? picked : h % 3; // 0 居中/插图在下，1 居中/插图在上，2 左对齐/插图在下
   const kicker = meta.kicker || COVER_KICKER[theme];
 
   let kickerStyle, titleStyle, subTop, artTop;
@@ -541,4 +949,4 @@ ${parts.join('\n')}
 `;
 }
 
-module.exports = { renderHTML, titleFS };
+module.exports = { renderHTML, titleFS, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme };

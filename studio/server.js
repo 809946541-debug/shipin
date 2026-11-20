@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createJob, retryJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir } = require('./lib/pipeline');
+const { createJob, retryJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir, listCovers, setCover, confirmCover } = require('./lib/pipeline');
 const { listNews, generateTopic } = require('./lib/news');
 
 const PORT = Number(process.env.PORT || 4180);
@@ -112,7 +112,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       if (!body.title || !String(body.title).trim()) return json(res, 400, { error: '请填写标题' });
       if (!body.summary || !String(body.summary).trim()) return json(res, 400, { error: '请填写一句话介绍' });
-      const dup = listJobs().find(j => j.brief && j.brief.title === String(body.title).trim() && (j.status === 'running' || j.status === 'queued'));
+      const dup = listJobs().find(j => j.brief && j.brief.title === String(body.title).trim() && (j.status === 'running' || j.status === 'queued' || j.status === 'preview'));
       if (dup) return json(res, 409, { error: '已有相同标题的任务在排队或生成中，请等待完成' });
       let board = null;
       if (body.storyboard) {
@@ -127,6 +127,28 @@ const server = http.createServer(async (req, res) => {
       const j = retryJob(rt[1]);
       if (!j) return json(res, 404, { error: '任务不存在' });
       return json(res, 200, { id: j.id });
+    }
+
+    const coverList = p.match(/^\/api\/jobs\/([\w-]+)\/covers$/);
+    if (coverList && req.method === 'GET') {
+      const r = await listCovers(coverList[1], url.searchParams.get('page') || 0);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
+    const coverSet = p.match(/^\/api\/jobs\/([\w-]+)\/cover$/);
+    if (coverSet && req.method === 'POST') {
+      const body = await readBody(req, 64 * 1024);
+      const r = await setCover(coverSet[1], String(body.motif || ''), body.layout);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
+    const coverOk = p.match(/^\/api\/jobs\/([\w-]+)\/confirm$/);
+    if (coverOk && req.method === 'POST') {
+      const r = confirmCover(coverOk[1]);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
     }
 
     const delJob = p.match(/^\/api\/jobs\/([\w-]+)$/);
@@ -153,9 +175,11 @@ const server = http.createServer(async (req, res) => {
       return sendFile(req, res, path.join(jobDir(id), 'output.mp4'), title + '.mp4');
     }
 
-    const media = p.match(/^\/media\/([\w-]+)\/(output\.mp4)$/);
+    const media = p.match(/^\/media\/([\w-]+)\/(output\.mp4|covers\/[\w.-]+\.png|covers\/preview\.png)$/);
     if (media && getJob(media[1])) {
-      return sendFile(req, res, path.join(jobDir(media[1]), media[2]));
+      const target = path.resolve(jobDir(media[1]), media[2]);
+      if (!target.startsWith(path.resolve(jobDir(media[1])))) return json(res, 403, { error: '非法路径' });
+      return sendFile(req, res, target);
     }
 
     // 静态资源
