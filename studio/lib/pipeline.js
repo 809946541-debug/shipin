@@ -148,6 +148,13 @@ function retryJob(id) {
   return job;
 }
 
+// 用同一个选题重新生成一条新任务，旧任务与成片保留
+function rebuildJob(id) {
+  const src = jobs.get(id);
+  if (!src) return null;
+  return createJob({ ...src.brief });
+}
+
 async function drain() {
   if (running) return;
   running = true;
@@ -347,8 +354,15 @@ async function setCover(id, motif, layout) {
   const dir = jobDir(id);
   const board = readBoard(dir);
   if (!board) return { code: 400, error: '分镜文件缺失' };
+  const changed = board.meta.cover !== motif;
   board.meta.cover = motif;
   board.meta.coverLayout = lay;
+  // 小道具是按模型原本选的主体配的，换主体后只保留数字/地名批注
+  if (changed && board.meta.coverSpec) {
+    const calls = board.meta.coverSpec.callouts;
+    if (calls && calls.length) board.meta.coverSpec = { callouts: calls };
+    else delete board.meta.coverSpec;
+  }
   fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
   try {
     await covers.renderPreview(dir, board, motif, lay);
@@ -434,6 +448,6 @@ function getJob(id) {
 }
 
 module.exports = {
-  createJob, retryJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
+  createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
   listCovers, setCover, confirmCover,
 };

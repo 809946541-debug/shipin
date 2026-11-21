@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createJob, retryJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir, listCovers, setCover, confirmCover } = require('./lib/pipeline');
+const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir, listCovers, setCover, confirmCover } = require('./lib/pipeline');
 const { listNews, generateTopic } = require('./lib/news');
 
 const PORT = Number(process.env.PORT || 4180);
@@ -127,6 +127,16 @@ const server = http.createServer(async (req, res) => {
       const j = retryJob(rt[1]);
       if (!j) return json(res, 404, { error: '任务不存在' });
       return json(res, 200, { id: j.id });
+    }
+
+    const rb = p.match(/^\/api\/jobs\/([\w-]+)\/rebuild$/);
+    if (rb && req.method === 'POST') {
+      const src = getJob(rb[1]);
+      if (!src) return json(res, 404, { error: '任务不存在' });
+      if (src.status === 'running' || src.status === 'queued') return json(res, 409, { error: '这条任务还在生成中，完成后再重新生成' });
+      const j = rebuildJob(rb[1]);
+      if (!j) return json(res, 404, { error: '任务不存在' });
+      return json(res, 201, { id: j.id });
     }
 
     const coverList = p.match(/^\/api\/jobs\/([\w-]+)\/covers$/);
