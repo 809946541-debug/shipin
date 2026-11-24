@@ -6,7 +6,7 @@ const { generateStoryboard } = require('./llm');
 const { validate, CHARS_PER_SEC, GAP_PER_SCENE } = require('./prompt');
 const { renderHTML, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme, chooseCover } = require('./template');
 const covers = require('./covers');
-const { generateCoverArt, normalizeProvider, PROVIDER_LABEL, generateSceneArts, normalizeSceneMode, SCENE_MODE_LABEL, sceneArtStat } = require('./artgen');
+const { generateCoverArt, normalizeProvider, PROVIDER_LABEL, generateSceneArts, normalizeSceneMode, SCENE_MODE_LABEL, sceneArtStat, normalizeStyle, STYLE_LABEL, STYLE_KEYS } = require('./artgen');
 const { buildChapters } = require('./chapters');
 const { findFfmpeg, findPython, buildEnv } = require('./platform');
 
@@ -41,6 +41,8 @@ function publicConfig() {
     hasArtKey: !!c.artApiKey,
     artKeyMask: c.artApiKey ? c.artApiKey.slice(0, 4) + '****' + c.artApiKey.slice(-4) : '',
     sceneArtMode: normalizeSceneMode(c.sceneArtMode),
+    artStyle: normalizeStyle(c.artStyle),
+    artStyleLabel: STYLE_LABEL[normalizeStyle(c.artStyle)],
   };
 }
 
@@ -466,7 +468,7 @@ async function setCover(id, motif, layout) {
 }
 
 /* 按标题重画一张封面插画，覆盖上一张；可指定生成方式和自定义提示词 */
-async function regenCoverArt(id, provider, prompt) {
+async function regenCoverArt(id, provider, prompt, style) {
   const job = jobs.get(id);
   if (!job) return { code: 404, error: '任务不存在' };
   if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以重画插画' };
@@ -476,6 +478,7 @@ async function regenCoverArt(id, provider, prompt) {
   const cfg = readConfig();
   const p = normalizeProvider(provider || board.meta.artProvider || cfg.artProvider);
   const text = prompt === undefined ? undefined : String(prompt || '').trim().slice(0, 400);
+  if (STYLE_KEYS.includes(style)) board.meta.artStyle = normalizeStyle(style);
   log(job, '按标题重画封面插画（' + PROVIDER_LABEL[p] + '）' + (text ? '，使用自定义提示词' : ''));
   try {
     await generateCoverArt(dir, board.meta, cfg, m => log(job, m), {
@@ -503,20 +506,35 @@ async function regenCoverArt(id, provider, prompt) {
   return { ok: true, coverAt: job.coverAt };
 }
 
-/* 封面预览阶段选择整片的分镜插图模式，确认封面后按它逐屏生成 */
-function setSceneArtMode(id, mode) {
+/* 封面预览阶段选择整片的分镜插图模式与手绘风格，确认封面后按它生成 */
+function setSceneArtMode(id, mode, style) {
   const job = jobs.get(id);
   if (!job) return { code: 404, error: '任务不存在' };
-  if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以修改分镜插图模式' };
+  if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以修改插图设置' };
   const dir = jobDir(id);
   const board = readBoard(dir);
   if (!board) return { code: 400, error: '分镜文件缺失' };
-  const m = normalizeSceneMode(mode);
-  board.meta.sceneArtMode = m;
+
+  const hasMode = ['library', 'svg', 'api'].includes(mode);
+  const hasStyle = STYLE_KEYS.includes(style);
+  if (!hasMode && !hasStyle) return { code: 400, error: '没有可保存的插图设置' };
+
+  if (hasMode) board.meta.sceneArtMode = normalizeSceneMode(mode);
+  if (hasStyle) board.meta.artStyle = normalizeStyle(style);
   fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
-  log(job, '分镜插图模式改为：' + SCENE_MODE_LABEL[m]);
+
+  const savedMode = board.meta.sceneArtMode ? normalizeSceneMode(board.meta.sceneArtMode) : '';
+  const savedStyle = board.meta.artStyle ? normalizeStyle(board.meta.artStyle) : '';
+  const bits = [];
+  if (hasMode) bits.push('分镜插图模式改为：' + SCENE_MODE_LABEL[savedMode]);
+  if (hasStyle) bits.push('手绘风格改为：' + STYLE_LABEL[savedStyle]);
+  log(job, bits.join('，'));
   persist(job);
-  return { ok: true, mode: m, label: SCENE_MODE_LABEL[m] };
+  return {
+    ok: true,
+    mode: savedMode, modeLabel: savedMode ? SCENE_MODE_LABEL[savedMode] : '',
+    style: savedStyle, styleLabel: savedStyle ? STYLE_LABEL[savedStyle] : '',
+  };
 }
 
 function confirmCover(id) {
@@ -563,6 +581,8 @@ function jobView(job, withLog = true) {
     sceneArt: board ? {
       mode: board.meta.sceneArtMode ? normalizeSceneMode(board.meta.sceneArtMode) : '',
       label: board.meta.sceneArtMode ? SCENE_MODE_LABEL[normalizeSceneMode(board.meta.sceneArtMode)] : '',
+      style: board.meta.artStyle ? normalizeStyle(board.meta.artStyle) : '',
+      styleLabel: board.meta.artStyle ? STYLE_LABEL[normalizeStyle(board.meta.artStyle)] : '',
       ...sceneArtStat(dir, board),
     } : null,
     hasVideo: fs.existsSync(path.join(dir, 'output.mp4')),

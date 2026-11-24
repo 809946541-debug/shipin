@@ -215,6 +215,16 @@ ul.news .meta a{text-decoration:none}
             </select>
           </div>
           <div class="field">
+            <label>默认手绘风格（本地 AI 手绘时生效）</label>
+            <select id="artStyleDefault">
+              <option value="rough">手绘纸感（默认）</option>
+              <option value="marker">马克笔扁平</option>
+              <option value="ink">墨线淡彩</option>
+              <option value="blueprint">工程蓝图</option>
+              <option value="retro">复古海报</option>
+            </select>
+          </div>
+          <div class="field">
             <label>生图接口地址（仅第三方方式需要）</label>
             <input id="artBaseUrl" placeholder="https://api.siliconflow.cn/v1">
           </div>
@@ -276,6 +286,16 @@ ul.news .meta a{text-decoration:none}
               </select>
             </div>
             <div class="field" style="margin:8px 0 0">
+              <label>手绘风格（本地 AI 手绘时生效，封面和分镜都用它）</label>
+              <select id="artStyle">
+                <option value="rough">手绘纸感（默认）</option>
+                <option value="marker">马克笔扁平</option>
+                <option value="ink">墨线淡彩</option>
+                <option value="blueprint">工程蓝图</option>
+                <option value="retro">复古海报</option>
+              </select>
+            </div>
+            <div class="field" style="margin:8px 0 0">
               <label>封面自定义提示词（可选，留空就按标题自动写）</label>
               <input id="artPrompt" placeholder="例如：一辆白色电动车停在超充站前">
             </div>
@@ -327,7 +347,9 @@ let coverPages = 1;
 let coverBusy = false;
 const ART_LABEL = { svg: '本地 AI 手绘', pollinations: '免费自动插画', openai: '第三方生图 API' };
 const SCENE_LABEL = { library: '素材库 AI 匹配', svg: '每屏电脑手绘', api: '每屏生图 API' };
+const STYLE_LABEL = { rough: '手绘纸感', marker: '马克笔扁平', ink: '墨线淡彩', blueprint: '工程蓝图', retro: '复古海报' };
 let defaultSceneMode = 'library';
+let defaultArtStyle = 'rough';
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -513,6 +535,8 @@ async function loadConfig(){
   $('#artProviderDefault').value = c.artProvider || 'svg';
   $('#sceneArtModeDefault').value = c.sceneArtMode || 'library';
   defaultSceneMode = c.sceneArtMode || 'library';
+  $('#artStyleDefault').value = c.artStyle || 'rough';
+  defaultArtStyle = c.artStyle || 'rough';
   $('#artBaseUrl').value = c.artBaseUrl || '';
   $('#artModel').value = c.artModel || '';
   $('#artSize').value = c.artSize || '1024x1024';
@@ -543,6 +567,7 @@ $('#saveArtCfg').onclick = async () => {
   const body = {
     artProvider: $('#artProviderDefault').value,
     sceneArtMode: $('#sceneArtModeDefault').value,
+    artStyle: $('#artStyleDefault').value,
     artBaseUrl: $('#artBaseUrl').value.trim(),
     artModel: $('#artModel').value.trim(),
     artSize: $('#artSize').value.trim() || '1024x1024',
@@ -670,11 +695,12 @@ $('#coverArt').onclick = async () => {
   btn.disabled = true;
   const provider = $('#artProvider').value;
   const prompt = $('#artPrompt').value.trim();
+  const style = $('#artStyle').value;
   btn.textContent = provider === 'svg' ? 'AI 手绘中，请稍候…' : '出图中，请稍候…';
   try {
     const r = await fetch('/api/jobs/' + currentId + '/art', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider, prompt }),
+      body: JSON.stringify({ provider, prompt, style }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || '生成插画失败');
@@ -684,6 +710,7 @@ $('#coverArt').onclick = async () => {
         art: true, provider, prompt,
         label: '按标题生成的插画 · ' + (ART_LABEL[provider] || provider),
       });
+      lastJob.sceneArt = Object.assign({}, lastJob.sceneArt, { style, styleLabel: STYLE_LABEL[style] || style });
       $('#coverMeta').textContent = coverMetaText(lastJob);
     }
   } catch (e) {
@@ -695,23 +722,36 @@ $('#coverArt').onclick = async () => {
   }
 };
 
-// 选择整片的分镜插图模式（确认封面后按它逐屏生成）
-$('#sceneArtMode').onchange = async () => {
+// 保存整片的分镜插图模式 / 手绘风格（确认封面后按它逐屏生成）
+async function saveIllus(patch, tipText) {
   if (!currentId) return;
-  const mode = $('#sceneArtMode').value;
   try {
     const r = await fetch('/api/jobs/' + currentId + '/illus', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
     });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error || '保存分镜插图模式失败');
-    if (lastJob) lastJob.sceneArt = Object.assign({}, lastJob.sceneArt, { mode: d.mode, label: d.label });
-    $('#coverTip').textContent = '分镜插图已设为：' + d.label + '，确认封面后开始生成';
+    if (!r.ok) throw new Error(d.error || '保存插图设置失败');
+    if (lastJob) {
+      lastJob.sceneArt = Object.assign({}, lastJob.sceneArt, {
+        mode: d.mode, label: d.modeLabel, style: d.style, styleLabel: d.styleLabel,
+      });
+    }
+    $('#coverTip').textContent = tipText(d);
     if (lastJob && lastJob.coverStyle) $('#coverMeta').textContent = coverMetaText(lastJob);
   } catch (e) {
     alert(e.message);
   }
-};
+}
+
+$('#sceneArtMode').onchange = () => saveIllus(
+  { mode: $('#sceneArtMode').value },
+  d => '分镜插图已设为：' + d.modeLabel + '，确认封面后开始生成'
+);
+
+$('#artStyle').onchange = () => saveIllus(
+  { style: $('#artStyle').value },
+  d => '手绘风格已设为：' + d.styleLabel + '，点「按标题重画插画」可立即看效果'
+);
 
 $('#coverConfirm').onclick = async () => {
   if (!currentId) return;
@@ -740,6 +780,8 @@ function coverMetaText(job){
   const sa = job.sceneArt || {};
   const mode = sa.mode || defaultSceneMode;
   s += ' · 分镜：' + (SCENE_LABEL[mode] || mode);
+  const styleKey = sa.style || (mode === 'svg' || cs.provider === 'svg' ? defaultArtStyle : '');
+  if (styleKey) s += ' · 风格：' + (STYLE_LABEL[styleKey] || styleKey);
   if (sa.total && sa.done) s += `（已生成 ${sa.done}/${sa.total}）`;
   return s;
 }
@@ -771,6 +813,7 @@ function render(job){
       if (coverJobId !== job.id) {
         $('#artProvider').value = job.coverStyle.provider || 'svg';
         $('#sceneArtMode').value = (job.sceneArt && job.sceneArt.mode) || defaultSceneMode;
+        $('#artStyle').value = (job.sceneArt && job.sceneArt.style) || defaultArtStyle;
         $('#artPrompt').value = job.coverStyle.prompt || '';
       }
     }

@@ -107,6 +107,7 @@ const server = http.createServer(async (req, res) => {
       if (body.clearKey) next.apiKey = '';
       if (['svg', 'pollinations', 'openai'].includes(body.artProvider)) next.artProvider = body.artProvider;
       if (['library', 'svg', 'api'].includes(body.sceneArtMode)) next.sceneArtMode = body.sceneArtMode;
+      if (['rough', 'marker', 'ink', 'blueprint', 'retro'].includes(body.artStyle)) next.artStyle = body.artStyle;
       if (typeof body.artBaseUrl === 'string') next.artBaseUrl = body.artBaseUrl.trim();
       if (typeof body.artModel === 'string') next.artModel = body.artModel.trim();
       if (typeof body.artSize === 'string' && body.artSize.trim()) next.artSize = body.artSize.trim();
@@ -167,7 +168,7 @@ const server = http.createServer(async (req, res) => {
     const coverArt = p.match(/^\/api\/jobs\/([\w-]+)\/art$/);
     if (coverArt && req.method === 'POST') {
       const body = await readBody(req);
-      const r = await regenCoverArt(coverArt[1], body.provider, body.prompt);
+      const r = await regenCoverArt(coverArt[1], body.provider, body.prompt, body.style);
       if (!r.ok) return json(res, r.code, { error: r.error });
       return json(res, 200, r);
     }
@@ -175,7 +176,7 @@ const server = http.createServer(async (req, res) => {
     const sceneArt = p.match(/^\/api\/jobs\/([\w-]+)\/illus$/);
     if (sceneArt && req.method === 'POST') {
       const body = await readBody(req, 64 * 1024);
-      const r = setSceneArtMode(sceneArt[1], body.mode);
+      const r = setSceneArtMode(sceneArt[1], body.mode, body.style);
       if (!r.ok) return json(res, r.code, { error: r.error });
       return json(res, 200, r);
     }

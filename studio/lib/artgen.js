@@ -28,6 +28,42 @@ function normalizeSceneMode(m) {
   return SCENE_MODES.includes(m) ? m : 'library';
 }
 
+// 本地手绘风格预设：只影响 SVG 手绘（封面 + 分镜），不影响素材库
+const STYLES = {
+  rough: {
+    label: '手绘纸感',
+    rule: '扁平手绘插画、粗描边（stroke 3-6）、少量排线阴影，颜色只用：描边 #2d2822，暖黄 #f0b968，赭金 #b08a3e，蓝 #8cb4d8，深蓝 #2b6b85，红 #b23a2a，玫红 #df938b。',
+  },
+  marker: {
+    label: '马克笔扁平',
+    rule: '马克笔平涂风格、大色块、不要排线和纹理，描边 4-7 且转角略圆，颜色只用：描边 #2b2723，红 #e2573f，黄 #f2c14e，蓝 #4f8fc0，绿 #6aa86b，米白 #f4efe2，色块边缘干净利落。',
+  },
+  ink: {
+    label: '墨线淡彩',
+    rule: '像报纸插图：黑色细线描边 2-4，用交叉排线画阴影，淡彩只做局部薄涂，颜色只用：线 #2d2822，淡彩 #d8c7a4、#c6d2dc、#dfc2b8、#c9d6c3，画面留白多、克制。',
+  },
+  blueprint: {
+    label: '工程蓝图',
+    rule: '工程制图/蓝图风格：线条以深蓝 #2b5f8a 为主，描边 2-4，结构线用虚线或双线表达，填充浅蓝 #dceaf3 与 #8cb4d8，少量 #2b6b85 加深，像零件示意图，不要写任何尺寸数字或文字。',
+  },
+  retro: {
+    label: '复古海报',
+    rule: '复古海报风格：粗黑描边 5-8，高饱和大色块，颜色只用：描边 #241f1a，砖红 #c8452f，芥末黄 #e8a33d，墨绿 #2f6b5e，米色 #e6dcc3，可以用半调圆点或斜条纹做装饰，但不要铺满背景。',
+  },
+};
+const STYLE_KEYS = Object.keys(STYLES);
+const STYLE_LABEL = {};
+STYLE_KEYS.forEach(k => { STYLE_LABEL[k] = STYLES[k].label; });
+
+function normalizeStyle(s) {
+  return STYLES[s] ? s : 'rough';
+}
+
+function styleRule(meta, config) {
+  const key = normalizeStyle((meta && meta.artStyle) || (config && config.artStyle));
+  return STYLES[key].rule;
+}
+
 // 风格词放提示词末尾：实测出图接口只认简单的主体描述，长风格前缀会把画面带偏
 const STYLE = ' flat vector illustration, thick clean outlines, no gradient, no shadow, warm cream beige background, minimal, centered with empty margins, no text, no watermark';
 
@@ -41,7 +77,7 @@ const SVG_SYS = '你是手绘财经短视频的插画师。根据标题、副标
   '硬性要求：\n' +
   '1. 只输出一个完整的 <svg>…</svg>，不要 markdown 代码块、不要解释文字。\n' +
   '2. 画布 viewBox="0 0 860 560"，横版构图，主体居中，四周至少留 40px 空白。\n' +
-  '3. 手艺要求：扁平手绘插画、粗描边（stroke 3-6）、少量排线阴影，颜色只用这几种：描边 #2d2822，暖黄 #f0b968，赭金 #b08a3e，蓝 #8cb4d8，深蓝 #2b6b85，红 #b23a2a，玫红 #df938b。**整张图不要背景色**：禁止铺满画布的底色矩形，只画物件本身，背景保持透明。\n' +
+  '3. 手艺要求：{{STYLE}}**整张图不要背景色**：禁止铺满画布的底色矩形，只画物件本身，背景保持透明。\n' +
   '4. 画面必须是标题里最具体的事物组成的单一场景，能让观众一眼看出这条视频讲什么。公司/人物要落到具体业务物件：车企画汽车，芯片公司画晶圆/显卡，数据中心画机柜，发布会画讲台，航运画货轮，能源画油管/风机。\n' +
   '5. 除非标题主体就是机器人，否则禁止画人形机器人；不要因为提到 AI、智能、自动驾驶就画机器人。\n' +
   '6. 画面里禁止出现任何文字、字母、数字、Logo、水印；不要 <text>、<script>、<image>、<foreignObject>、<style>、外部链接和事件属性。\n' +
@@ -51,7 +87,7 @@ const SCENE_SVG_SYS = '你是手绘财经短视频的分镜插画师。根据这
   '硬性要求：\n' +
   '1. 只输出一个完整的 <svg>…</svg>，不要 markdown 代码块、不要解释文字。\n' +
   '2. 画布 viewBox="0 0 860 380"，横版长条构图，主体居中，左右至少留 40px 空白。\n' +
-  '3. 手艺要求：扁平手绘插画、粗描边（stroke 3-6）、少量排线阴影，颜色只用这几种：描边 #2d2822，暖黄 #f0b968，赭金 #b08a3e，蓝 #8cb4d8，深蓝 #2b6b85，红 #b23a2a，玫红 #df938b。**整张图不要背景色**：禁止铺满画布的底色矩形，只画物件本身，背景保持透明。\n' +
+  '3. 手艺要求：{{STYLE}}**整张图不要背景色**：禁止铺满画布的底色矩形，只画物件本身，背景保持透明。\n' +
   '4. 画面只表现这一屏最具体的那件事/物，不要堆砌；抽象概念用一两件具体物件加简单符号表达，能让观众一眼看懂这一屏在讲什么。\n' +
   '5. 除非这一屏讲的就是机器人，否则禁止画人形机器人；不要因为提到 AI、智能、自动驾驶就画机器人。\n' +
   '6. 画面里禁止出现任何文字、字母、数字、Logo、水印；不要 <text>、<script>、<image>、<foreignObject>、<style>、外部链接和事件属性。\n' +
@@ -344,11 +380,12 @@ async function svgPrompt(meta, config, log, context, custom) {
     '这次请用这种构图：' + pickComposition(),
     '请直接输出 SVG。',
   ].filter(Boolean).join('\n');
+  const sys = SVG_SYS.replace('{{STYLE}}', styleRule(meta, config));
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await chat(config, [
-        { role: 'system', content: SVG_SYS },
+        { role: 'system', content: sys },
         {
           role: 'user',
           content: attempt === 0 ? user
@@ -464,11 +501,12 @@ async function sceneSvgPrompt(scene, meta, config, log) {
     '这次请用这种构图：' + SCENE_COMPS[Math.floor(Math.random() * SCENE_COMPS.length)],
     '请直接输出 SVG。',
   ].join('\n');
+  const sys = SCENE_SVG_SYS.replace('{{STYLE}}', styleRule(meta, config));
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await chat(config, [
-        { role: 'system', content: SCENE_SVG_SYS },
+        { role: 'system', content: sys },
         {
           role: 'user',
           content: attempt === 0 ? user
@@ -643,5 +681,6 @@ module.exports = {
   generateCoverArt, artDataUri, artSvg, artBox, STYLE,
   PROVIDERS, PROVIDER_LABEL, normalizeProvider,
   SCENE_MODES, SCENE_MODE_LABEL, normalizeSceneMode, SCENE_BOX,
+  STYLES, STYLE_KEYS, STYLE_LABEL, normalizeStyle,
   generateSceneArts, sceneArtSvg, sceneArtDataUri, sceneArtStat, stripSvgBg,
 };

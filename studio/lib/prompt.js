@@ -301,6 +301,7 @@ function validate(raw, channel = '财经') {
   if (['svg', 'pollinations', 'openai'].includes(meta.artProvider)) board.meta.artProvider = meta.artProvider;
   if (meta.artPrompt) board.meta.artPrompt = String(meta.artPrompt).trim().slice(0, 400);
   if (['library', 'svg', 'api'].includes(meta.sceneArtMode)) board.meta.sceneArtMode = meta.sceneArtMode;
+  if (['rough', 'marker', 'ink', 'blueprint', 'retro'].includes(meta.artStyle)) board.meta.artStyle = meta.artStyle;
   const spec = sanitizeCoverSpec(meta.coverSpec);
   if (spec) board.meta.coverSpec = spec;
 
