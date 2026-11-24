@@ -1,5 +1,5 @@
 'use strict';
-const { SYSTEM, buildUserPrompt, validate } = require('./prompt');
+const { buildSystem, buildUserPrompt, validate } = require('./prompt');
 
 function endpoint(baseUrl) {
   const u = String(baseUrl || '').trim().replace(/\/+$/, '');
@@ -58,22 +58,26 @@ function pickText(res) {
 
 async function generateStoryboard(brief, config, log = () => {}) {
   if (!config || !config.baseUrl || !config.model) throw new Error('未配置大模型接口');
-  const messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: buildUserPrompt(brief) }];
-  log('调用模型生成分镜：' + config.model);
+  const channel = brief.channel || '财经';
+  const messages = [{ role: 'system', content: buildSystem(channel) }, { role: 'user', content: buildUserPrompt(brief) }];
+  log('调用模型生成分镜（' + channel + '频道）：' + config.model);
   const res = await chat(config, messages, { temperature: 0.65 });
   const text = pickText(res);
   const usage = res.usage ? `tokens ${res.usage.total_tokens || ''}` : '';
   log('模型返回 ' + text.length + ' 字符 ' + usage);
   try {
-    return validate(text);
+    return validate(text, channel);
   } catch (e) {
     log('分镜校验失败，请求模型修正：' + e.message);
+    const fixHint = e.jsonContext
+      ? '语法出错位置附近的内容是：「' + e.jsonContext + '」。请重点检查这里的引号、逗号和括号。'
+      : '';
     const fix = messages.concat([
       { role: 'assistant', content: text.slice(0, 6000) },
-      { role: 'user', content: '上面的 JSON 不合格：' + e.message + '。请严格按给定结构重新输出完整 JSON，不要任何解释文字。' },
+      { role: 'user', content: '上面的 JSON 不合格：' + e.message + '。' + fixHint + '请严格按给定结构重新输出完整、合法的 JSON：所有属性名和字符串必须用英文双引号，不要尾逗号，不要注释，不要任何解释文字。' },
     ]);
     const res2 = await chat(config, fix, { temperature: 0.3 });
-    return validate(pickText(res2));
+    return validate(pickText(res2), channel);
   }
 }
 

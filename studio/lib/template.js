@@ -30,6 +30,9 @@ html,body{width:1080px;height:1728px;overflow:hidden;background:#e6d4af;color:va
 .foot{position:absolute;left:106px;bottom:26px;font-size:24px;letter-spacing:.1em;color:var(--ink2);opacity:.9}
 .cover-tag{position:absolute;left:0;width:1080px;text-align:center;top:1500px;font-size:30px;letter-spacing:.12em}
 .cover-title{text-wrap:balance}
+.cover-art{position:absolute;overflow:hidden}
+.cover-art img{position:absolute;left:-12.5%;top:-12.5%;width:125%;height:125%;object-fit:cover}
+.cover-art svg{display:block;width:100%;height:100%}
 .red{color:var(--red)}.blue{color:var(--blue)}.sea{color:var(--sea)}.gold{color:var(--gold)}.b{font-weight:700}
 .num{font-family:var(--num);font-weight:700}
 .stamp{position:absolute;border:4px solid var(--red);border-radius:8px;color:var(--red);font-size:34px;font-weight:700;letter-spacing:.1em;padding:10px 20px;transform:rotate(-7deg);opacity:.82}
@@ -242,52 +245,87 @@ function artLayer(extra, idx) {
   return `<svg class="art" viewBox="0 0 1080 1920">${extra}${sceneDeco(idx)}</svg>`;
 }
 
-const COVER_THEMES = [
-  { id: 'rocket', re: /火箭|星舰|Starship|发射|登月|探月|太空|深空|运载/ },
-  { id: 'speaker', re: /黄仁勋|马斯克|奥特曼|CEO|创始人|董事长|掌门人|发布会|演讲|访谈|掌舵/ },
-  { id: 'datacenter', re: /数据中心|机房|服务器|算力中心|机柜|集群/ },
-  { id: 'gpu', re: /显卡|GPU|gpu|英伟达|Blackwell|H100|算力卡|加速卡/ },
-  { id: 'robot', re: /机器人|人形|具身|机械臂/ },
-  { id: 'laptop', re: /端侧|笔记本|电脑|PC|平板|终端设备/ },
-  { id: 'oilrig', re: /钻井|采油|油田|油气开采/ },
-  { id: 'pipeline', re: /管道|输气|天然气管|输油/ },
-  { id: 'energy', re: /油|能源|伊朗|中东|霍尔木兹|俄|乌|战争|冲突|制裁|海峡|天然气|地缘|军|电力|电网|用电|电价|发电|供电|通电|缺电|电站/ },
-  { id: 'ship', re: /航运|海运|货轮|船|运价|运费|苏伊士|红海/ },
-  { id: 'port', re: /港口|码头|吞吐|装卸|港区/ },
-  { id: 'container', re: /集装箱|外贸|报关|跨境|出口订单/ },
-  { id: 'train', re: /班列|铁路|高铁|轨交|中欧/ },
-  { id: 'plane', re: /航空|飞机|机场|航班/ },
-  { id: 'truck', re: /物流|卡车|货运|快递|冷链|配送/ },
-  { id: 'chip', re: /芯片|算力|人工?智能|AI|半导体|大模型|GPU|数据中心|机器人|服务器|光刻|智能/ },
-  { id: 'battery', re: /电池|储能|锂|充电桩|电芯/ },
-  { id: 'solar', re: /光伏|太阳能|硅片|组件/ },
-  { id: 'wind', re: /风电|风机|海上风电/ },
-  { id: 'car', re: /汽车|新能源车|整车|车企|充电|智驾|车型/ },
-  { id: 'dna', re: /基因|生物|细胞|创新药|疫苗|临床/ },
-  { id: 'flask', re: /科研|实验|化工|材料|研发|实验室/ },
-  { id: 'pill', re: /医药|药|医疗|器械|医院|健康/ },
-  { id: 'house', re: /房|地产|楼|土地|物业|租|家居/ },
-  { id: 'store', re: /门店|商超|连锁|便利|shopping|商场/ },
-  { id: 'cart', re: /消费|零售|电商|购物|品牌|客单|渠道|直播带货/ },
-  { id: 'wheat', re: /农业|粮食|小麦|玉米|大豆|种植|农产品/ },
-  { id: 'mine', re: /矿|铜|铝|锂矿|稀土|煤炭|大宗|铁矿石/ },
-  { id: 'water', re: /水|水利|洪|干旱|水资源/ },
-  { id: 'bank', re: /银行|信贷|贷款|坏账|金融|保险/ },
-  { id: 'coin', re: /汇率|人民币|美元|货币|外储|结汇/ },
-  { id: 'scale', re: /监管|合规|反垄断|处罚|立法|听证/ },
-  { id: 'shield', re: /安全|防御|防务|军费|网络攻击/ },
-  { id: 'lock', re: /封锁|管制|禁令|限制出口|脱钩/ },
-  { id: 'clock', re: /周期|时间表|倒计时|窗口期|节奏/ },
-  { id: 'network', re: /互联网|平台|连接|网络|生态/ },
-  { id: 'phone', re: /手机|移动|App|终端|用户/ },
-  { id: 'satellite', re: /航天|卫星|火箭|太空|北斗/ },
-  { id: 'people', re: /人口|就业|工资|社保|养老|教育|收入|劳动者|人才/ },
-  { id: 'policy', re: /政策|改革|国资|国企|规划|法案|会议|央行|利率|关税|目标|制度|补贴/ },
-  { id: 'factory', re: /工厂|制造|产能|投产|产线|订单|供应|扩产|基地/ },
-  { id: 'bridge', re: /基建|桥梁|公路|投资|工程/ },
-  { id: 'leaf', re: /碳|环保|绿色|减排|气候/ },
-  { id: 'chart', re: /股|指数|市值|板块|行情|估值|财报|营收|利润|份额|价格|市场|基金|债|涨|跌/ },
-  { id: 'globe', re: /全球|世界|出海|国际|贸易/ },
+/* 封面选题表：强信号=标题里写得出的具体实物/品牌（10-12 分），弱信号=题材大类（4 分）。
+   不再按表序取第一个命中，而是全部计分后取最高分，避免“机器人/智能”把车企话题抢走 */
+const COVER_STRONG = [
+  // 品牌、公司、人名（12 分，最高优先级）
+  { id: 'car', w: 12, re: /特斯拉|比亚迪|蔚来|小鹏|问界|极氪|智己|理想汽车|小米汽车|SU7/ },
+  { id: 'gpu', w: 12, re: /英伟达|Blackwell|H100/ },
+  { id: 'speaker', w: 12, re: /黄仁勋|马斯克|奥特曼/ },
+  { id: 'rocket', w: 12, re: /SpaceX|星舰|Starship/ },
+  // 具体实物（10 分）
+  { id: 'rocket', w: 10, re: /火箭|发射|登月|探月|太空|深空|运载/ },
+  { id: 'speaker', w: 10, re: /CEO|创始人|董事长|掌门人|发布会|演讲|访谈|掌舵/ },
+  { id: 'datacenter', w: 10, re: /数据中心|机房|服务器|算力中心|机柜|集群/ },
+  { id: 'gpu', w: 10, re: /显卡|GPU|gpu|算力卡|加速卡/ },
+  { id: 'robot', w: 10, re: /机器人|人形|具身|机械臂/ },
+  { id: 'laptop', w: 10, re: /端侧|笔记本|平板|PC|终端设备/ },
+  { id: 'trophy', w: 10, re: /世界杯|欧洲杯|亚洲杯|奥运会|冬奥|亚运|全运|总决赛|决赛|锦标赛|大奖赛|冠军|夺冠|奖杯|颁奖|金靴|金球奖|NBA|CBA|中超|英超|西甲|意甲|德甲|欧冠/ },
+  { id: 'ball', w: 10, re: /足球|篮球|排球|乒乓|羽毛球|网球|台球|高尔夫|球赛|球员|球星|球队|赛场|球场|赛季|转会|进球|射门|扣篮|比赛|对阵|赛事|教练|主场|客场|马拉松|跑|泳|体操|搏击|拳击/ },
+  { id: 'oilrig', w: 10, re: /钻井|采油|油田|油气开采/ },
+  { id: 'pipeline', w: 10, re: /管道|输气|天然气管|输油/ },
+  { id: 'energy', w: 10, re: /原油|石油|天然气|油价|油气|霍尔木兹|海峡|中东|电力|电网|用电|电价|发电|供电|缺电|电站/ },
+  { id: 'ship', w: 10, re: /航运|海运|货轮|油轮|邮轮|船|运价|运费|苏伊士|红海/ },
+  { id: 'port', w: 10, re: /港口|码头|港区|吞吐|装卸/ },
+  { id: 'container', w: 10, re: /集装箱|报关|跨境|出口订单|外贸/ },
+  { id: 'train', w: 10, re: /班列|铁路|高铁|轨交|中欧/ },
+  { id: 'plane', w: 10, re: /航空|飞机|机场|航班/ },
+  { id: 'truck', w: 10, re: /物流|卡车|货车|货运|快递|冷链|配送/ },
+  { id: 'chip', w: 10, re: /芯片|半导体|光刻|晶圆|封测/ },
+  { id: 'battery', w: 10, re: /电池|储能|电芯|充电桩|锂电/ },
+  { id: 'solar', w: 10, re: /光伏|太阳能|硅片|组件/ },
+  { id: 'wind', w: 10, re: /风电|风机|海上风电/ },
+  { id: 'car', w: 10, re: /汽车|新能源车|电动车|整车|车企|车型|智驾|智能驾驶|自动驾驶/ },
+  { id: 'dna', w: 10, re: /基因|细胞|创新药|疫苗|临床/ },
+  { id: 'flask', w: 10, re: /科研|实验|实验室|化工/ },
+  { id: 'pill', w: 10, re: /医药|药|医疗|器械|医院|健康/ },
+  { id: 'house', w: 10, re: /房地产|楼市|楼盘|房价|物业|家居|租房/ },
+  { id: 'store', w: 10, re: /门店|商超|连锁|便利|商场|shopping/ },
+  { id: 'cart', w: 10, re: /零售|电商|购物|客单|渠道|直播带货/ },
+  { id: 'wheat', w: 10, re: /农业|粮食|小麦|玉米|大豆|种植|农产品/ },
+  { id: 'mine', w: 10, re: /矿业|矿山|矿产|铜矿|铝|锂矿|稀土|煤炭|铁矿石/ },
+  { id: 'water', w: 10, re: /水利|洪水|干旱|水资源/ },
+  { id: 'bank', w: 10, re: /银行|信贷|贷款|坏账|保险/ },
+  { id: 'coin', w: 10, re: /汇率|人民币|美元|货币|外储|结汇/ },
+  { id: 'scale', w: 10, re: /监管|合规|反垄断|处罚|立法|听证/ },
+  { id: 'shield', w: 10, re: /防务|军费|网络攻击|防御/ },
+  { id: 'lock', w: 10, re: /封锁|管制|禁令|限制出口|脱钩/ },
+  { id: 'clock', w: 10, re: /时间表|倒计时|窗口期/ },
+  { id: 'network', w: 10, re: /互联网|平台经济/ },
+  { id: 'phone', w: 10, re: /手机|App/ },
+  { id: 'satellite', w: 10, re: /航天|卫星|北斗|航天器/ },
+  { id: 'people', w: 10, re: /人口|就业|工资|社保|养老|教育|劳动者|人才/ },
+  { id: 'policy', w: 10, re: /政策|改革|法案|央行|利率|关税|补贴|规划/ },
+  { id: 'factory', w: 10, re: /工厂|产线|投产|扩产|产能|制造/ },
+  { id: 'bridge', w: 10, re: /基建|桥梁|公路|工程/ },
+  { id: 'leaf', w: 10, re: /碳中和|碳达峰|减排|环保|气候/ },
+  { id: 'chart', w: 10, re: /股指|市值|财报|营收|净利润|板块|行情|估值|基金|债券/ },
+  { id: 'globe', w: 10, re: /出海|国际贸易|全球化/ },
+];
+
+// 弱信号：只在没有强信号时起作用，绝不允许把标题里的具体实物挤掉
+const COVER_WEAK = [
+  { id: 'energy', w: 4, re: /油|能源|伊朗|俄|乌|战争|冲突|制裁|军|地缘/ },
+  { id: 'chip', w: 4, re: /算力|大模型|人工智能|AI|智能化/ },
+  { id: 'car', w: 4, re: /充电/ },
+  { id: 'dna', w: 4, re: /生物/ },
+  { id: 'flask', w: 4, re: /研发|材料/ },
+  { id: 'house', w: 4, re: /房|楼|土地|租/ },
+  { id: 'cart', w: 4, re: /消费|品牌/ },
+  { id: 'mine', w: 4, re: /矿|铜|锂|稀土|煤炭|大宗/ },
+  { id: 'water', w: 4, re: /水/ },
+  { id: 'bank', w: 4, re: /金融/ },
+  { id: 'shield', w: 4, re: /安全/ },
+  { id: 'clock', w: 4, re: /周期|节奏/ },
+  { id: 'network', w: 4, re: /平台|连接|网络|生态/ },
+  { id: 'phone', w: 4, re: /移动|终端|用户/ },
+  { id: 'people', w: 4, re: /收入/ },
+  { id: 'policy', w: 4, re: /国资|国企|会议|目标|制度/ },
+  { id: 'factory', w: 4, re: /订单|供应|基地/ },
+  { id: 'bridge', w: 4, re: /投资/ },
+  { id: 'leaf', w: 4, re: /碳|绿色/ },
+  { id: 'chart', w: 4, re: /股|指数|价格|市场|涨|跌|利润|份额/ },
+  { id: 'globe', w: 4, re: /全球|世界|国际|贸易/ },
 ];
 
 const COVER_LABEL = {
@@ -300,7 +338,7 @@ const COVER_LABEL = {
   phone: '手机终端', satellite: '卫星', dna: '双螺旋', flask: '实验瓶', store: '零售门店',
   bridge: '基建大桥', leaf: '双碳叶子',
   rocket: '火箭发射', speaker: '人物演讲', datacenter: '机房机柜', gpu: '显卡', laptop: '笔记本电脑',
-  robot: '人形机器人',
+  robot: '人形机器人', trophy: '冠军奖杯', ball: '足球',
 };
 
 const COVER_ACCENT = {
@@ -313,7 +351,7 @@ const COVER_ACCENT = {
   phone: '#33506f', satellite: '#33506f', dna: '#2b6b85', flask: '#33506f', store: '#b23a2a',
   bridge: '#b08a3e', leaf: '#2b6b85',
   rocket: '#b23a2a', speaker: '#b08a3e', datacenter: '#33506f', gpu: '#33506f', laptop: '#2b6b85',
-  robot: '#33506f',
+  robot: '#33506f', trophy: '#b08a3e', ball: '#2b6b85',
 };
 
 const COVER_CLASS = {
@@ -326,6 +364,7 @@ const COVER_CLASS = {
   phone: 'blue', satellite: 'blue', dna: 'sea', flask: 'blue', store: 'red',
   bridge: 'gold', leaf: 'sea',
   rocket: 'red', speaker: 'gold', datacenter: 'blue', gpu: 'blue', laptop: 'sea', robot: 'blue',
+  trophy: 'gold', ball: 'sea',
 };
 
 const COVER_KICKER = {
@@ -345,6 +384,7 @@ const COVER_KICKER = {
   bridge: '手绘财经 · 基建观察', leaf: '手绘财经 · 双碳观察',
   rocket: '手绘财经 · 航天观察', speaker: '手绘财经 · 人物观察', datacenter: '手绘财经 · 算力观察',
   gpu: '手绘财经 · 硬件观察', laptop: '手绘财经 · 终端观察', robot: '手绘财经 · 机器人观察',
+  trophy: '手绘体育 · 荣誉时刻', ball: '手绘体育 · 赛场观察',
 };
 
 const COVER_ART_H = {
@@ -355,9 +395,20 @@ const COVER_ART_H = {
   lock: 440, clock: 400, network: 420, phone: 440, satellite: 420, dna: 380, flask: 410,
   store: 400, bridge: 400, leaf: 420,
   rocket: 470, speaker: 460, datacenter: 430, gpu: 420, laptop: 430, robot: 460,
+  trophy: 400, ball: 380,
 };
 
 const COVER_LAYOUT_NAME = ['居中 · 图在下', '居中 · 图在上', '左对齐 · 图在下'];
+
+/* 按标题生成的插画放在哪个画框：跟封面版式共用一套坐标，尺寸同时用于出图请求 */
+function artBox(layout) {
+  const l = Number(layout);
+  const lay = (l === 0 || l === 1 || l === 2) ? l : 0;
+  return lay === 1
+    ? { x: 110, y: 300, w: 860, h: 540 }
+    : { x: 110, y: 860, w: 860, h: 560 };
+}
+
 const COVER_ART_IDS = Object.keys(COVER_ACCENT);
 const COVER_STYLES = COVER_ART_IDS.flatMap(id =>
   [0, 1, 2].map(layout => ({
@@ -1821,20 +1872,115 @@ ${tie}
     s += RF(542, top + 398, 76, 18, { rx: 6, w: 3.4, fill: PAPER_FILL, t: 1 });
     return s;
   }
+  if (theme === 'trophy') {
+    let s = `<ellipse cx="540" cy="${top + 366}" rx="168" ry="14" fill="none" stroke="#2d2822" stroke-width="2.4" stroke-dasharray="10 11" opacity=".2" class="f" style="--d:.3s"/>`;
+    // 杯身
+    s += P(`M452 ${top + 84} Q540 ${top + 128} 628 ${top + 84} L604 ${top + 226} Q540 ${top + 256} 476 ${top + 226} Z`, { w: 4.6, fill: PAPER_FILL, t: .36 });
+    // 杯口
+    s += P(`M446 ${top + 84} Q540 ${top + 108} 634 ${top + 84}`, { w: 3.4, op: .55, t: .4 });
+    // 左右把手
+    s += P(`M452 ${top + 96} Q366 ${top + 102} 392 ${top + 184} Q404 ${top + 218} 450 ${top + 202}`, { w: 4.2, t: .46 });
+    s += P(`M628 ${top + 96} Q714 ${top + 102} 688 ${top + 184} Q676 ${top + 218} 630 ${top + 202}`, { w: 4.2, t: .5 });
+    // 顶珠
+    s += LN(540, top + 78, 540, top + 90, { w: 3.4, t: .54 });
+    s += CI(540, top + 68, 10, { fill: accent, c: accent, t: .56 });
+    // 杯身星芒
+    s += coverSparkle(540, top + 158, 22, accent, .85);
+    s += coverSparkle(492, top + 178, 10, accent, .55);
+    s += coverSparkle(590, top + 172, 8, accent, .5);
+    // 杯颈与两层底座
+    s += RF(512, top + 252, 56, 30, { w: 3.6, fill: PAPER_FILL, t: .66 });
+    s += RF(442, top + 282, 196, 26, { rx: 6, w: 4.2, fill: PAPER_FILL, t: .72 });
+    s += RF(414, top + 312, 252, 26, { rx: 7, w: 4.2, fill: 'url(#hatchD)', t: .78 });
+    // 两侧小光点
+    s += CI(330, top + 150, 6, { fill: accent, c: accent, op: .5, t: .84 });
+    s += CI(752, top + 146, 6, { fill: accent, c: accent, op: .5, t: .88 });
+    return s;
+  }
+  if (theme === 'ball') {
+    const cx = 540, cy = top + 196, r = 124;
+    const pt = (rad, deg) => [cx + Math.cos(deg) * rad, cy + Math.sin(deg) * rad];
+    let s = `<ellipse cx="540" cy="${top + 342}" rx="150" ry="13" fill="none" stroke="#2d2822" stroke-width="2.4" stroke-dasharray="10 11" opacity=".2" class="f" style="--d:.3s"/>`;
+    // 速度线
+    s += LN(300, top + 150, 372, top + 150, { w: 3, op: .35, t: .36 });
+    s += LN(282, top + 196, 366, top + 196, { w: 3, op: .45, t: .4 });
+    s += LN(304, top + 242, 372, top + 242, { w: 3, op: .35, t: .44 });
+    // 球体外轮廓
+    s += CI(cx, cy, r, { w: 4.8, fill: PAPER_FILL, t: .48 });
+    // 中心五边形
+    const pent = [];
+    for (let i = 0; i < 5; i++) pent.push(pt(r * .34, -Math.PI / 2 + i * 2 * Math.PI / 5));
+    s += P('M' + pent.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z', { w: 3.4, fill: 'url(#hatchD)', t: .58 });
+    // 五边形到外圈的接缝
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+      const [ex, ey] = pt(r * .94, a);
+      s += LN(pent[i][0].toFixed(1), pent[i][1].toFixed(1), ex.toFixed(1), ey.toFixed(1), { w: 2.8, op: .6, t: .66 + i * .04 });
+    }
+    // 外圈五段接缝弧
+    for (let i = 0; i < 5; i++) {
+      const b1 = -Math.PI / 2 + i * 2 * Math.PI / 5 + Math.PI / 5;
+      const b2 = b1 + 2 * Math.PI / 5 - 2 * Math.PI / 5 * .5;
+      const [x1, y1] = pt(r, b1);
+      const [x2, y2] = pt(r, b2);
+      s += P(`M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`, { w: 2.8, op: .6, t: .82 + i * .03 });
+    }
+    return s;
+  }
   return '';
 }
 
-// 标题里能直接看出的具体实物，优先级高于模型选的泛类（芯片/科技）
-const COVER_SPECIFIC = ['rocket', 'speaker', 'datacenter', 'gpu', 'laptop', 'robot'];
+// 标题/副标题对每个候选主体打分：标题权重 ×1.5，副标题 ×1；同分取文字里更早出现的
+function coverScores(title = '', sub = '') {
+  const scores = new Map();
+  const eat = (text, mult) => {
+    if (!text) return;
+    for (const rule of COVER_STRONG) {
+      const m = text.match(rule.re);
+      if (!m) continue;
+      const cur = scores.get(rule.id);
+      if (!cur) scores.set(rule.id, { s: rule.w * mult, idx: m.index, strong: rule.w });
+      else { cur.s += rule.w * mult; cur.idx = Math.min(cur.idx, m.index); cur.strong = Math.max(cur.strong, rule.w); }
+    }
+    for (const rule of COVER_WEAK) {
+      const m = text.match(rule.re);
+      if (!m) continue;
+      const cur = scores.get(rule.id);
+      if (!cur) scores.set(rule.id, { s: rule.w * mult, idx: m.index, strong: 0 });
+      else cur.s += rule.w * mult;
+    }
+  };
+  eat(title, 1.5);
+  eat(sub, 1);
+  return scores;
+}
 
-function coverTheme(title, sub, prefer) {
-  const hit = COVER_THEMES.find(t => t.re.test(title + ' ' + sub));
-  if (prefer && COVER_ACCENT[prefer]) {
-    // 模型选了泛类，但标题明确写了火箭/人物/机房/显卡/端侧/机器人时，以标题为准
-    if (hit && COVER_SPECIFIC.includes(hit.id) && !COVER_SPECIFIC.includes(prefer)) return hit.id;
-    return prefer;
-  }
-  return hit ? hit.id : 'idea';
+function rankCover(title, sub) {
+  return [...coverScores(title, sub).entries()]
+    .filter(([id]) => COVER_ACCENT[id])
+    .sort((a, b) => (b[1].s - a[1].s) || (a[1].idx - b[1].idx));
+}
+
+// 按标题决定封面主体：标题里有强信号实物就一律以标题为准（同分按文字出现先后）；
+// 标题完全没有信号时，才看副标题，最后才退回模型的选择
+function coverTheme(title = '', sub = '', prefer) {
+  const titleStrong = rankCover(title, '').filter(([, v]) => v.strong >= 10);
+  if (titleStrong.length) return titleStrong[0][0];
+  const ranked = rankCover(title, sub);
+  if (ranked.length) return ranked[0][0];
+  return prefer && COVER_ACCENT[prefer] ? prefer : 'idea';
+}
+
+// 跨视频去重：与最近几条片子撞主体时，只要标题还有别的强信号主体，就换一个（优先同族）
+function chooseCover(title, sub, prefer, recent = []) {
+  const motif = coverTheme(title, sub, prefer);
+  const recentSet = new Set((recent || []).filter(id => COVER_ACCENT[id]));
+  if (!recentSet.has(motif)) return { motif, shifted: false, from: motif };
+  const alts = rankCover(title, sub).filter(([id, v]) => v.strong >= 10 && !recentSet.has(id));
+  if (!alts.length) return { motif, shifted: false, from: motif };
+  const fam = ART_FAMILIES.find(f => f.includes(motif));
+  const pick = (fam && alts.find(([id]) => fam.includes(id))) || alts[0];
+  return { motif: pick[0], shifted: true, from: motif };
 }
 
 /* 封面画笔：纸色填充 + 手抖滤镜 + 星芒点缀，让配图接近定制插画的笔触 */
@@ -2064,12 +2210,17 @@ function coverSceneAnnot(theme, top, accent, seed, spec, k = 1) {
   return s;
 }
 
+// 这两个主体画面里含文字/价格牌，镜像会穿帮，不参与翻转
+const COVER_NO_FLIP = new Set(['coin', 'house']);
 function coverArt(theme, top, accent, seed, scale = 1, spec) {
   const cy = top + (COVER_ART_H[theme] || 400) / 2;
   const fk = spec && spec.focus === 'close' ? 1.14 : spec && spec.focus === 'wide' ? .95 : 1;
   const k = scale * fk;
-  const zoom = k === 1 ? '' : ` transform="translate(540 ${cy}) scale(${k}) translate(-540 -${cy})"`;
-  return `<g filter="url(#rough)"><g${zoom}>${paperFill(coverArtRaw(theme, top, accent, seed))}${coverDeco(theme, top, accent, seed)}</g>${coverSceneAnnot(theme, top, accent, seed, spec, k)}</g>`;
+  const zoom = k === 1 ? '' : `translate(540 ${cy}) scale(${k}) translate(-540 -${cy})`;
+  // 同一主体按标题种子取正/反朝向，相邻视频即使撞到同一主体，构图也不会一模一样
+  const mirror = !COVER_NO_FLIP.has(theme) && hash(seed + '#flip') % 2 === 0 ? 'translate(1080 0) scale(-1 1)' : '';
+  const tf = (mirror || zoom) ? ` transform="${[mirror, zoom].filter(Boolean).join(' ')}"` : '';
+  return `<g filter="url(#rough)"><g${tf}>${paperFill(coverArtRaw(theme, top, accent, seed))}${coverDeco(theme, top, accent, seed)}</g>${coverSceneAnnot(theme, top, accent, seed, spec, k)}</g>`;
 }
 
 function coverScene(scene, meta) {
@@ -2077,7 +2228,9 @@ function coverScene(scene, meta) {
   const sub = meta.subtitle || scene.sub || '';
   const seed = title + '|' + sub;
   const h = hash(seed);
-  const theme = coverTheme(title, sub, meta.cover);
+  // 明确指定了封面主体（封面选择器、pipeline 决策结果）就直接用；
+  // 标题规则只在没指定时兜底
+  const theme = COVER_ACCENT[meta.cover] ? meta.cover : coverTheme(title, sub, meta.cover);
   const accent = COVER_ACCENT[theme];
   const u = units(title);
   // 长标题按两行排版，字号仍保持封面级别的存在感
@@ -2116,10 +2269,26 @@ function coverScene(scene, meta) {
     ? esc(title.slice(0, ci + 1)) + '<br>' + esc(title.slice(ci + 1))
     : esc(title);
 
-  return `<section class="scene" id="s0">
-<svg class="art" viewBox="0 0 1080 1920">
+  // 已按标题生成插画时，用出图结果替换手绘素材主体，版式坐标跟着画框走
+  const box = (meta.artDataUri || meta.artSvg) ? artBox(layout) : null;
+  if (box) {
+    artTop = box.y;
+    if (layout === 1) {
+      const kickerTop = box.y + box.h + 40;
+      kickerStyle = `left:0;width:1080px;text-align:center;top:${kickerTop}px`;
+      titleStyle = `left:100px;top:${kickerTop + 62}px;width:880px;text-align:center;font-size:${fs}px`;
+      subTop = kickerTop + 62 + titleH + 26;
+    }
+  }
+
+  const artHTML = box
+    ? `<div class="cover-art f" style="--d:.15s;left:${box.x}px;top:${box.y}px;width:${box.w}px;height:${box.h}px">${meta.artSvg || `<img src="${meta.artDataUri}" alt="">`}</div>`
+    : `<svg class="art" viewBox="0 0 1080 1920">
 ${coverArt(theme, artTop, accent, seed, layout === 1 ? 1.06 : 1.3, meta.coverSpec)}
-</svg>
+</svg>`;
+
+  return `<section class="scene" id="s0">
+${artHTML}
 <div class="k f" style="--d:.05s;${kickerStyle}">${esc(kicker)}</div>
 <h1 class="h1 rise cover-title" style="--d:.15s;${titleStyle}">${titleHTML}</h1>
 <div class="f" style="position:absolute;left:${subLeft}px;width:${subWidth}px;text-align:${subAlign};top:${Math.round(subTop)}px;font-size:38px;line-height:1.5;color:var(--ink2);--d:.4s">${esc(sub)}</div>
@@ -2139,6 +2308,7 @@ const ART_FAMILIES = [
   ['bank', 'coin', 'chart', 'scale', 'policy', 'lock', 'shield'],
   ['people', 'speaker', 'clock', 'store', 'cart', 'house', 'car'],
   ['chip', 'gpu', 'datacenter', 'laptop', 'robot', 'network', 'phone', 'satellite', 'rocket', 'flask', 'dna'],
+  ['trophy', 'ball', 'people', 'clock'],
 ];
 
 // 题材族里没图可用时，这些主体放在哪个选题都不至于突兀
@@ -2177,7 +2347,29 @@ function sceneText(s) {
   return out.filter(Boolean).join(' ');
 }
 
+// 分镜插图已经由 AI 生成时，固定画框内直接放图，不再画素材库插图
+function sceneArtFrame(scene) {
+  const top = sceneArtTop(scene, scene.kind);
+  const h = Math.max(240, Math.min(400, 1640 - top));
+  return { x: 110, y: top, w: 860, h };
+}
+
+function sceneArtCustom(scene) {
+  const box = sceneArtFrame(scene);
+  if (scene._artSvg) {
+    const m = String(scene._artSvg).match(/^<svg\b([^>]*)>([\s\S]*)<\/svg>\s*$/i);
+    if (!m) return '';
+    const vb = (m[1].match(/viewBox\s*=\s*"([^"]+)"/i) || [])[1] || '0 0 860 380';
+    return `<svg x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" viewBox="${vb}" preserveAspectRatio="xMidYMid slice">${m[2]}</svg>`;
+  }
+  if (scene._artDataUri) {
+    return `<image x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" href="${scene._artDataUri}" preserveAspectRatio="xMidYMid slice"/>`;
+  }
+  return '';
+}
+
 function sceneArtBand(scene, idx) {
+  if (scene._artSvg || scene._artDataUri) return sceneArtCustom(scene);
   const spec = scene.art && typeof scene.art === 'object' ? scene.art : null;
   const used = scene._usedArt || new Set();
   const famAny = Array.isArray(scene._artFam) ? scene._artFam : [];
@@ -2461,7 +2653,7 @@ function renderHTML(board, beats) {
   const meta = board.meta || {};
   // 整片共用一份"已用过的插画主体"，避免同一题材反复出现
   const usedArt = new Set();
-  const cth = coverTheme(meta.title || '', meta.subtitle || '', meta.cover);
+  const cth = COVER_ACCENT[meta.cover] ? meta.cover : coverTheme(meta.title || '', meta.subtitle || '');
   if (cth) usedArt.add(cth);
   // 主题族用于兜底出图，保证每屏都有图可挂且不跑题
   const topic = COVER_ACCENT[meta.cover] && meta.cover !== 'idea'
@@ -2499,4 +2691,4 @@ ${parts.join('\n')}
 `;
 }
 
-module.exports = { renderHTML, titleFS, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme };
+module.exports = { renderHTML, titleFS, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme, chooseCover, artBox };

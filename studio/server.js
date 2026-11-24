@@ -2,7 +2,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, publicConfig, saveConfig, readConfig, jobDir, listCovers, setCover, confirmCover } = require('./lib/pipeline');
+const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, publicConfig, saveConfig, jobDir, listCovers, setCover, confirmCover, regenCoverArt, setSceneArtMode } = require('./lib/pipeline');
+const { buildChapters } = require('./lib/chapters');
 const { listNews, generateTopic } = require('./lib/news');
 
 const PORT = Number(process.env.PORT || 4180);
@@ -35,6 +36,7 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
 function sendFile(req, res, file, downloadName) {
@@ -89,7 +91,8 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req, 256 * 1024);
       const items = Array.isArray(body.items) ? body.items.slice(0, 8) : [];
       if (!items.length) return json(res, 400, { error: '请先选择快讯' });
-      const topic = await generateTopic(items, readConfig());
+      const channel = ['财经', '科技', '体育'].includes(body.channel) ? body.channel : '财经';
+      const topic = await generateTopic(items, readConfig(), channel);
       return json(res, 200, topic);
     }
 
@@ -102,6 +105,13 @@ const server = http.createServer(async (req, res) => {
       if (typeof body.model === 'string') next.model = body.model.trim();
       if (typeof body.apiKey === 'string' && body.apiKey.trim() && !body.apiKey.includes('****')) next.apiKey = body.apiKey.trim();
       if (body.clearKey) next.apiKey = '';
+      if (['svg', 'pollinations', 'openai'].includes(body.artProvider)) next.artProvider = body.artProvider;
+      if (['library', 'svg', 'api'].includes(body.sceneArtMode)) next.sceneArtMode = body.sceneArtMode;
+      if (typeof body.artBaseUrl === 'string') next.artBaseUrl = body.artBaseUrl.trim();
+      if (typeof body.artModel === 'string') next.artModel = body.artModel.trim();
+      if (typeof body.artSize === 'string' && body.artSize.trim()) next.artSize = body.artSize.trim();
+      if (typeof body.artApiKey === 'string' && body.artApiKey.trim() && !body.artApiKey.includes('****')) next.artApiKey = body.artApiKey.trim();
+      if (body.clearArtKey) next.artApiKey = '';
       saveConfig(next);
       return json(res, 200, publicConfig());
     }
@@ -154,6 +164,22 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, r);
     }
 
+    const coverArt = p.match(/^\/api\/jobs\/([\w-]+)\/art$/);
+    if (coverArt && req.method === 'POST') {
+      const body = await readBody(req);
+      const r = await regenCoverArt(coverArt[1], body.provider, body.prompt);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
+    const sceneArt = p.match(/^\/api\/jobs\/([\w-]+)\/illus$/);
+    if (sceneArt && req.method === 'POST') {
+      const body = await readBody(req, 64 * 1024);
+      const r = setSceneArtMode(sceneArt[1], body.mode);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
     const coverOk = p.match(/^\/api\/jobs\/([\w-]+)\/confirm$/);
     if (coverOk && req.method === 'POST') {
       const r = confirmCover(coverOk[1]);
@@ -175,6 +201,22 @@ const server = http.createServer(async (req, res) => {
       if (m[2] === 'script') return sendFile(req, res, path.join(jobDir(id), 'script.md'));
       if (m[2] === 'storyboard') return sendFile(req, res, path.join(jobDir(id), 'storyboard.json'));
       return json(res, 200, getJob(id));
+    }
+
+    const chap = p.match(/^\/api\/jobs\/([\w-]+)\/chapters$/);
+    if (chap && req.method === 'GET') {
+      const id = chap[1];
+      const job = getJob(id);
+      if (!job) return json(res, 404, { error: '任务不存在' });
+      let r;
+      try {
+        r = await buildChapters(jobDir(id), readConfig(), m => console.log(`[${id}] ${m}`));
+      } catch (e) {
+        return json(res, 400, { error: e.message || '文案生成失败' });
+      }
+      const name = (job.brief.title || 'video').replace(/[\\/:*?"<>|]/g, '').slice(0, 40) + '-章节文案.txt';
+      return sendFile(req, res, path.join(jobDir(id), 'chapters.txt'),
+        url.searchParams.get('download') === '1' ? name : undefined);
     }
 
     const dl = p.match(/^\/api\/jobs\/([\w-]+)\/download$/);

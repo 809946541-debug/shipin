@@ -7,7 +7,7 @@ const COVER_ARTS = [
   'globe', 'port', 'ship', 'train', 'plane', 'truck', 'container', 'pipeline', 'oilrig',
   'battery', 'solar', 'wind', 'mine', 'wheat', 'water', 'bank', 'coin', 'scale', 'shield',
   'lock', 'clock', 'network', 'phone', 'satellite', 'dna', 'flask', 'store', 'bridge', 'leaf', 'idea',
-  'rocket', 'speaker', 'datacenter', 'gpu', 'laptop', 'robot',
+  'rocket', 'speaker', 'datacenter', 'gpu', 'laptop', 'robot', 'trophy', 'ball',
 ];
 // 封面现场编排可用的小道具（与 template.js 的 coverProp 一一对应）
 const COVER_PROPS = [
@@ -20,26 +20,58 @@ const COVER_PROPS_BOTTOM = ['barrel', 'crate', 'coins', 'container', 'crowd', 't
 const CHARS_PER_SEC = 5.05;
 const GAP_PER_SCENE = 1.3; // 句首 0.3s + 句尾 1.0s
 
+// 三个频道的口径差异：角色定位、客观边界、结尾印章、封面 kicker 前缀
+const CHANNEL_CONF = {
+  '财经': {
+    role: '财经',
+    rule2: '内容必须客观：只做公开信息梳理与情景推演，不荐股、不喊单、不预测具体点位、不评价他国领导人、不描述暴力细节、不使用煽动性表述。',
+    stamp: '不构成投资建议',
+    brand: '手绘财经',
+    disclaimer: '公开信息梳理 · 不构成投资建议',
+  },
+  '科技': {
+    role: '科技',
+    rule2: '内容必须客观：只做公开信息与公开报道梳理，不夸大技术效果、不写厂商通稿、不预测股价，不使用「颠覆」「炸裂」「遥遥领先」这类营销词。',
+    stamp: '不构成消费或投资建议',
+    brand: '手绘科技',
+    disclaimer: '公开报道整理 · 不构成消费或投资建议',
+  },
+  '体育': {
+    role: '体育',
+    rule2: '内容必须客观：只基于公开报道叙述，不谩骂不引战、不编伤病与转会内幕、不预测未开赛果、不涉赌球赔率、不使用侮辱性绰号或煽动球迷对立的表述。',
+    stamp: '赛果与数据以官方为准',
+    brand: '手绘体育',
+    disclaimer: '内容基于公开报道 · 赛果以官方为准',
+  },
+};
+
+function channelConf(channel) {
+  return CHANNEL_CONF[channel] || CHANNEL_CONF['财经'];
+}
+
 function planScenes(minutes) {
   return Math.min(38, Math.max(16, Math.round(minutes * 5.5)));
 }
 
-const SYSTEM = `你是一名中文财经竖屏短视频的分镜编导。你把用户给出的主题，整理成一份可直接渲染的 JSON 分镜。
+function buildSystem(channel) {
+  const c = channelConf(channel);
+  return `你是一名中文${c.role}竖屏短视频的分镜编导。你把用户给出的主题，整理成一份可直接渲染的 JSON 分镜。
 
 【硬性要求】
 1. 只输出 JSON，不要解释、不要 markdown 代码块。
-2. 内容必须客观：只做公开信息梳理与情景推演，不荐股、不喊单、不预测具体点位、不评价他国领导人、不描述暴力细节、不使用煽动性表述。
+2. ${c.rule2}
 3. 数值只写你确定有公开来源的；不确定就改用定性表述。不要编造精确数字。
-4. 最后一屏必须是 end 类型，stamp 固定为「不构成投资建议」。
+4. 最后一屏必须是 end 类型，stamp 固定为「${c.stamp}」。
 5. 语言风格：口语、短句、克制，不用感叹号，不用“我们必须”“震惊”“内幕”等词。
 
 【结构】
-{"meta":{"title":"主标题，不超过 16 字","subtitle":"副标题，一句话，不超过 26 字","kicker":"手绘财经 · 情景推演 · 2026.11","cover":"封面插画，见下方清单","coverLayout":0,"disclaimer":"公开信息梳理 · 不构成投资建议","source":"数据来源说明，不超过 22 字"},"scenes":[...]}
+{"meta":{"title":"主标题，不超过 16 字","subtitle":"副标题，一句话，不超过 26 字","kicker":"${c.brand} · 情景推演 · 2026.11","cover":"封面插画，见下方清单","coverLayout":0,"disclaimer":"${c.disclaimer}","source":"数据来源说明，不超过 22 字"},"scenes":[...]}
 
 cover 是封面配图。**先看标题里最具体的那件事物**，选“画出来最像这条视频”的那一个，不要一律选题材大类：
+- 品牌/公司要落到具体产品：特斯拉/比亚迪/蔚来/小鹏/理想/小米汽车等车企 → car；英伟达 → gpu；SpaceX/星舰 → rocket
 - 人物/发布会/CEO 相关（黄仁勋、马斯克、奥特曼、某创始人、某场演讲）→ speaker
 - 火箭/星舰/发射/登月/太空 → rocket；卫星/北斗/航天器 → satellite
-- 数据中心/机房/服务器/算力集群 → datacenter；显卡/GPU/英伟达 → gpu；端侧/PC/笔记本 → laptop
+- 数据中心/机房/服务器/算力集群 → datacenter；显卡/GPU → gpu；端侧/PC/笔记本 → laptop
 - 人形机器人/具身智能/机械臂 → robot；芯片/半导体/光刻 → chip
 - 能源地缘 energy/oilrig/pipeline；航运物流 ship/port/container/train/plane/truck/globe
 - 电池储能 battery/充电桩，光伏 solar，风电 wind
@@ -47,6 +79,7 @@ cover 是封面配图。**先看标题里最具体的那件事物**，选“画�
 - 社会人口 people/clock；产业 factory/mine/wheat/water/bridge/leaf；行情报价 chart
 - 同一选题族里，优先用更具体、更少见的那个（有 gpu 就不选 chip，有 datacenter 就不选 chip）；都不贴切才用 idea。
 - 判断顺序：标题里出现的人名/物体名 > 副标题 > 选题大类。宁可画“那条视频里真实出现的东西”，也不要套一个泛泛的大类。
+- 禁止懒选：不要因为内容沾到 AI、智能化、自动驾驶就选 robot 或 chip——讲车企的视频选 car，讲公司发布会选 speaker，只有标题主体确实是机器人/芯片本身时才选 robot/chip。
 
 meta 里还要给出 coverSpec，让封面按这条视频的内容现场编排，而不是套固定模板：
 {"focus":"auto|close|wide","extras":[{"kind":"道具","pos":"lt|rt|lb|rb"}],"callouts":[{"text":"不超过 8 字","pos":"left|right"}]}
@@ -86,6 +119,9 @@ scenes 第 1 屏固定 kind="cover"，最后一屏固定 kind="end"，中间每�
 【画面匹配】
 标题与图形要互补：有先后关系用 flow，有对立用 compare，有数量差距用 bars，有时间变化用 line，有 2–3 个关键数字用 stats，多要点用 bullets，条目多且需要解释用 list。
 相邻两屏不要连续使用同一种图形类型（cover/end 除外）。`;
+}
+
+const SYSTEM = buildSystem('财经');
 
 function buildUserPrompt(brief) {
   const minutes = Number(brief.minutes) || 5;
@@ -110,6 +146,83 @@ function stripFence(text) {
   const e = t.lastIndexOf('}');
   if (s >= 0 && e > s) t = t.slice(s, e + 1);
   return t;
+}
+
+// 小模型常输出单引号、裸属性名、尾逗号、注释，标准 JSON.parse 会直接挂掉。
+// 用字符级状态机修一遍：字符串外才做替换，绝不改动字符串内容。
+function repairJSON(src) {
+  let out = '';
+  let i = 0;
+  const n = src.length;
+  const isWord = c => /[A-Za-z0-9_$\u4e00-\u9fa5-]/.test(c);
+  const isWordStart = c => /[A-Za-z_$\u4e00-\u9fa5]/.test(c);
+  while (i < n) {
+    const ch = src[i];
+    // 字符串：单/双引号统一成双引号，转义随引号类型调整
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      out += '"';
+      i++;
+      while (i < n) {
+        const c = src[i];
+        if (c === '\\') {
+          if (quote === "'" && src[i + 1] === "'") { out += "'"; i += 2; continue; }
+          out += c + (src[i + 1] != null ? src[i + 1] : '');
+          i += 2; continue;
+        }
+        if (c === quote) { out += '"'; i++; break; }
+        if (c === '"' && quote === "'") { out += '\\"'; i++; continue; }
+        out += c; i++;
+      }
+      continue;
+    }
+    // 行注释与块注释直接删除
+    if (ch === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') i++; continue; }
+    if (ch === '/' && src[i + 1] === '*') {
+      i += 2;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i += 2; continue;
+    }
+    // 裸属性名：词后面（跳空白）跟冒号，就给它补上双引号
+    if (isWordStart(ch)) {
+      let j = i;
+      while (j < n && isWord(src[j])) j++;
+      const word = src.slice(i, j);
+      let k = j;
+      while (k < n && /\s/.test(src[k])) k++;
+      if (src[k] === ':') { out += '"' + word + '"'; i = j; continue; }
+      out += word; i = j; continue;
+    }
+    // 尾逗号：, 后面是 } 或 ] 时丢掉
+    if (ch === ',') {
+      let k = i + 1;
+      while (k < n && /\s/.test(src[k])) k++;
+      if (src[k] === '}' || src[k] === ']') { i++; continue; }
+    }
+    out += ch; i++;
+  }
+  return out;
+}
+
+// 先标准解析，失败再修复解析；仍失败时抛出带出错位置上下文的错误，便于模型针对性修正
+function looseParseJSON(text) {
+  const t = stripFence(text);
+  try {
+    return JSON.parse(t);
+  } catch (e1) {
+    let repaired;
+    try {
+      repaired = repairJSON(t);
+      return JSON.parse(repaired);
+    } catch (e2) {
+      const m = /position (\d+)/.exec(e2.message || '');
+      const p = m ? Number(m[1]) : 0;
+      const ctx = (repaired || t).slice(Math.max(0, p - 70), p + 70).replace(/\s+/g, ' ');
+      const err = new Error('JSON 语法错误：' + e2.message + '；出错位置附近：' + ctx);
+      err.jsonContext = ctx;
+      throw err;
+    }
+  }
 }
 
 const clean = (v, max = 200) => String(v == null ? '' : v)
@@ -163,8 +276,9 @@ function sanitizeSceneArt(raw) {
   return out;
 }
 
-function validate(raw) {
-  const board = typeof raw === 'string' ? JSON.parse(stripFence(raw)) : raw;
+function validate(raw, channel = '财经') {
+  const conf = channelConf(channel);
+  const board = typeof raw === 'string' ? looseParseJSON(raw) : raw;
   if (!board || !Array.isArray(board.scenes) || board.scenes.length < 8) {
     throw new Error('分镜数量不足或格式错误');
   }
@@ -172,14 +286,21 @@ function validate(raw) {
   board.meta = {
     title: clean(meta.title || '', 30) || '未命名选题',
     subtitle: clean(meta.subtitle || '', 40),
-    kicker: clean(meta.kicker || '手绘财经 · 情景推演', 40),
+    kicker: clean(meta.kicker || (conf.brand + ' · 情景推演'), 40),
     cover: COVER_ARTS.includes(meta.cover) ? meta.cover : '',
-    disclaimer: clean(meta.disclaimer || '公开信息梳理 · 不构成投资建议', 40),
+    disclaimer: clean(meta.disclaimer || conf.disclaimer, 40),
     source: clean(meta.source || '公开信息整理', 30),
   };
+  board.meta.channel = channel;
   const lay = Number(meta.coverLayout);
   if (lay === 0 || lay === 1 || lay === 2) board.meta.coverLayout = lay;
   if (meta.coverConfirmed) board.meta.coverConfirmed = true;
+  // 插画模式标记必须保留，否则确认封面重新进 run() 时会被白名单洗掉，成片就不出插画了
+  if (meta.artMode) board.meta.artMode = true;
+  if (meta.artFailed) board.meta.artFailed = true;
+  if (['svg', 'pollinations', 'openai'].includes(meta.artProvider)) board.meta.artProvider = meta.artProvider;
+  if (meta.artPrompt) board.meta.artPrompt = String(meta.artPrompt).trim().slice(0, 400);
+  if (['library', 'svg', 'api'].includes(meta.sceneArtMode)) board.meta.sceneArtMode = meta.sceneArtMode;
   const spec = sanitizeCoverSpec(meta.coverSpec);
   if (spec) board.meta.coverSpec = spec;
 
@@ -212,7 +333,7 @@ function validate(raw) {
     const art = sanitizeSceneArt(s.art);
     if (art) out.art = art;
     out.unit = clean(s.unit, 10);
-    out.stamp = clean(s.stamp, 20);
+    out.stamp = clean(s.stamp, 20) || (out.kind === 'end' ? conf.stamp : '');
     if (!out.narration || out.narration.length < 12) throw new Error(`第 ${i + 1} 屏缺少旁白`);
     const need = {
       bullets: out.points, list: out.points, flow: out.steps, bars: out.bars,
@@ -234,4 +355,4 @@ function durationEstimate(board) {
   return board.scenes.reduce((a, s) => a + s.narration.length / CHARS_PER_SEC + GAP_PER_SCENE, 0);
 }
 
-module.exports = { SYSTEM, buildUserPrompt, validate, planScenes, durationEstimate, stripFence, CHARS_PER_SEC, GAP_PER_SCENE };
+module.exports = { SYSTEM, buildSystem, buildUserPrompt, validate, planScenes, durationEstimate, stripFence, looseParseJSON, CHARS_PER_SEC, GAP_PER_SCENE, CHANNEL_CONF };

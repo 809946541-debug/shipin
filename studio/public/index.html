@@ -55,6 +55,10 @@ pre.log{background:#211d18;color:#e8dfd0;border-radius:9px;padding:12px 14px;fon
 .video-wrap{margin-top:16px;display:none}
 .video-wrap video{width:100%;max-height:70vh;background:#000;border-radius:10px}
 .video-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+dialog#chapDlg{border:0;border-radius:14px;padding:20px;width:min(760px,92vw);background:#fffdf7;color:var(--ink);box-shadow:0 24px 80px rgba(30,24,16,.35)}
+dialog#chapDlg::backdrop{background:rgba(35,29,21,.42)}
+#chapText{height:min(58vh,460px);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.75;background:#fff;resize:vertical}
+.chap-actions{display:flex;gap:9px;align-items:center;margin-top:12px;flex-wrap:wrap}
 .empty{color:var(--ink2);font-size:13px;padding:8px 0}
 ul.jobs{list-style:none;margin:0;padding:0}
 ul.jobs li{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px dashed var(--line);cursor:pointer}
@@ -62,9 +66,11 @@ ul.jobs li:last-child{border-bottom:0}
 ul.jobs li:hover{background:#fff9ec}
 ul.jobs .t{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 ul.jobs .m{font-size:11px;color:var(--ink2);white-space:nowrap}
-ul.jobs .jdel,ul.jobs .jreb{border:0;background:none;color:var(--ink2);font-size:16px;line-height:1;cursor:pointer;padding:2px 5px;border-radius:4px;flex:0 0 auto}
+ul.jobs .jdel,ul.jobs .jreb,ul.jobs .jchap{border:0;background:none;color:var(--ink2);font-size:16px;line-height:1;cursor:pointer;padding:2px 5px;border-radius:4px;flex:0 0 auto}
 ul.jobs .jdel:hover{background:#f3e3d3;color:var(--red)}
 ul.jobs .jreb:hover{background:#e7eef1;color:var(--sea)}
+ul.jobs .jchap{font-size:11px;padding:3px 6px;border:1px solid var(--line)}
+ul.jobs .jchap:hover{background:#fff3dc;color:var(--gold);border-color:var(--gold)}
 .news-tools{display:flex;gap:8px;margin-bottom:8px}
 .news-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .news-tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-size:12px;color:var(--ink2);cursor:pointer}
@@ -116,14 +122,14 @@ ul.news .meta a{text-decoration:none}
       <div class="card" style="margin-bottom:18px">
         <h2>快讯 / 热点<small id="newsTime">抓取中…</small></h2>
         <div class="news-tools">
-          <input id="newsQ" placeholder="搜索关键词，如 俄乌 / 美伊 / 英伟达 / 关税">
+          <input id="newsQ" placeholder="搜索关键词，如 俄乌 / 英伟达 / 世界杯 / 关税">
           <button class="btn ghost small" id="newsReload">刷新</button>
         </div>
         <div class="news-tabs" id="newsTabs">
-          <button data-cat="全部" class="on">全部</button>
+          <button data-cat="全部" class="on">热点</button>
+          <button data-cat="科技">科技</button>
+          <button data-cat="体育">体育</button>
           <button data-cat="财经">财经</button>
-          <button data-cat="A股">A股</button>
-          <button data-cat="国际">国际</button>
           <button data-cat="自定义">自定义</button>
         </div>
         <div class="news-add">
@@ -189,6 +195,46 @@ ul.news .meta a{text-decoration:none}
           <button class="btn ghost small" id="saveCfg">保存设置</button>
           <div class="hint" id="cfgHint">密钥只保存在本机 studio/data/config.json，不会上传。</div>
         </details>
+
+        <details class="settings" id="artSettingsBox">
+          <summary>插图设置 <span id="artCfgState" class="badge">本地 AI 手绘</span></summary>
+          <div class="field" style="margin-top:12px">
+            <label>默认封面插画方式</label>
+            <select id="artProviderDefault">
+              <option value="svg">本地 AI 手绘（不用生图接口）</option>
+              <option value="pollinations">免费自动插画（Pollinations）</option>
+              <option value="openai">第三方生图 API（OpenAI 兼容）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>默认分镜插图模式（整片每一屏）</label>
+            <select id="sceneArtModeDefault">
+              <option value="library">素材库 AI 匹配（原方式，最快）</option>
+              <option value="svg">每屏电脑手绘（AI 画 SVG，较慢）</option>
+              <option value="api">每屏调用生图 API（走下面的生图接口）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>生图接口地址（仅第三方方式需要）</label>
+            <input id="artBaseUrl" placeholder="https://api.siliconflow.cn/v1">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>生图模型</label>
+              <input id="artModel" placeholder="Kwai-Kolors/Kolors">
+            </div>
+            <div class="field">
+              <label>生图 API Key</label>
+              <input id="artApiKey" type="password" placeholder="sk-...">
+            </div>
+          </div>
+          <div class="field">
+            <label>出图尺寸</label>
+            <input id="artSize" placeholder="1024x1024">
+          </div>
+          <button class="btn ghost small" id="saveArtCfg">保存插图设置</button>
+          <div class="hint" id="artCfgHint">封面插画和分镜插图分开设置。每屏电脑手绘只调用大模型写 SVG，不需要生图 Key，但整片会多花几分钟；每屏生图 API 走下面的接口。</div>
+        </details>
       </div>
 
       <div class="card" style="margin-top:18px">
@@ -211,8 +257,29 @@ ul.news .meta a{text-decoration:none}
         <div class="cover-main">
           <img id="coverImg" alt="封面预览">
           <div class="cover-info">
-            <div><b>分镜已完成。</b>挑一张封面，确认后再开始配音、渲染和编码。</div>
+            <div><b>分镜已完成。</b>封面可按标题自动画一张插画，也可以选素材封面；分镜插图可选素材库或逐屏生成。确认后再配音、渲染和编码。</div>
             <div id="coverMeta" style="margin-top:6px"></div>
+            <div class="field" style="margin:10px 0 0">
+              <label>封面插画方式</label>
+              <select id="artProvider">
+                <option value="svg">本地 AI 手绘（推荐，免生图 Key）</option>
+                <option value="pollinations">免费自动插画（有限流）</option>
+                <option value="openai">第三方生图 API</option>
+              </select>
+            </div>
+            <div class="field" style="margin:8px 0 0">
+              <label>分镜插图模式（整片每一屏，确认封面后生成）</label>
+              <select id="sceneArtMode">
+                <option value="library">素材库 AI 匹配（原方式，最快）</option>
+                <option value="svg">每屏电脑手绘（AI 画 SVG，较慢）</option>
+                <option value="api">每屏调用生图 API</option>
+              </select>
+            </div>
+            <div class="field" style="margin:8px 0 0">
+              <label>封面自定义提示词（可选，留空就按标题自动写）</label>
+              <input id="artPrompt" placeholder="例如：一辆白色电动车停在超充站前">
+            </div>
+            <button class="btn ghost small" id="coverArt" style="margin-top:8px">按标题重画插画</button>
             <button class="btn ghost small" id="coverMore" style="margin-top:8px">换一批缩略图</button>
           </div>
         </div>
@@ -231,11 +298,23 @@ ul.news .meta a{text-decoration:none}
           <a class="btn primary" id="dl" style="width:auto" href="#">下载成片</a>
           <a class="btn ghost" id="scriptLink" target="_blank" href="#">查看脚本</a>
           <a class="btn ghost" id="boardLink" target="_blank" href="#">查看分镜 JSON</a>
+          <button class="btn ghost" id="chapBtn">发布文案</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<dialog id="chapDlg">
+  <h2 style="font-family:var(--hand);font-size:19px;margin:0 0 12px">发布文案与章节</h2>
+  <textarea id="chapText" readonly spellcheck="false"></textarea>
+  <div class="chap-actions">
+    <span class="hint" id="chapHint" style="margin:0;flex:1"></span>
+    <button class="btn ghost small" id="chapCopy">复制全文</button>
+    <a class="btn ghost small" id="chapDl" download>下载 .txt</a>
+    <button class="btn primary small" id="chapClose" style="width:auto">关闭</button>
+  </div>
+</dialog>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -246,6 +325,9 @@ let coverJobId = null;
 let coverPage = 0;
 let coverPages = 1;
 let coverBusy = false;
+const ART_LABEL = { svg: '本地 AI 手绘', pollinations: '免费自动插画', openai: '第三方生图 API' };
+const SCENE_LABEL = { library: '素材库 AI 匹配', svg: '每屏电脑手绘', api: '每屏生图 API' };
+let defaultSceneMode = 'library';
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -258,6 +340,7 @@ const MAX_PICK = 4;
 let newsItems = [];
 let newsAt = 0;
 let newsCat = '全部';
+let curChannel = '财经';
 const picked = new Set();
 
 const MANUAL_KEY = 'shipin.manualNews';
@@ -288,9 +371,9 @@ function renderNews(){
   const all = allNews();
   if (!all.length) { ul.innerHTML = '<li class="empty">暂时没抓到快讯，点「刷新」重试，或手动添加</li>'; updateFoot(); return; }
   const list = all.filter(x =>
-    (newsCat === '全部' || x.cat === newsCat) &&
+    (newsCat === '全部' || x.channel === newsCat || (newsCat === '自定义' && x.cat === '自定义')) &&
     (!q || (x.title + ' ' + x.summary).toLowerCase().includes(q)));
-  if (!list.length) { ul.innerHTML = '<li class="empty">这个分类下没有匹配的快讯</li>'; updateFoot(); return; }
+  if (!list.length) { ul.innerHTML = '<li class="empty">这个频道下没有匹配的快讯</li>'; updateFoot(); return; }
   ul.innerHTML = list.map(x => `<li data-id="${x.id}" class="${picked.has(x.id) ? 'on' : ''}">
     <input type="checkbox" ${picked.has(x.id) ? 'checked' : ''}>
     <span class="txt">
@@ -370,6 +453,7 @@ $('#newsAdd').onclick = () => {
   manualNews.unshift({
     id: 'manual-' + Date.now().toString(36),
     source: '手动添加',
+    channel: ['科技', '体育', '财经'].includes(newsCat) ? newsCat : '财经',
     cat: '自定义',
     time: Date.now(),
     title: text.slice(0, 90),
@@ -385,19 +469,24 @@ $('#newsAdd').onclick = () => {
 };
 
 $('#newsGen').onclick = async () => {
-  const items = allNews().filter(x => picked.has(x.id))
+  const pickedAll = allNews().filter(x => picked.has(x.id));
+  const items = pickedAll
     .map(x => ({ title: x.title, summary: x.summary, source: x.source, time: x.time }));
   if (!items.length) return;
+  // 频道跟随所选快讯：取第一条的频道，混选时优先非财经的具体频道
+  const channels = pickedAll.map(x => x.channel).filter(c => ['科技', '体育', '财经'].includes(c));
+  const channel = channels.find(c => c !== '财经') || channels[0] || '财经';
   const btn = $('#newsGen');
   btn.disabled = true;
   btn.textContent = '生成中…';
   try {
     const r = await fetch('/api/news/topic', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items, channel })
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || '生成失败');
+    curChannel = d.channel || channel;
     $('#title').value = d.title || '';
     $('#summary').value = d.intro || '';
     if (d.requirements) $('#requirements').value = d.requirements;
@@ -420,6 +509,22 @@ async function loadConfig(){
   else if (c.hasKey) { s.textContent = '缺少模型名'; s.className = 'badge err'; }
   else { s.textContent = '未配置'; s.className = 'badge err'; }
   if (!c.hasKey) $('#settingsBox').open = true;
+
+  $('#artProviderDefault').value = c.artProvider || 'svg';
+  $('#sceneArtModeDefault').value = c.sceneArtMode || 'library';
+  defaultSceneMode = c.sceneArtMode || 'library';
+  $('#artBaseUrl').value = c.artBaseUrl || '';
+  $('#artModel').value = c.artModel || '';
+  $('#artSize').value = c.artSize || '1024x1024';
+  const a = $('#artCfgState');
+  const label = ART_LABEL[c.artProvider || 'svg'] || ART_LABEL.svg;
+  if (c.artProvider === 'openai') {
+    a.textContent = c.hasArtKey ? ('已配置 ' + (c.artModel || '生图接口')) : '缺少生图 Key';
+    a.className = c.hasArtKey && c.artModel ? 'badge ok' : 'badge err';
+  } else {
+    a.textContent = label;
+    a.className = 'badge';
+  }
   return c;
 }
 
@@ -431,6 +536,23 @@ $('#saveCfg').onclick = async () => {
   const c = await r.json();
   $('#apiKey').value = '';
   $('#cfgHint').textContent = c.hasKey ? ('已保存，密钥 ' + c.keyMask) : '已保存，但还没有密钥';
+  loadConfig();
+};
+
+$('#saveArtCfg').onclick = async () => {
+  const body = {
+    artProvider: $('#artProviderDefault').value,
+    sceneArtMode: $('#sceneArtModeDefault').value,
+    artBaseUrl: $('#artBaseUrl').value.trim(),
+    artModel: $('#artModel').value.trim(),
+    artSize: $('#artSize').value.trim() || '1024x1024',
+  };
+  const k = $('#artApiKey').value.trim();
+  if (k && !k.includes('****')) body.artApiKey = k;
+  const r = await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const c = await r.json();
+  $('#artApiKey').value = '';
+  $('#artCfgHint').textContent = c.hasArtKey ? ('已保存，生图密钥 ' + c.artKeyMask) : '已保存，但还没有填生图 Key（第三方方式需要）';
   loadConfig();
 };
 
@@ -449,9 +571,11 @@ $('#go').onclick = async () => {
   $('#go').disabled = true;
   $('#go').textContent = '提交中…';
   try {
+    // 没用 AI 选题时，频道跟随当前 Tab；用了 AI 选题则用接口回传的频道
+    const channel = curChannel || (['科技', '体育', '财经'].includes(newsCat) ? newsCat : '财经');
     const r = await fetch('/api/jobs', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ title, summary, requirements: $('#requirements').value.trim(), minutes: Number($('#minutes').value) })
+      body: JSON.stringify({ title, summary, requirements: $('#requirements').value.trim(), minutes: Number($('#minutes').value), channel })
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || '提交失败');
@@ -486,7 +610,7 @@ function setDot(status){
 function markCoverSelection(){
   const s = lastJob && lastJob.coverStyle;
   [...$('#coverGrid').children].forEach(b => {
-    const on = !!s && b.dataset && b.dataset.motif === s.motif && Number(b.dataset.layout) === Number(s.layout);
+    const on = !!s && !s.art && b.dataset && b.dataset.motif === s.motif && Number(b.dataset.layout) === Number(s.layout);
     b.classList.toggle('on', on);
   });
 }
@@ -537,6 +661,58 @@ async function pickCover(motif, layout){
 
 $('#coverMore').onclick = () => loadCoverGrid((coverPage + 1) % Math.max(1, coverPages));
 
+// 按标题重画一张封面插画；点素材缩略图则退回素材封面
+$('#coverArt').onclick = async () => {
+  if (!currentId || coverBusy) return;
+  coverBusy = true;
+  const btn = $('#coverArt');
+  const old = btn.textContent;
+  btn.disabled = true;
+  const provider = $('#artProvider').value;
+  const prompt = $('#artPrompt').value.trim();
+  btn.textContent = provider === 'svg' ? 'AI 手绘中，请稍候…' : '出图中，请稍候…';
+  try {
+    const r = await fetch('/api/jobs/' + currentId + '/art', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, prompt }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '生成插画失败');
+    $('#coverImg').src = '/media/' + currentId + '/covers/preview.png?v=' + d.coverAt;
+    if (lastJob) {
+      lastJob.coverStyle = Object.assign({}, lastJob.coverStyle, {
+        art: true, provider, prompt,
+        label: '按标题生成的插画 · ' + (ART_LABEL[provider] || provider),
+      });
+      $('#coverMeta').textContent = coverMetaText(lastJob);
+    }
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
+    coverBusy = false;
+  }
+};
+
+// 选择整片的分镜插图模式（确认封面后按它逐屏生成）
+$('#sceneArtMode').onchange = async () => {
+  if (!currentId) return;
+  const mode = $('#sceneArtMode').value;
+  try {
+    const r = await fetch('/api/jobs/' + currentId + '/illus', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '保存分镜插图模式失败');
+    if (lastJob) lastJob.sceneArt = Object.assign({}, lastJob.sceneArt, { mode: d.mode, label: d.label });
+    $('#coverTip').textContent = '分镜插图已设为：' + d.label + '，确认封面后开始生成';
+    if (lastJob && lastJob.coverStyle) $('#coverMeta').textContent = coverMetaText(lastJob);
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
 $('#coverConfirm').onclick = async () => {
   if (!currentId) return;
   const btn = $('#coverConfirm');
@@ -557,6 +733,16 @@ $('#coverConfirm').onclick = async () => {
     btn.textContent = '确认封面，开始生成视频';
   }
 };
+
+function coverMetaText(job){
+  const cs = job.coverStyle || {};
+  let s = '当前封面：' + (cs.label || cs.motif || '素材封面') + (cs.layoutName ? ' · ' + cs.layoutName : '');
+  const sa = job.sceneArt || {};
+  const mode = sa.mode || defaultSceneMode;
+  s += ' · 分镜：' + (SCENE_LABEL[mode] || mode);
+  if (sa.total && sa.done) s += `（已生成 ${sa.done}/${sa.total}）`;
+  return s;
+}
 
 function render(job){
   setDot(job.status);
@@ -581,8 +767,12 @@ function render(job){
     const src = '/media/' + job.id + '/covers/preview.png?v=' + (job.coverAt || 0);
     if (img.getAttribute('src') !== src) img.src = src;
     if (job.coverStyle) {
-      $('#coverMeta').textContent = '当前封面：' + (job.coverStyle.label || job.coverStyle.motif) +
-        (job.coverStyle.layoutName ? ' · ' + job.coverStyle.layoutName : '');
+      $('#coverMeta').textContent = coverMetaText(job);
+      if (coverJobId !== job.id) {
+        $('#artProvider').value = job.coverStyle.provider || 'svg';
+        $('#sceneArtMode').value = (job.sceneArt && job.sceneArt.mode) || defaultSceneMode;
+        $('#artPrompt').value = job.coverStyle.prompt || '';
+      }
     }
     if (coverJobId !== job.id) {
       coverJobId = job.id;
@@ -654,12 +844,13 @@ async function loadJobs(){
     <span class="t">${(j.brief && j.brief.title) || '(未命名)'}</span>
     <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : j.status === 'preview' ? '待选封面' : (j.progress||0) + '%'}</span>
     <span class="m">${fmtTime(j.createdAt)}</span>
+    ${j.hasVideo ? `<button class="jchap" title="生成发布文案与章节">文</button>` : ''}
     ${(j.status === 'done' || j.status === 'error' || j.status === 'preview') ? `<button class="jreb" title="用同样的选题重新生成一条">↻</button>` : ''}
     ${(j.status === 'done' || j.status === 'error' || j.status === 'preview') ? `<button class="jdel" title="删除任务与成片">×</button>` : ''}
   </li>`).join('');
   [...ul.querySelectorAll('li[data-id]')].forEach(li => {
     li.onclick = e => {
-      if (e.target.closest('.jdel') || e.target.closest('.jreb')) return;
+      if (e.target.closest('.jdel') || e.target.closest('.jreb') || e.target.closest('.jchap')) return;
       const id = li.dataset.id;
       const job = list.find(x => x.id === id);
       $('#videoWrap').style.display = 'none';
@@ -703,8 +894,50 @@ async function loadJobs(){
       if (currentId === id) resetView();
       loadJobs();
     };
+    const ch = li.querySelector('.jchap');
+    if (ch) ch.onclick = e => {
+      e.stopPropagation();
+      openChapters(li.dataset.id);
+    };
   });
 }
+
+/* ---------------- 发布文案与章节 ---------------- */
+async function openChapters(id){
+  const dlg = $('#chapDlg');
+  const ta = $('#chapText');
+  ta.value = '正在生成文案…';
+  $('#chapHint').textContent = '';
+  $('#chapDl').removeAttribute('href');
+  if (!dlg.open) dlg.showModal();
+  try {
+    const r = await fetch('/api/jobs/' + id + '/chapters');
+    const t = await r.text();
+    if (!r.ok) {
+      let msg = t;
+      try { msg = JSON.parse(t).error || t; } catch { }
+      ta.value = '生成失败：' + msg;
+      return;
+    }
+    ta.value = t;
+    $('#chapDl').href = '/api/jobs/' + id + '/chapters?download=1';
+  } catch (e) {
+    ta.value = '生成失败：' + e.message;
+  }
+}
+
+$('#chapBtn').onclick = () => { if (currentId) openChapters(currentId); };
+$('#chapCopy').onclick = async () => {
+  const t = $('#chapText').value;
+  try { await navigator.clipboard.writeText(t); }
+  catch {
+    $('#chapText').select();
+    document.execCommand('copy');
+  }
+  $('#chapHint').textContent = '已复制全文';
+  setTimeout(() => { $('#chapHint').textContent = ''; }, 1800);
+};
+$('#chapClose').onclick = () => $('#chapDlg').close();
 
 loadConfig();
 loadJobs();

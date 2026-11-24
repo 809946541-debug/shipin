@@ -4,8 +4,10 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { generateStoryboard } = require('./llm');
 const { validate, CHARS_PER_SEC, GAP_PER_SCENE } = require('./prompt');
-const { renderHTML, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme } = require('./template');
+const { renderHTML, COVER_STYLES, COVER_LABEL, COVER_LAYOUT_NAME, coverTheme, chooseCover } = require('./template');
 const covers = require('./covers');
+const { generateCoverArt, normalizeProvider, PROVIDER_LABEL, generateSceneArts, normalizeSceneMode, SCENE_MODE_LABEL, sceneArtStat } = require('./artgen');
+const { buildChapters } = require('./chapters');
 const { findFfmpeg, findPython, buildEnv } = require('./platform');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -32,6 +34,13 @@ function publicConfig() {
     model: c.model || '',
     hasKey: !!c.apiKey,
     keyMask: c.apiKey ? c.apiKey.slice(0, 4) + '****' + c.apiKey.slice(-4) : '',
+    artProvider: normalizeProvider(c.artProvider),
+    artBaseUrl: c.artBaseUrl || '',
+    artModel: c.artModel || '',
+    artSize: c.artSize || '1024x1024',
+    hasArtKey: !!c.artApiKey,
+    artKeyMask: c.artApiKey ? c.artApiKey.slice(0, 4) + '****' + c.artApiKey.slice(-4) : '',
+    sceneArtMode: normalizeSceneMode(c.sceneArtMode),
   };
 }
 
@@ -69,6 +78,33 @@ const queue = [];
 let running = false;
 
 function jobDir(id) { return path.join(JOBS, id); }
+
+// 最近几条已生成片子实际使用的封面主体，用于新片避开重复（目录名按日期前缀，字典序即时间序）
+function recentCoverIds(excludeId, n = 6) {
+  const out = [];
+  let ids;
+  try { ids = fs.readdirSync(JOBS).sort().reverse(); } catch { return out; }
+  for (const id of ids) {
+    if (id === excludeId) continue;
+    try {
+      const b = JSON.parse(fs.readFileSync(path.join(JOBS, id, 'storyboard.json'), 'utf8'));
+      const c = b && b.meta && b.meta.cover;
+      if (COVER_LABEL[c]) out.push(c);
+    } catch { }
+    if (out.length >= n) break;
+  }
+  return out;
+}
+
+// 给封面插画补充内容线索：取前几屏标题，避免只凭标题猜画面
+function artContext(board) {
+  return (board.scenes || [])
+    .filter(s => s && s.kind !== 'cover' && s.kind !== 'end')
+    .slice(0, 6)
+    .map(s => [s.title, s.sub].filter(Boolean).join(' '))
+    .filter(Boolean)
+    .join('；');
+}
 
 function newId() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' +
@@ -119,6 +155,7 @@ function createJob(brief, storyboard) {
       title: String(brief.title || '').trim(),
       summary: String(brief.summary || '').trim(),
       requirements: String(brief.requirements || '').trim(),
+      channel: ['财经', '科技', '体育'].includes(brief.channel) ? brief.channel : '财经',
       minutes: Math.min(10, Math.max(2, Number(brief.minutes) || 5)),
     },
     log: [], error: null,
@@ -212,19 +249,42 @@ async function runJob(job) {
 
   /* 2. 封面预览：等用户挑选确认后再继续 */
   if (!board.meta.coverConfirmed) {
-    const motif = COVER_LABEL[board.meta.cover] ? board.meta.cover : coverTheme(board.meta.title, board.meta.subtitle);
+    const modelPick = COVER_LABEL[board.meta.cover] ? board.meta.cover : undefined;
+    // 按标题实物选封面，并避开最近几条片子用过的主体
+    const { motif, shifted, from } = chooseCover(board.meta.title, board.meta.subtitle, modelPick, recentCoverIds(job.id));
+    if (shifted) log(job, `封面「${COVER_LABEL[from]}」与最近视频重复，按标题自动换成「${COVER_LABEL[motif]}」`);
     const picked = Number(board.meta.coverLayout);
     const layout = (picked === 0 || picked === 1 || picked === 2) ? picked : (board.meta.title.length + board.scenes.length) % 3;
     board.meta.cover = motif;
     board.meta.coverLayout = layout;
+
+    // 先按标题画一张专属插画；画不出来就退回手绘素材，不阻塞流程
+    const cfg = readConfig();
+    const provider = normalizeProvider(board.meta.artProvider || cfg.artProvider);
+    if (!board.meta.artMode && !board.meta.artFailed) {
+      setStep(job, '按标题生成封面插画（' + PROVIDER_LABEL[provider] + '）', 10);
+      try {
+        await generateCoverArt(dir, board.meta, cfg, m => log(job, m), {
+          provider, context: artContext(board),
+        });
+        board.meta.artProvider = provider;
+        board.meta.artMode = true;
+      } catch (e) {
+        board.meta.artFailed = true;
+        log(job, '按标题生成插画失败，改用手绘素材封面：' + e.message);
+      }
+    }
     fs.writeFileSync(boardPath, JSON.stringify(board, null, 2));
+
     setStep(job, '生成封面预览', 10);
     try {
       await covers.renderPreview(dir, board, motif, layout);
     } catch (e) {
       throw new Error('封面预览渲染失败：' + e.message);
     }
-    log(job, `封面样式：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[layout]}（共 ${COVER_STYLES.length} 种可选）`);
+    log(job, board.meta.artMode
+      ? `封面插画：已按标题「${board.meta.title}」用${PROVIDER_LABEL[normalizeProvider(board.meta.artProvider)]}生成 · ${COVER_LAYOUT_NAME[layout]}`
+      : `封面样式：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[layout]}（共 ${COVER_STYLES.length} 种可选）`);
     job.status = 'preview';
     job.step = '等待确认封面';
     job.progress = 10;
@@ -234,6 +294,26 @@ async function runJob(job) {
     return;
   }
   log(job, '封面已确认，继续生成');
+
+  /* 2.5 分镜插图：按选择的方式逐屏生成，失败的单屏退回素材图 */
+  const sceneCfg = readConfig();
+  const sceneMode = normalizeSceneMode(board.meta.sceneArtMode || sceneCfg.sceneArtMode);
+  if (sceneMode !== 'library') {
+    board.meta.sceneArtMode = sceneMode;
+    setStep(job, '逐屏生成插图（' + SCENE_MODE_LABEL[sceneMode] + '）', 11);
+    try {
+      await generateSceneArts(dir, board, sceneCfg, m => log(job, m), {
+        mode: sceneMode, provider: normalizeProvider(sceneCfg.artProvider),
+        onProgress: (done, total) => {
+          job.step = `逐屏生成插图 ${done}/${total}`;
+          persist(job);
+        },
+      });
+    } catch (e) {
+      log(job, '逐屏生成插图失败，改用手绘素材：' + e.message);
+    }
+    fs.writeFileSync(boardPath, JSON.stringify(board, null, 2));
+  }
 
   /* 3. 配音 */
   setStep(job, '生成配音', 12);
@@ -258,7 +338,7 @@ async function runJob(job) {
 
   /* 3. 合成页面 */
   setStep(job, '合成手绘页面', 32);
-  const html = renderHTML(board, beats.beats);
+  const html = renderHTML(covers.withSceneArt(dir, covers.withArt(dir, board)), beats.beats);
   const htmlPath = path.join(dir, 'index.html');
   fs.writeFileSync(htmlPath, html);
   log(job, `页面 ${(html.length / 1024).toFixed(0)}KB，${beats.beats.length} 屏`);
@@ -312,7 +392,15 @@ async function runJob(job) {
   const size = fs.statSync(mp4).size;
   log(job, `成片 ${mb(size)}，${Math.floor(beats.total / 60)}:${String(Math.round(beats.total % 60)).padStart(2, '0')}`);
 
-  /* 6. 清理帧，节省磁盘 */
+  /* 6. 发布文案与章节（失败不影响成片） */
+  try {
+    const r = await buildChapters(dir, readConfig(), m => log(job, m));
+    log(job, (r.cached ? '发布文案已存在：' : '发布文案已生成：') + 'chapters.txt');
+  } catch (e) {
+    log(job, '发布文案生成失败（不影响成片）：' + e.message);
+  }
+
+  /* 7. 清理帧，节省磁盘 */
   try {
     fs.rmSync(framesDir, { recursive: true, force: true });
     log(job, '已清理临时帧');
@@ -357,6 +445,8 @@ async function setCover(id, motif, layout) {
   const changed = board.meta.cover !== motif;
   board.meta.cover = motif;
   board.meta.coverLayout = lay;
+  // 手动挑素材封面就退出插画模式
+  board.meta.artMode = false;
   // 小道具是按模型原本选的主体配的，换主体后只保留数字/地名批注
   if (changed && board.meta.coverSpec) {
     const calls = board.meta.coverSpec.callouts;
@@ -373,6 +463,60 @@ async function setCover(id, motif, layout) {
   persist(job);
   log(job, `封面改为：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[lay]}`);
   return { ok: true, coverAt: job.coverAt };
+}
+
+/* 按标题重画一张封面插画，覆盖上一张；可指定生成方式和自定义提示词 */
+async function regenCoverArt(id, provider, prompt) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以重画插画' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜文件缺失' };
+  const cfg = readConfig();
+  const p = normalizeProvider(provider || board.meta.artProvider || cfg.artProvider);
+  const text = prompt === undefined ? undefined : String(prompt || '').trim().slice(0, 400);
+  log(job, '按标题重画封面插画（' + PROVIDER_LABEL[p] + '）' + (text ? '，使用自定义提示词' : ''));
+  try {
+    await generateCoverArt(dir, board.meta, cfg, m => log(job, m), {
+      provider: p, prompt: text, context: artContext(board),
+    });
+  } catch (e) {
+    return { code: 500, error: '生成插画失败：' + e.message };
+  }
+  board.meta.artMode = true;
+  board.meta.artProvider = p;
+  if (text !== undefined) {
+    if (text) board.meta.artPrompt = text;
+    else delete board.meta.artPrompt;
+  }
+  delete board.meta.artFailed;
+  fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+  try {
+    await covers.renderPreview(dir, board, board.meta.cover, board.meta.coverLayout);
+  } catch (e) {
+    return { code: 500, error: '封面预览渲染失败：' + e.message };
+  }
+  job.coverAt = Date.now();
+  persist(job);
+  log(job, '封面插画已重画');
+  return { ok: true, coverAt: job.coverAt };
+}
+
+/* 封面预览阶段选择整片的分镜插图模式，确认封面后按它逐屏生成 */
+function setSceneArtMode(id, mode) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'preview') return { code: 409, error: '只有等待确认封面的任务可以修改分镜插图模式' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜文件缺失' };
+  const m = normalizeSceneMode(mode);
+  board.meta.sceneArtMode = m;
+  fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+  log(job, '分镜插图模式改为：' + SCENE_MODE_LABEL[m]);
+  persist(job);
+  return { ok: true, mode: m, label: SCENE_MODE_LABEL[m] };
 }
 
 function confirmCover(id) {
@@ -399,9 +543,13 @@ function jobView(job, withLog = true) {
   let coverStyle = null;
   const board = readBoard(dir);
   if (board && board.meta && board.meta.cover) {
+    const provider = normalizeProvider(board.meta.artProvider);
     coverStyle = {
       motif: board.meta.cover, layout: board.meta.coverLayout,
-      label: COVER_LABEL[board.meta.cover] || board.meta.cover,
+      art: !!board.meta.artMode,
+      provider,
+      prompt: board.meta.artPrompt || '',
+      label: board.meta.artMode ? ('按标题生成的插画 · ' + PROVIDER_LABEL[provider]) : (COVER_LABEL[board.meta.cover] || board.meta.cover),
       layoutName: COVER_LAYOUT_NAME[board.meta.coverLayout] || '',
     };
   }
@@ -412,6 +560,11 @@ function jobView(job, withLog = true) {
     coverAt: job.coverAt || null,
     hasCover: fs.existsSync(path.join(dir, 'covers', 'preview.png')),
     coverStyle,
+    sceneArt: board ? {
+      mode: board.meta.sceneArtMode ? normalizeSceneMode(board.meta.sceneArtMode) : '',
+      label: board.meta.sceneArtMode ? SCENE_MODE_LABEL[normalizeSceneMode(board.meta.sceneArtMode)] : '',
+      ...sceneArtStat(dir, board),
+    } : null,
     hasVideo: fs.existsSync(path.join(dir, 'output.mp4')),
     duration: (() => {
       try { return JSON.parse(fs.readFileSync(path.join(dir, 'beats.json'), 'utf8')).total; } catch { return null; }
@@ -449,5 +602,5 @@ function getJob(id) {
 
 module.exports = {
   createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
-  listCovers, setCover, confirmCover,
+  listCovers, setCover, confirmCover, regenCoverArt, setSceneArtMode,
 };
