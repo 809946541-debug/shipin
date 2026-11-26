@@ -162,8 +162,8 @@ ul.news .meta a{text-decoration:none}
           <div>
             <label>目标时长</label>
             <select id="minutes">
-              <option value="4">约 4 分钟</option>
-              <option value="5" selected>约 5 分钟</option>
+              <option value="4" selected>约 4 分钟</option>
+              <option value="5">约 5 分钟</option>
               <option value="6">约 6 分钟</option>
               <option value="7">约 7 分钟</option>
             </select>
@@ -209,8 +209,7 @@ ul.news .meta a{text-decoration:none}
           <div class="field">
             <label>默认分镜插图模式（整片每一屏）</label>
             <select id="sceneArtModeDefault">
-              <option value="library">素材库 AI 匹配（原方式，最快）</option>
-              <option value="svg">每屏电脑手绘（AI 画 SVG，较慢）</option>
+              <option value="svg">每屏电脑手绘（默认，AI 画 SVG）</option>
               <option value="api">每屏调用生图 API（走下面的生图接口）</option>
             </select>
           </div>
@@ -247,14 +246,11 @@ ul.news .meta a{text-decoration:none}
         </details>
       </div>
 
-      <div class="card" style="margin-top:18px">
-        <h2>历史任务<small id="jobCount"></small></h2>
-        <ul class="jobs" id="jobs"><li class="empty">暂无任务</li></ul>
-      </div>
     </div>
 
-    <div class="card">
-      <h2><span>当前任务</span><small id="jobId"></small></h2>
+    <div>
+      <div class="card">
+        <h2><span>当前任务</span><small id="jobId"></small></h2>
       <div class="status">
         <span class="dot" id="dot"></span>
         <span class="step" id="step">等待开始</span>
@@ -267,7 +263,7 @@ ul.news .meta a{text-decoration:none}
         <div class="cover-main">
           <img id="coverImg" alt="封面预览">
           <div class="cover-info">
-            <div><b>分镜已完成。</b>封面可按标题自动画一张插画，也可以选素材封面；分镜插图可选素材库或逐屏生成。确认后再配音、渲染和编码。</div>
+            <div><b>分镜已完成。</b>封面可按标题自动画一张插画，也可以选素材封面；分镜插图默认逐屏电脑手绘，也可切换成生图 API。确认后再配音、渲染和编码。</div>
             <div id="coverMeta" style="margin-top:6px"></div>
             <div class="field" style="margin:10px 0 0">
               <label>封面插画方式</label>
@@ -280,8 +276,7 @@ ul.news .meta a{text-decoration:none}
             <div class="field" style="margin:8px 0 0">
               <label>分镜插图模式（整片每一屏，确认封面后生成）</label>
               <select id="sceneArtMode">
-                <option value="library">素材库 AI 匹配（原方式，最快）</option>
-                <option value="svg">每屏电脑手绘（AI 画 SVG，较慢）</option>
+                <option value="svg">每屏电脑手绘（默认，AI 画 SVG）</option>
                 <option value="api">每屏调用生图 API</option>
               </select>
             </div>
@@ -322,6 +317,12 @@ ul.news .meta a{text-decoration:none}
         </div>
       </div>
     </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>历史任务<small id="jobCount"></small></h2>
+        <ul class="jobs" id="jobs"><li class="empty">暂无任务</li></ul>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -348,7 +349,7 @@ let coverBusy = false;
 const ART_LABEL = { svg: '本地 AI 手绘', pollinations: '免费自动插画', openai: '第三方生图 API' };
 const SCENE_LABEL = { library: '素材库 AI 匹配', svg: '每屏电脑手绘', api: '每屏生图 API' };
 const STYLE_LABEL = { rough: '手绘纸感', marker: '马克笔扁平', ink: '墨线淡彩', blueprint: '工程蓝图', retro: '复古海报' };
-let defaultSceneMode = 'library';
+let defaultSceneMode = 'svg';
 let defaultArtStyle = 'rough';
 
 function fmtTime(ts){
@@ -533,8 +534,8 @@ async function loadConfig(){
   if (!c.hasKey) $('#settingsBox').open = true;
 
   $('#artProviderDefault').value = c.artProvider || 'svg';
-  $('#sceneArtModeDefault').value = c.sceneArtMode || 'library';
-  defaultSceneMode = c.sceneArtMode || 'library';
+  $('#sceneArtModeDefault').value = c.sceneArtMode || 'svg';
+  defaultSceneMode = c.sceneArtMode || 'svg';
   $('#artStyleDefault').value = c.artStyle || 'rough';
   defaultArtStyle = c.artStyle || 'rough';
   $('#artBaseUrl').value = c.artBaseUrl || '';

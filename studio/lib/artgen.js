@@ -25,7 +25,7 @@ function normalizeProvider(p) {
 }
 
 function normalizeSceneMode(m) {
-  return SCENE_MODES.includes(m) ? m : 'library';
+  return SCENE_MODES.includes(m) ? m : 'svg';
 }
 
 // 本地手绘风格预设：只影响 SVG 手绘（封面 + 分镜），不影响素材库
