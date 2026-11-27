@@ -295,6 +295,7 @@ function validate(raw, channel = '财经') {
   const lay = Number(meta.coverLayout);
   if (lay === 0 || lay === 1 || lay === 2) board.meta.coverLayout = lay;
   if (meta.coverConfirmed) board.meta.coverConfirmed = true;
+  if (meta.boardConfirmed) board.meta.boardConfirmed = true;
   // 插画模式标记必须保留，否则确认封面重新进 run() 时会被白名单洗掉，成片就不出插画了
   if (meta.artMode) board.meta.artMode = true;
   if (meta.artFailed) board.meta.artFailed = true;

@@ -201,7 +201,7 @@ async function drain() {
     const job = queue.shift();
     try {
       await runJob(job);
-      if (job.status === 'preview') { persist(job); continue; }
+      if (job.status === 'preview' || job.status === 'board') { persist(job); continue; }
       job.status = 'done'; job.step = '完成'; job.progress = 100;
       log(job, '成片完成');
     } catch (e) {
@@ -249,6 +249,16 @@ async function runJob(job) {
   job.progress = 10;
   persist(job);
 
+  /* 1.5 分镜确认：先给用户看要点，满意了再做封面 */
+  if (!board.meta.boardConfirmed && !board.meta.coverConfirmed) {
+    job.status = 'board';
+    job.step = '等待确认分镜要点';
+    job.progress = 10;
+    persist(job);
+    log(job, `分镜要点已生成，共 ${board.scenes.length} 屏，请确认或让 AI 重新生成`);
+    return;
+  }
+
   /* 2. 封面预览：等用户挑选确认后再继续 */
   if (!board.meta.coverConfirmed) {
     const modelPick = COVER_LABEL[board.meta.cover] ? board.meta.cover : undefined;
@@ -292,7 +302,7 @@ async function runJob(job) {
     job.progress = 10;
     job.coverAt = Date.now();
     persist(job);
-    log(job, '请在上方挑一张封面，确认后开始配音与渲染');
+    log(job, '请确认封面，确认后开始配音与渲染');
     return;
   }
   log(job, '封面已确认，继续生成');
@@ -537,6 +547,62 @@ function setSceneArtMode(id, mode, style) {
   };
 }
 
+function confirmBoard(id) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'board') return { code: 409, error: '任务当前不在等待分镜确认' };
+  const dir = jobDir(id);
+  const board = readBoard(dir);
+  if (!board) return { code: 400, error: '分镜文件缺失' };
+  board.meta.boardConfirmed = true;
+  fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+  job.status = 'queued';
+  job.step = '排队中';
+  job.error = null;
+  log(job, '分镜要点已确认，开始生成封面');
+  persist(job);
+  queue.push(job);
+  setImmediate(drain);
+  return { ok: true };
+}
+
+/* 按用户修改意见重写分镜，完成后回到「等待确认分镜」 */
+function regenBoard(id, note) {
+  const job = jobs.get(id);
+  if (!job) return { code: 404, error: '任务不存在' };
+  if (job.status !== 'board') return { code: 409, error: '只有等待确认分镜的任务可以重新生成' };
+  const dir = jobDir(id);
+  job.status = 'running';
+  job.step = '重新生成分镜要点';
+  job.progress = 5;
+  job.error = null;
+  log(job, '重新生成分镜' + (note ? '，修改意见：' + note : ''));
+  persist(job);
+  (async () => {
+    try {
+      const cfg = readConfig();
+      const brief = { ...job.brief };
+      if (note) brief.requirements = [job.brief.requirements, '用户对上一版分镜的修改意见：' + note].filter(Boolean).join('\n');
+      const board = await generateStoryboard(brief, cfg, m => log(job, m));
+      board.meta.boardConfirmed = false;
+      delete board.meta.coverConfirmed;
+      fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
+      try { fs.rmSync(path.join(dir, 'covers'), { recursive: true, force: true }); } catch { }
+      job.status = 'board';
+      job.step = '等待确认分镜要点';
+      job.progress = 10;
+      log(job, `分镜已重新生成，共 ${board.scenes.length} 屏，请确认`);
+    } catch (e) {
+      job.status = 'board';
+      job.step = '等待确认分镜要点';
+      job.error = '重新生成分镜失败：' + (e && e.message ? e.message : String(e));
+      log(job, job.error);
+    }
+    persist(job);
+  })();
+  return { ok: true };
+}
+
 function confirmCover(id) {
   const job = jobs.get(id);
   if (!job) return { code: 404, error: '任务不存在' };
@@ -544,6 +610,7 @@ function confirmCover(id) {
   const dir = jobDir(id);
   const board = readBoard(dir);
   if (!board) return { code: 400, error: '分镜文件缺失' };
+  board.meta.boardConfirmed = true;
   board.meta.coverConfirmed = true;
   fs.writeFileSync(path.join(dir, 'storyboard.json'), JSON.stringify(board, null, 2));
   job.status = 'queued';
@@ -571,9 +638,28 @@ function jobView(job, withLog = true) {
       layoutName: COVER_LAYOUT_NAME[board.meta.coverLayout] || '',
     };
   }
+  const boardReady = job.status === 'board';
+  let boardInfo = null;
+  if (boardReady && board && Array.isArray(board.scenes)) {
+    boardInfo = {
+      title: board.meta.title || job.brief.title,
+      subtitle: board.meta.subtitle || '',
+      estimate: board.scenes.reduce((a, s) => a + String(s.narration || '').length / CHARS_PER_SEC + GAP_PER_SCENE, 0),
+      scenes: board.scenes.map((s, i) => ({
+        i: i + 1,
+        kind: s.kind || '',
+        title: s.title || '',
+        sub: s.sub || '',
+        narration: s.narration || '',
+        points: Array.isArray(s.points) ? s.points.map(p => (p && p.t) || '').filter(Boolean) : [],
+      })),
+    };
+  }
   return {
     id: job.id, createdAt: job.createdAt, status: job.status, step: job.step,
     progress: job.progress, error: job.error || null, brief: job.brief,
+    boardReady,
+    board: boardInfo,
     preview: job.status === 'preview',
     coverAt: job.coverAt || null,
     hasCover: fs.existsSync(path.join(dir, 'covers', 'preview.png')),
@@ -622,5 +708,5 @@ function getJob(id) {
 
 module.exports = {
   createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, saveConfig, publicConfig, jobDir, JOBS,
-  listCovers, setCover, confirmCover, regenCoverArt, setSceneArtMode,
+  listCovers, setCover, confirmCover, confirmBoard, regenBoard, regenCoverArt, setSceneArtMode,
 };

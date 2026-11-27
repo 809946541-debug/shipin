@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, publicConfig, saveConfig, jobDir, listCovers, setCover, confirmCover, regenCoverArt, setSceneArtMode } = require('./lib/pipeline');
+const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, publicConfig, saveConfig, jobDir, listCovers, setCover, confirmCover, confirmBoard, regenBoard, regenCoverArt, setSceneArtMode } = require('./lib/pipeline');
 const { buildChapters } = require('./lib/chapters');
 const { listNews, generateTopic } = require('./lib/news');
 
@@ -123,7 +123,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       if (!body.title || !String(body.title).trim()) return json(res, 400, { error: '请填写标题' });
       if (!body.summary || !String(body.summary).trim()) return json(res, 400, { error: '请填写一句话介绍' });
-      const dup = listJobs().find(j => j.brief && j.brief.title === String(body.title).trim() && (j.status === 'running' || j.status === 'queued' || j.status === 'preview'));
+      const dup = listJobs().find(j => j.brief && j.brief.title === String(body.title).trim() && (j.status === 'running' || j.status === 'queued' || j.status === 'board' || j.status === 'preview'));
       if (dup) return json(res, 409, { error: '已有相同标题的任务在排队或生成中，请等待完成' });
       let board = null;
       if (body.storyboard) {
@@ -177,6 +177,21 @@ const server = http.createServer(async (req, res) => {
     if (sceneArt && req.method === 'POST') {
       const body = await readBody(req, 64 * 1024);
       const r = setSceneArtMode(sceneArt[1], body.mode, body.style);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
+    const boardOk = p.match(/^\/api\/jobs\/([\w-]+)\/board\/confirm$/);
+    if (boardOk && req.method === 'POST') {
+      const r = confirmBoard(boardOk[1]);
+      if (!r.ok) return json(res, r.code, { error: r.error });
+      return json(res, 200, r);
+    }
+
+    const boardRegen = p.match(/^\/api\/jobs\/([\w-]+)\/board\/regen$/);
+    if (boardRegen && req.method === 'POST') {
+      const body = await readBody(req, 64 * 1024);
+      const r = regenBoard(boardRegen[1], String(body.note || '').trim().slice(0, 200));
       if (!r.ok) return json(res, r.code, { error: r.error });
       return json(res, 200, r);
     }

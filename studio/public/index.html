@@ -98,16 +98,23 @@ ul.news .meta a{text-decoration:none}
 .dot.preview{background:var(--blue);animation:pulse 1.4s infinite}
 .dot.done{background:var(--ok)}
 .dot.error{background:var(--red)}
+.dot.board{background:var(--gold);animation:pulse 1.4s infinite}
 @keyframes pulse{50%{opacity:.35}}
 .cover-box{margin:12px 0 14px;border:1px dashed var(--line);border-radius:10px;padding:12px;background:#fffdf7;display:none}
 .cover-main{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
 .cover-main img{width:210px;border-radius:8px;border:1px solid var(--line);background:#fff;flex:0 0 auto}
 .cover-info{font-size:12.5px;color:var(--ink2);line-height:1.7;flex:1;min-width:180px}
-.cover-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-top:10px;max-height:330px;overflow:auto}
-.cover-grid button{padding:0;border:2px solid transparent;border-radius:6px;background:none;cursor:pointer}
-.cover-grid button.on{border-color:var(--red)}
-.cover-grid img{width:100%;display:block;border-radius:4px;border:1px solid var(--line);background:#fff}
 .cover-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.board-box{display:none;margin:12px 0 14px;border:1px dashed var(--line);border-radius:10px;padding:14px;background:#fffdf7}
+.board-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.board-list{margin-top:10px;border-top:1px dashed var(--line);max-height:430px;overflow:auto}
+.board-item{padding:9px 2px;border-bottom:1px dashed var(--line)}
+.board-item:last-child{border-bottom:0}
+.board-item h4{margin:0 0 3px;font-size:14px;display:flex;align-items:baseline;gap:7px}
+.board-item h4 i{font-style:normal;font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 6px;font-weight:400}
+.board-item p{margin:0;font-size:13px;line-height:1.6;color:var(--ink2)}
+.board-item .pts{margin-top:3px;font-size:12.5px;color:var(--ink2)}
+.board-actions{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -259,11 +266,28 @@ ul.news .meta a{text-decoration:none}
       </div>
       <div class="bar"><i id="bar"></i></div>
 
+      <div class="board-box" id="boardBox">
+        <div class="board-head">
+          <b>分镜要点已生成，请先确认</b>
+          <span class="hint" style="margin:0" id="boardMeta"></span>
+        </div>
+        <div class="board-list" id="boardList"></div>
+        <div class="field" style="margin:10px 0 0">
+          <label>不满意？写一句修改意见（可选），再让 AI 重写分镜</label>
+          <input id="boardNote" placeholder="例如：少讲参数，多讲对普通人的影响">
+        </div>
+        <div class="board-actions">
+          <button class="btn ghost small" id="boardRegen">重新生成分镜</button>
+          <button class="btn primary small" id="boardConfirm" style="width:auto">确认分镜，生成封面</button>
+          <span class="hint" style="margin:0" id="boardTip"></span>
+        </div>
+      </div>
+
       <div class="cover-box" id="coverBox">
         <div class="cover-main">
           <img id="coverImg" alt="封面预览">
           <div class="cover-info">
-            <div><b>分镜已完成。</b>封面可按标题自动画一张插画，也可以选素材封面；分镜插图默认逐屏电脑手绘，也可切换成生图 API。确认后再配音、渲染和编码。</div>
+            <div><b>分镜要点已确认。</b>封面已按标题自动画好，不满意可换方式或写提示词重画；确认后开始配音、逐屏画插图、渲染和编码。</div>
             <div id="coverMeta" style="margin-top:6px"></div>
             <div class="field" style="margin:10px 0 0">
               <label>封面插画方式</label>
@@ -295,13 +319,11 @@ ul.news .meta a{text-decoration:none}
               <input id="artPrompt" placeholder="例如：一辆白色电动车停在超充站前">
             </div>
             <button class="btn ghost small" id="coverArt" style="margin-top:8px">按标题重画插画</button>
-            <button class="btn ghost small" id="coverMore" style="margin-top:8px">换一批缩略图</button>
           </div>
         </div>
-        <div class="cover-grid" id="coverGrid"></div>
         <div class="cover-actions">
           <button class="btn primary" id="coverConfirm" style="width:auto">确认封面，开始生成视频</button>
-          <span class="hint" style="margin:0" id="coverTip">点缩略图可在大图预览中替换</span>
+          <span class="hint" style="margin:0" id="coverTip">封面按标题自动生成，确认即可</span>
         </div>
       </div>
 
@@ -343,9 +365,8 @@ let currentId = null;
 let timer = null;
 let lastJob = null;
 let coverJobId = null;
-let coverPage = 0;
-let coverPages = 1;
 let coverBusy = false;
+let boardBusy = false;
 const ART_LABEL = { svg: '本地 AI 手绘', pollinations: '免费自动插画', openai: '第三方生图 API' };
 const SCENE_LABEL = { library: '素材库 AI 匹配', svg: '每屏电脑手绘', api: '每屏生图 API' };
 const STYLE_LABEL = { rough: '手绘纸感', marker: '马克笔扁平', ink: '墨线淡彩', blueprint: '工程蓝图', retro: '复古海报' };
@@ -629,65 +650,82 @@ $('#retryBtn').onclick = async () => {
 
 function setDot(status){
   const d = $('#dot');
-  d.className = 'dot' + (status === 'running' ? ' running' : status === 'preview' ? ' preview' : status === 'done' ? ' done' : status === 'error' ? ' error' : '');
+  d.className = 'dot' + (status === 'running' ? ' running' : status === 'board' ? ' board' : status === 'preview' ? ' preview' : status === 'done' ? ' done' : status === 'error' ? ' error' : '');
 }
 
-/* ---------------- 封面预览 ---------------- */
-function markCoverSelection(){
-  const s = lastJob && lastJob.coverStyle;
-  [...$('#coverGrid').children].forEach(b => {
-    const on = !!s && !s.art && b.dataset && b.dataset.motif === s.motif && Number(b.dataset.layout) === Number(s.layout);
-    b.classList.toggle('on', on);
-  });
-}
-
-async function loadCoverGrid(page){
-  if (!currentId || coverBusy) return;
-  const id = currentId;
-  coverBusy = true;
-  const grid = $('#coverGrid');
-  grid.innerHTML = '<div class="cover-info">缩略图渲染中，约需几秒…</div>';
-  try {
-    const r = await fetch('/api/jobs/' + id + '/covers?page=' + page);
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || '加载封面样式失败');
-    if (id !== currentId) return;
-    coverPage = d.page;
-    coverPages = d.pages;
-    grid.innerHTML = d.items.map(it => `<button data-motif="${esc(it.motif)}" data-layout="${it.layout}" title="${esc(it.label)} · ${esc(it.layoutName)}"><img loading="lazy" src="${it.url}" alt="${esc(it.label)}"></button>`).join('');
-    [...grid.children].forEach(b => { b.onclick = () => pickCover(b.dataset.motif, Number(b.dataset.layout)); });
-    $('#coverTip').textContent = `第 ${d.page + 1}/${d.pages} 批 · 共 ${d.total} 种样式`;
-    markCoverSelection();
-  } catch (e) {
-    grid.innerHTML = '<div class="cover-info">' + esc(e.message) + '</div>';
-  } finally {
-    coverBusy = false;
+/* ---------------- 分镜要点确认 ---------------- */
+function renderBoard(job){
+  const box = $('#boardBox');
+  if (!job.boardReady || !job.board) { box.style.display = 'none'; return; }
+  const b = job.board;
+  box.style.display = 'block';
+  $('#boardMeta').textContent = `共 ${b.scenes.length} 屏 · 预估 ${(b.estimate / 60).toFixed(1)} 分钟`;
+  $('#boardList').innerHTML = b.scenes.map(s => {
+    const tag = s.kind === 'cover' ? '封面' : s.kind === 'end' ? '结尾' : '';
+    const pts = (s.points || []).join(' · ');
+    return `<div class="board-item"><h4><i>${s.i}</i><span>${esc(s.title || tag || '分镜')}</span>${tag && s.title ? `<i>${tag}</i>` : ''}</h4>` +
+      (s.narration ? `<p>${esc(s.narration)}</p>` : '') +
+      (pts ? `<div class="pts">要点：${esc(pts)}</div>` : '') +
+      '</div>';
+  }).join('');
+  if (!boardBusy) {
+    $('#boardRegen').disabled = false;
+    $('#boardConfirm').disabled = false;
+    $('#boardRegen').textContent = '重新生成分镜';
+    $('#boardConfirm').textContent = '确认分镜，生成封面';
+    $('#boardTip').textContent = job.error ? job.error : '';
   }
 }
 
-async function pickCover(motif, layout){
-  if (!currentId || coverBusy) return;
-  coverBusy = true;
+$('#boardConfirm').onclick = async () => {
+  if (!currentId || boardBusy) return;
+  const btn = $('#boardConfirm');
+  boardBusy = true;
+  btn.disabled = true;
+  btn.textContent = '提交中…';
   try {
-    const r = await fetch('/api/jobs/' + currentId + '/cover', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ motif, layout }),
-    });
+    const r = await fetch('/api/jobs/' + currentId + '/board/confirm', { method: 'POST' });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error || '切换封面失败');
-    $('#coverImg').src = '/media/' + currentId + '/covers/preview.png?v=' + d.coverAt;
-    if (lastJob) lastJob.coverStyle = { motif, layout, label: '', layoutName: '' };
-    markCoverSelection();
+    if (!r.ok) throw new Error(d.error || '确认失败');
+    $('#boardBox').style.display = 'none';
+    poll(currentId);
+    loadJobs();
   } catch (e) {
     alert(e.message);
   } finally {
-    coverBusy = false;
+    boardBusy = false;
+    btn.disabled = false;
+    btn.textContent = '确认分镜，生成封面';
   }
-}
+};
 
-$('#coverMore').onclick = () => loadCoverGrid((coverPage + 1) % Math.max(1, coverPages));
+$('#boardRegen').onclick = async () => {
+  if (!currentId || boardBusy) return;
+  const btn = $('#boardRegen');
+  boardBusy = true;
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  try {
+    const r = await fetch('/api/jobs/' + currentId + '/board/regen', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note: $('#boardNote').value.trim() }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '重新生成失败');
+    $('#boardBox').style.display = 'none';
+    poll(currentId);
+    loadJobs();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    boardBusy = false;
+    btn.disabled = false;
+    btn.textContent = '重新生成分镜';
+  }
+};
 
-// 按标题重画一张封面插画；点素材缩略图则退回素材封面
+/* ---------------- 封面预览 ---------------- */
+// 封面按标题自动生成，只需确认；可换生图方式或写提示词重画
 $('#coverArt').onclick = async () => {
   if (!currentId || coverBusy) return;
   coverBusy = true;
@@ -804,6 +842,7 @@ function render(job){
   if (atBottom) logEl.scrollTop = logEl.scrollHeight;
 
   lastJob = job;
+  renderBoard(job);
   if (job.preview) {
     $('#coverBox').style.display = 'block';
     const img = $('#coverImg');
@@ -820,10 +859,8 @@ function render(job){
     }
     if (coverJobId !== job.id) {
       coverJobId = job.id;
-      coverPage = 0;
-      loadCoverGrid(0);
+      $('#boardNote').value = '';
     }
-    markCoverSelection();
   } else {
     $('#coverBox').style.display = 'none';
     if (coverJobId) coverJobId = null;
@@ -875,6 +912,7 @@ function resetView(){
   $('#retryBtn').style.display = 'none';
   $('#durBadge').style.display = 'none';
   $('#coverBox').style.display = 'none';
+  $('#boardBox').style.display = 'none';
   coverJobId = null;
 }
 
@@ -886,11 +924,11 @@ async function loadJobs(){
   ul.innerHTML = list.map(j => `<li data-id="${j.id}">
     <span class="dot ${j.status}"></span>
     <span class="t">${(j.brief && j.brief.title) || '(未命名)'}</span>
-    <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : j.status === 'preview' ? '待选封面' : (j.progress||0) + '%'}</span>
+    <span class="m">${j.status === 'done' ? '完成' : j.status === 'error' ? '失败' : j.status === 'board' ? '待确认分镜' : j.status === 'preview' ? '待确认封面' : (j.progress||0) + '%'}</span>
     <span class="m">${fmtTime(j.createdAt)}</span>
-    ${j.hasVideo ? `<button class="jchap" title="生成发布文案与章节">文</button>` : ''}
-    ${(j.status === 'done' || j.status === 'error' || j.status === 'preview') ? `<button class="jreb" title="用同样的选题重新生成一条">↻</button>` : ''}
-    ${(j.status === 'done' || j.status === 'error' || j.status === 'preview') ? `<button class="jdel" title="删除任务与成片">×</button>` : ''}
+    ${j.hasVideo ? `<button class="jchap" title="生成发布文案与章节">📄</button>` : ''}
+    ${(j.status === 'done' || j.status === 'error' || j.status === 'board' || j.status === 'preview') ? `<button class="jreb" title="用同样的选题重新生成一条">↻</button>` : ''}
+    ${(j.status === 'done' || j.status === 'error' || j.status === 'board' || j.status === 'preview') ? `<button class="jdel" title="删除任务与成片">×</button>` : ''}
   </li>`).join('');
   [...ul.querySelectorAll('li[data-id]')].forEach(li => {
     li.onclick = e => {
