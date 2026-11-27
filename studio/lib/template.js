@@ -2,7 +2,7 @@
 // 分镜 JSON -> 手绘风竖屏 HTML（1080x1728 渲染区，编码时上下各补 96px 黑边）
 
 const CSS = `
-:root{--paper:#f4efe2;--ink:#2d2822;--ink2:#4b4034;--red:#b23a2a;--blue:#33506f;--sea:#2b6b85;--gold:#b08a3e;--hand:"Hanzipen SC","Kaiti SC","STKaiti","KaiTi","Noto Serif CJK SC","Songti SC",serif;--num:"Baskerville","Songti SC",serif}
+:root{--paper:#f4efe2;--ink:#2d2822;--ink2:#4b4034;--red:#b23a2a;--green:#2c7a52;--blue:#33506f;--sea:#2b6b85;--gold:#b08a3e;--hand:"Hanzipen SC","Kaiti SC","STKaiti","KaiTi","Noto Serif CJK SC","Songti SC",serif;--num:"Baskerville","Songti SC",serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1728px;overflow:hidden;background:#e6d4af;color:var(--ink);font-family:var(--hand)}
 #stage{position:relative;width:1080px;height:1728px;overflow:hidden;background:radial-gradient(72% 38% at 18% 2%,rgba(255,252,242,.96),rgba(255,252,242,0) 62%),radial-gradient(56% 32% at 84% 96%,rgba(132,100,58,.20),rgba(132,100,58,0) 68%),radial-gradient(42% 24% at 78% 12%,rgba(126,96,54,.11),rgba(126,96,54,0) 70%),linear-gradient(160deg,#f9f1dd 0%,#f2e5c8 44%,#e6d3ae 100%)}
@@ -55,7 +55,43 @@ html,body{width:1080px;height:1728px;overflow:hidden;background:#e6d4af;color:va
 .vs{position:absolute;left:0;width:1080px;text-align:center;top:726px;line-height:1.2;font-family:var(--num);font-weight:700;font-size:38px;color:var(--ink2)}
 .sc{position:absolute;padding-top:6px}
 .sc .v{font-family:var(--num);font-weight:700;font-size:64px;line-height:1.08;white-space:nowrap}
+.sc .v.up{color:var(--red)}
+.sc .v.down{color:var(--green)}
 .sc .l{font-size:25px;color:var(--ink2);margin-top:12px;line-height:1.5;width:100%}
+/* 近 7 个交易日涨跌家数：红涨绿跌的小表格 */
+.hist{position:absolute;left:104px;width:872px}
+.hist .cap{font-size:26px;color:var(--ink2);line-height:1.5}
+.hist .hd{font-size:27px;letter-spacing:.08em;margin-top:8px;color:var(--ink)}
+.hist .cols{display:flex;gap:6px;margin-top:16px;padding-top:14px;border-top:2px solid rgba(45,40,34,.26)}
+.hist .col{flex:1;text-align:center}
+.hist .col .u{font-family:var(--num);font-weight:700;font-size:31px;line-height:1.2;color:var(--red)}
+.hist .col .d{font-family:var(--num);font-weight:700;font-size:26px;line-height:1.2;color:var(--green);margin-top:2px}
+.hist .col .dt{font-size:20px;color:var(--ink2);margin-top:8px}
+.hist .col.today .dt{color:var(--ink);font-weight:700}
+/* 数据大数字封面 */
+.hero-title{position:absolute;left:0;width:1080px;text-align:center;top:262px;font-size:32px;font-weight:700;letter-spacing:.28em;color:var(--ink2)}
+.hero-date{position:absolute;left:0;width:1080px;text-align:center;top:150px;font-size:72px;font-weight:700;letter-spacing:.04em;color:var(--ink)}
+.hero{position:absolute;left:104px;top:500px;width:872px}
+.hero-row{display:flex;align-items:baseline;gap:24px;line-height:1}
+.hero-row + .hero-row{margin-top:26px}
+.hero-num{font-family:var(--num);font-weight:700;font-size:210px;letter-spacing:-4px}
+.hero-row.up .hero-num{color:var(--red)}
+.hero-row.down .hero-num{color:var(--green)}
+.hero-lb{font-size:46px;color:var(--ink2)}
+.hero-bar{position:absolute;left:104px;top:1020px;width:872px;height:36px;display:flex;overflow:hidden;border:3px solid rgba(45,40,34,.55);border-radius:6px;transform:rotate(-.5deg)}
+.hero-bar i{display:block;height:100%}
+.hero-bar i.up{background:var(--red)}
+.hero-bar i.down{background:var(--green)}
+.hero-legend{position:absolute;left:104px;top:1072px;width:872px;display:flex;justify-content:space-between;font-size:28px;color:var(--ink2)}
+.hero-legend .up{color:var(--red)}
+.hero-legend .down{color:var(--green)}
+.hero-sub{position:absolute;left:104px;top:1146px;width:872px;font-size:38px;line-height:1.5;color:var(--ink2)}
+.hero-idx{position:absolute;left:104px;top:1262px;width:872px;display:flex;gap:16px}
+.hero-idx .hi{flex:1;text-align:center;border-top:2px solid rgba(45,40,34,.25);padding-top:14px}
+.hero-idx .hin{display:block;font-size:27px;color:var(--ink2);letter-spacing:.08em}
+.hero-idx .hip{display:block;font-family:var(--num);font-weight:700;font-size:46px;line-height:1.2;margin-top:4px}
+.up{color:var(--red)}
+.down{color:var(--green)}
 `;
 
 const DEFS = `
@@ -2223,7 +2259,41 @@ function coverArt(theme, top, accent, seed, scale = 1, spec) {
   return `<g filter="url(#rough)"><g${tf}>${paperFill(coverArtRaw(theme, top, accent, seed))}${coverDeco(theme, top, accent, seed)}</g>${coverSceneAnnot(theme, top, accent, seed, spec, k)}</g>`;
 }
 
+// 每日播报封面：用涨跌家数的大数字和红绿占比条做主视觉
+function heroCover(meta) {
+  const d = meta.dataHero || {};
+  const up = Number(d.up) || 0;
+  const down = Number(d.down) || 0;
+  const tot = up + down;
+  const upW = Number(d.upPct) > 0 ? Number(d.upPct) : (tot ? Math.round((up / tot) * 100) : 50);
+  const pct = Math.max(2, Math.min(98, Math.round(upW)));
+  // 数量多的一行放上面、字号最大；数量少的一行放下方、按比例缩小，形成对比
+  const rows = up >= down
+    ? [{ v: up, l: '家上涨', t: 'up' }, { v: down, l: '家下跌', t: 'down' }]
+    : [{ v: down, l: '家下跌', t: 'down' }, { v: up, l: '家上涨', t: 'up' }];
+  const big = Math.max(up, down, 1);
+  const small = Math.max(104, Math.round(210 * Math.pow(Math.min(up, down) / big, 0.33)));
+  const rowHTML = rows.map((r, i) => `<div class="hero-row ${r.t}"><span class="hero-num" style="font-size:${i ? small : 210}px">${esc(String(r.v))}</span><span class="hero-lb">${r.l}</span></div>`).join('\n');
+  const idxs = Array.isArray(d.indices) ? d.indices : [];
+  const idxHTML = idxs.length
+    ? `<div class="hero-idx f" style="--d:.95s">${idxs.map(x => `<div class="hi"><span class="hin">${esc(x.name)}</span><span class="hip ${x.tone === 'up' ? 'up' : x.tone === 'down' ? 'down' : ''}">${esc(x.pct)}</span></div>`).join('')}</div>`
+    : '';
+  return `<section class="scene" id="s0">
+<div class="hero-title rise" style="--d:.18s">${esc(meta.heroTitle || '今日行情播报')}</div>
+<div class="hero-date rise" style="--d:.08s">${esc(d.kicker || '')}</div>
+<div class="hero f" style="--d:.24s">
+${rowHTML}
+</div>
+<div class="hero-bar f" style="--d:.55s"><i class="up" style="width:${pct}%"></i><i class="down" style="width:${100 - pct}%"></i></div>
+<div class="hero-legend f" style="--d:.65s"><span class="up">${pct}% 上涨</span><span class="down">${100 - pct}% 下跌</span></div>
+<div class="hero-sub f" style="--d:.8s">两市成交 ${esc(d.amtText || '')} · 较昨日${esc(d.amtDiffText || '')}</div>
+${idxHTML}
+<div class="f cover-tag" style="--d:1.4s">${esc(meta.disclaimer || '公开数据复盘 · 不构成投资建议')}</div>
+</section>`;
+}
+
 function coverScene(scene, meta) {
+  if (meta.dataHero) return heroCover(meta);
   const title = meta.title || scene.title || '';
   const sub = meta.subtitle || scene.sub || '';
   const seed = title + '|' + sub;
@@ -2369,6 +2439,8 @@ function sceneArtCustom(scene) {
 }
 
 function sceneArtBand(scene, idx) {
+  // 有近 7 日数据表格的屏，表格本身就是内容，不再叠插图
+  if (Array.isArray(scene.history) && scene.history.length) return '';
   if (scene._artSvg || scene._artDataUri) return sceneArtCustom(scene);
   const spec = scene.art && typeof scene.art === 'object' ? scene.art : null;
   const used = scene._usedArt || new Set();
@@ -2444,8 +2516,20 @@ function kickerOf(scene, idx) {
 function notesOf(scene, delayBase = 0.75) {
   const notes = Array.isArray(scene.notes) ? scene.notes.filter(Boolean).slice(0, 3) : [];
   return notes.map((n, i) =>
-    `<div class="s f" style="top:${1090 + i * 78}px;--d:${(delayBase + i * 0.12).toFixed(2)}s">${esc(n)}</div>`
+    `<div class="s f" style="top:${1090 + i * 78}px;--d:${(delayBase + i * 0.12).toFixed(2)}s">${tonePct(n)}</div>`
   ).join('\n');
+}
+
+// 注释里的涨跌幅同样按「涨红跌绿」上色
+function tonePct(s) {
+  return esc(s).replace(/([+-]\d+(?:\.\d+)?%)/g, m => `<span class="${m[0] === '-' ? 'down' : 'up'}">${m}</span>`);
+}
+
+// 机构持仓：多单标红、空单标绿
+function toneOrg(s) {
+  return esc(s)
+    .replace(/(净?多单\s*[\d,]+\s*手|净多\s*[\d,]+\s*手)/g, '<span class="up">$1</span>')
+    .replace(/(净?空单\s*[\d,]+\s*手|净空\s*[\d,]+\s*手)/g, '<span class="down">$1</span>');
 }
 
 function footOf(scene, meta, d = 1.0) {
@@ -2470,7 +2554,7 @@ function bulletsScene(scene, idx) {
   const tops = pts.length >= 4 ? [560, 740, 920, 1100] : [570, 810, 1050];
   const body = pts.map((p, i) => `<div class="pt f" style="top:${tops[i] || 560 + i * 165}px;--d:${(0.4 + i * 0.14).toFixed(2)}s">
 <div class="n"><svg width="56" height="56" viewBox="0 0 56 56" style="overflow:visible">${inkCircle(28, 28, 23, { seed: idx * 13 + i * 5 + 2, w: 2.8, amp: .9, fill: 'rgba(255,252,242,.55)' })}<text x="28" y="37" text-anchor="middle" font-size="26" font-family="Baskerville,serif" font-weight="700" fill="#2d2822">${i + 1}</text></svg></div>
-<div><h3>${esc(p.t)}</h3>${p.d ? `<p>${esc(p.d)}</p>` : ''}</div>
+<div><h3>${esc(p.t)}</h3>${p.d ? `<p>${toneOrg(p.d)}</p>` : ''}</div>
 </div>`).join('\n');
   return `<section class="scene" id="s${idx}">
 ${artLayer(sceneArtBand(scene, idx), idx)}
@@ -2615,18 +2699,37 @@ function statsScene(scene, idx) {
   const cw = (W - gap * (n - 1)) / n;
   const body = items.map((it, i) => {
     const u = units(it.v);
-    const fs = u > 6.5 ? 44 : u > 4.5 ? 52 : 62;
+    // 关键数字尽量铺满列宽：两列（上涨/下跌）时最大可到 112px
+    const cap = n === 1 ? 132 : n === 2 ? 112 : 76;
+    const fs = Math.max(34, Math.min(cap, Math.floor(cw / Math.max(u, 1)) - 8));
     const x = 104 + i * (cw + gap);
+    const tone = it.c === 'up' ? ' up' : it.c === 'down' ? ' down' : '';
     return `<div class="sc f" style="left:${x.toFixed(0)}px;top:620px;width:${cw.toFixed(0)}px;--d:${(0.35 + i * 0.14).toFixed(2)}s">
-<div class="v" style="font-size:${fs}px">${esc(it.v)}</div><div class="l">${esc(it.l)}</div></div>`;
+<div class="v${tone}" style="font-size:${fs}px">${esc(it.v)}</div><div class="l">${esc(it.l)}</div></div>`;
   }).join('\n');
   return `<section class="scene" id="s${idx}">
 ${artLayer(sceneArtBand(scene, idx), idx)}
 ${header(scene, idx, scene.title, scene.sub)}
 ${body}
-${notesOf(scene, 0.85)}
+${histOf(scene)}
+${notesOf(scene, scene.history ? 1.05 : 0.85)}
 ${footOf(scene, scene._meta)}
 </section>`;
+}
+
+// 近 7 个交易日涨跌家数：一行一天，红涨绿跌
+function histOf(scene) {
+  const list = Array.isArray(scene.history) ? scene.history : [];
+  if (!list.length) return '';
+  const cols = list.map((x, i) => `<div class="col${i === list.length - 1 ? ' today' : ''}">
+<div class="u">${esc(String(x.up))}</div>
+<div class="d">${esc(String(x.down))}</div>
+<div class="dt">${esc(x.date)}</div></div>`).join('');
+  return `<div class="hist f" style="top:980px;--d:.7s">
+${scene.historyCaption ? `<div class="cap">${esc(scene.historyCaption)}</div>` : ''}
+<div class="hd">近 ${list.length} 个交易日 · 上涨 / 下跌家数</div>
+<div class="cols">${cols}</div>
+</div>`;
 }
 
 function endScene(scene, idx, meta) {

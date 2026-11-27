@@ -296,6 +296,8 @@ function validate(raw, channel = '财经') {
   if (lay === 0 || lay === 1 || lay === 2) board.meta.coverLayout = lay;
   if (meta.coverConfirmed) board.meta.coverConfirmed = true;
   if (meta.boardConfirmed) board.meta.boardConfirmed = true;
+  // 固定模式（每日播报）：数据确认后直接出片，不再等封面确认
+  if (meta.skipCoverConfirm) board.meta.skipCoverConfirm = true;
   // 插画模式标记必须保留，否则确认封面重新进 run() 时会被白名单洗掉，成片就不出插画了
   if (meta.artMode) board.meta.artMode = true;
   if (meta.artFailed) board.meta.artFailed = true;
@@ -305,6 +307,30 @@ function validate(raw, channel = '财经') {
   if (['rough', 'marker', 'ink', 'blueprint', 'retro'].includes(meta.artStyle)) board.meta.artStyle = meta.artStyle;
   const spec = sanitizeCoverSpec(meta.coverSpec);
   if (spec) board.meta.coverSpec = spec;
+  // 固定模式预先算好的章节（标题带真实数字），必须保留，否则确认分镜重新进 run() 会被白名单洗掉
+  if (Array.isArray(meta.chapters)) {
+    const chs = meta.chapters.slice(0, 8)
+      .map(c => ({ from: Math.max(0, Math.floor(Number(c && c.from) || 0)), title: clean(c && c.title, 16), desc: clean(c && c.desc, 52) }))
+      .filter(c => c.title);
+    if (chs.length) board.meta.chapters = chs;
+  }
+  // 固定模式的封面数据主视觉（大号涨跌家数 + 红绿占比条）
+  if (meta.dataHero && typeof meta.dataHero === 'object') {
+    const d = meta.dataHero;
+    board.meta.dataHero = {
+      kicker: clean(d.kicker, 30),
+      up: Number(d.up) || 0,
+      down: Number(d.down) || 0,
+      upPct: Number(d.upPct) || 0,
+      downPct: Number(d.downPct) || 0,
+      amtText: clean(d.amtText, 20),
+      amtDiffText: clean(d.amtDiffText, 20),
+      indices: Array.isArray(d.indices) ? d.indices.slice(0, 3).map(x => ({
+        name: clean(x.name, 12), pct: clean(x.pct, 12),
+        ...(x.tone === 'up' || x.tone === 'down' ? { tone: x.tone } : {}),
+      })) : [],
+    };
+  }
 
   const src = board.scenes.slice(0, 40);
   board.scenes = src.map((s, i) => {
@@ -329,7 +355,12 @@ function validate(raw, channel = '财经') {
     if (s.right) out.right = { title: clean(s.right.title || s.right.h, 24), items: (s.right.items || []).slice(0, 3).map(x => clean(x, 30)), win: !!s.right.win };
     if (Array.isArray(s.bars)) out.bars = s.bars.slice(0, 4).map(b => ({ label: clean(b.label, 16), value: Number(b.value) || 0, note: clean(b.note || b.value, 16) }));
     if (s.line) out.line = { labels: (s.line.labels || []).slice(0, 6).map(x => clean(x, 12)), values: (s.line.values || []).slice(0, 6).map(v => Number(v) || 0), unit: clean(s.line.unit, 8) };
-    if (Array.isArray(s.stats)) out.stats = s.stats.slice(0, 3).map(x => ({ v: clean(x.v, 12), l: clean(x.l, 24) }));
+    if (Array.isArray(s.stats)) out.stats = s.stats.slice(0, 3).map(x => ({
+      v: clean(x.v, 12), l: clean(x.l, 24),
+      ...(x.c === 'up' || x.c === 'down' ? { c: x.c } : {}),
+    }));
+    if (Array.isArray(s.history)) out.history = s.history.slice(0, 7).map(x => ({ date: clean(x.date, 10), up: Number(x.up) || 0, down: Number(x.down) || 0 }));
+    if (s.historyCaption) out.historyCaption = clean(s.historyCaption, 60);
     if (Array.isArray(s.notes)) out.notes = s.notes.slice(0, 3).map(x => clean(x, 40));
     if (Array.isArray(s.lines)) out.lines = s.lines.slice(0, 3).map(x => clean(x, 60));
     const art = sanitizeSceneArt(s.art);

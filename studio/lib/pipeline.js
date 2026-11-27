@@ -259,7 +259,8 @@ async function runJob(job) {
     return;
   }
 
-  /* 2. 封面预览：等用户挑选确认后再继续 */
+  /* 2. 封面预览：等用户挑选确认后再继续；固定模式自动确认直接出片 */
+  const skipCover = !!board.meta.skipCoverConfirm;
   if (!board.meta.coverConfirmed) {
     const modelPick = COVER_LABEL[board.meta.cover] ? board.meta.cover : undefined;
     // 按标题实物选封面，并避开最近几条片子用过的主体
@@ -297,15 +298,22 @@ async function runJob(job) {
     log(job, board.meta.artMode
       ? `封面插画：已按标题「${board.meta.title}」用${PROVIDER_LABEL[normalizeProvider(board.meta.artProvider)]}生成 · ${COVER_LAYOUT_NAME[layout]}`
       : `封面样式：${COVER_LABEL[motif]} · ${COVER_LAYOUT_NAME[layout]}（共 ${COVER_STYLES.length} 种可选）`);
-    job.status = 'preview';
-    job.step = '等待确认封面';
-    job.progress = 10;
-    job.coverAt = Date.now();
-    persist(job);
-    log(job, '请确认封面，确认后开始配音与渲染');
-    return;
+
+    if (skipCover) {
+      board.meta.coverConfirmed = true;
+      fs.writeFileSync(boardPath, JSON.stringify(board, null, 2));
+      log(job, '固定模式：数据已确认，封面自动通过，直接出片');
+    } else {
+      job.status = 'preview';
+      job.step = '等待确认封面';
+      job.progress = 10;
+      job.coverAt = Date.now();
+      persist(job);
+      log(job, '请确认封面，确认后开始配音与渲染');
+      return;
+    }
   }
-  log(job, '封面已确认，继续生成');
+  if (!skipCover) log(job, '封面已确认，继续生成');
 
   /* 2.5 分镜插图：按选择的方式逐屏生成，失败的单屏退回素材图 */
   const sceneCfg = readConfig();

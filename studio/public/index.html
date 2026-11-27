@@ -115,6 +115,11 @@ ul.news .meta a{text-decoration:none}
 .board-item p{margin:0;font-size:13px;line-height:1.6;color:var(--ink2)}
 .board-item .pts{margin-top:3px;font-size:12.5px;color:var(--ink2)}
 .board-actions{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.daily-list{border-top:1px dashed var(--line);margin-top:4px}
+.daily-item{display:flex;gap:10px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.6}
+.daily-item:last-child{border-bottom:0}
+.daily-item b{flex:0 0 52px;font-weight:600;color:var(--ink)}
+.daily-item span{flex:1;color:var(--ink2);word-break:break-all}
 </style>
 </head>
 <body>
@@ -126,6 +131,20 @@ ul.news .meta a{text-decoration:none}
 
   <div class="grid">
     <div>
+      <div class="card" style="margin-bottom:18px">
+        <h2>固定模式 · A股播报<small id="dailyTime">每日自动取数</small></h2>
+        <div class="hint" style="margin:0 0 12px">点一下抓取当天行情，核对数据无误后直接出片：固定 9 屏，不用写选题，也不用再确认封面。</div>
+        <button class="btn primary" id="dailyFetch">获取今日行情数据</button>
+        <div id="dailyBox" style="display:none;margin-top:14px">
+          <div class="daily-list" id="dailyList"></div>
+          <div class="board-actions">
+            <button class="btn ghost small" id="dailyRefresh">重新获取</button>
+            <button class="btn primary small" id="dailyGo" style="width:auto">确认数据，生成视频</button>
+            <span class="hint" style="margin:0" id="dailyTip"></span>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="margin-bottom:18px">
         <h2>快讯 / 热点<small id="newsTime">抓取中…</small></h2>
         <div class="news-tools">
@@ -541,6 +560,68 @@ $('#newsGen').onclick = async () => {
   } finally {
     btn.textContent = '用 AI 生成选题';
     btn.disabled = picked.size === 0;
+  }
+};
+
+/* ---------------- 固定模式：每日 A 股播报 ---------------- */
+let dailySnap = null;
+let dailyBusy = false;
+
+function renderDaily(view){
+  const items = [{ k: '日期', v: view.dateLabel + (view.intraday ? ' · 盘中，数据会变' : ' · 收盘') + ' · ' + view.updatedAt + (view.trendText ? ' · ' + view.trendText : '') }]
+    .concat(view.lines.map(l => ({ k: l.label, v: l.text })));
+  $('#dailyList').innerHTML = items.map(x => `<div class="daily-item"><b>${esc(x.k)}</b><span>${esc(x.v)}</span></div>`).join('');
+  $('#dailyBox').style.display = 'block';
+}
+
+async function fetchDaily(){
+  const btn = $('#dailyFetch');
+  btn.disabled = true;
+  btn.textContent = '抓取中…';
+  $('#dailyTip').textContent = '';
+  try {
+    const r = await fetch('/api/daily');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '抓取失败');
+    dailySnap = d.snapshotId;
+    renderDaily(d.view);
+    $('#dailyTime').textContent = d.view.dateLabel + ' ' + d.view.updatedAt;
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '获取今日行情数据';
+  }
+}
+
+$('#dailyFetch').onclick = fetchDaily;
+$('#dailyRefresh').onclick = fetchDaily;
+
+$('#dailyGo').onclick = async () => {
+  if (dailyBusy) return;
+  const btn = $('#dailyGo');
+  dailyBusy = true;
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  try {
+    const r = await fetch('/api/daily', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ snapshotId: dailySnap }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '提交失败');
+    dailySnap = null;
+    $('#dailyBox').style.display = 'none';
+    $('#videoWrap').style.display = 'none';
+    $('#log').textContent = '固定模式任务已提交，正在自动出片…';
+    poll(d.id);
+    loadJobs();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    dailyBusy = false;
+    btn.disabled = false;
+    btn.textContent = '确认数据，生成视频';
   }
 };
 

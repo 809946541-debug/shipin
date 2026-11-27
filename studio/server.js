@@ -5,6 +5,7 @@ const path = require('path');
 const { createJob, retryJob, rebuildJob, deleteJob, listJobs, getJob, readConfig, publicConfig, saveConfig, jobDir, listCovers, setCover, confirmCover, confirmBoard, regenBoard, regenCoverArt, setSceneArtMode } = require('./lib/pipeline');
 const { buildChapters } = require('./lib/chapters');
 const { listNews, generateTopic } = require('./lib/news');
+const { fetchMarket, buildBoard } = require('./lib/market');
 
 const PORT = Number(process.env.PORT || 4180);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -30,6 +31,14 @@ function readBody(req, limit = 5 * 1024 * 1024) {
     });
     req.on('error', reject);
   });
+}
+
+/* 固定模式：先把当日行情取下来给用户核对，确认后用同一份快照出片 */
+const dailySnaps = new Map();
+const SNAP_TTL = 30 * 60 * 1000;
+function pruneSnaps() {
+  const now = Date.now();
+  for (const [k, v] of dailySnaps) if (now - v.at > SNAP_TTL) dailySnaps.delete(k);
 }
 
 const MIME = {
@@ -94,6 +103,33 @@ const server = http.createServer(async (req, res) => {
       const channel = ['财经', '科技', '体育'].includes(body.channel) ? body.channel : '财经';
       const topic = await generateTopic(items, readConfig(), channel);
       return json(res, 200, topic);
+    }
+
+    if (p === '/api/daily' && req.method === 'GET') {
+      pruneSnaps();
+      const view = await fetchMarket();
+      const snapshotId = 'snap-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      dailySnaps.set(snapshotId, { view, at: Date.now() });
+      return json(res, 200, { snapshotId, view });
+    }
+
+    if (p === '/api/daily' && req.method === 'POST') {
+      pruneSnaps();
+      const body = await readBody(req, 64 * 1024);
+      const sid = String(body.snapshotId || '');
+      const snap = dailySnaps.get(sid);
+      const view = snap ? snap.view : await fetchMarket();
+      if (snap) dailySnaps.delete(sid);
+      const board = buildBoard(view);
+      const title = board.meta.title;
+      const dup = listJobs().find(j => j.brief && j.brief.title === title &&
+        (j.status === 'running' || j.status === 'queued' || j.status === 'board' || j.status === 'preview'));
+      if (dup) return json(res, 409, { error: '「' + title + '」还在生成中，完成后再试' });
+      const job = createJob({
+        title, summary: board.meta.subtitle, requirements: '固定模式：每日A股播报（公开数据复盘）',
+        channel: '财经', minutes: board.minutes,
+      }, board);
+      return json(res, 201, { id: job.id });
     }
 
     if (p === '/api/config' && req.method === 'GET') return json(res, 200, publicConfig());
