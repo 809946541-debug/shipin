@@ -107,7 +107,14 @@ const server = http.createServer(async (req, res) => {
 
     if (p === '/api/daily' && req.method === 'GET') {
       pruneSnaps();
-      const view = await fetchMarket();
+      const u = new URL(req.url, 'http://127.0.0.1');
+      const q = k => (u.searchParams.get(k) || '').trim();
+      let view;
+      try {
+        view = await fetchMarket({ date: q('date'), up: q('up'), down: q('down'), flat: q('flat'), zt: q('zt'), dt: q('dt') });
+      } catch (e) {
+        return json(res, 400, { error: e.message || '取数失败' });
+      }
       const snapshotId = 'snap-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       dailySnaps.set(snapshotId, { view, at: Date.now() });
       return json(res, 200, { snapshotId, view });

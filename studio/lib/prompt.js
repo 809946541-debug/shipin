@@ -325,10 +325,6 @@ function validate(raw, channel = '财经') {
       downPct: Number(d.downPct) || 0,
       amtText: clean(d.amtText, 20),
       amtDiffText: clean(d.amtDiffText, 20),
-      indices: Array.isArray(d.indices) ? d.indices.slice(0, 3).map(x => ({
-        name: clean(x.name, 12), pct: clean(x.pct, 12),
-        ...(x.tone === 'up' || x.tone === 'down' ? { tone: x.tone } : {}),
-      })) : [],
     };
   }
 

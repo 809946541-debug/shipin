@@ -62,34 +62,45 @@ html,body{width:1080px;height:1728px;overflow:hidden;background:#e6d4af;color:va
 .hist{position:absolute;left:104px;width:872px}
 .hist .cap{font-size:26px;color:var(--ink2);line-height:1.5}
 .hist .hd{font-size:27px;letter-spacing:.08em;margin-top:8px;color:var(--ink)}
-.hist .cols{display:flex;gap:6px;margin-top:16px;padding-top:14px;border-top:2px solid rgba(45,40,34,.26)}
-.hist .col{flex:1;text-align:center}
-.hist .col .u{font-family:var(--num);font-weight:700;font-size:31px;line-height:1.2;color:var(--red)}
-.hist .col .d{font-family:var(--num);font-weight:700;font-size:26px;line-height:1.2;color:var(--green);margin-top:2px}
-.hist .col .dt{font-size:20px;color:var(--ink2);margin-top:8px}
-.hist .col.today .dt{color:var(--ink);font-weight:700}
+.hist table{width:100%;margin-top:14px;border-collapse:collapse;table-layout:fixed}
+.hist th{font-size:23px;color:var(--ink2);font-weight:400;text-align:left;padding:7px 0;border-top:2px solid rgba(45,40,34,.26)}
+.hist td{padding:6px 0;border-bottom:1px solid rgba(45,40,34,.16);vertical-align:middle}
+.hist td.dt{font-size:25px;color:var(--ink2)}
+.hist td.u{font-family:var(--num);font-weight:700;font-size:31px;color:var(--red);text-align:right}
+.hist td.d{font-family:var(--num);font-weight:700;font-size:31px;color:var(--green);text-align:right}
+.hist .r{text-align:right}
+.hist tr.today td.u{font-size:44px}
+.hist tr.today td.d{font-size:44px}
+.hist tr.today td.dt{font-size:29px;color:var(--ink);font-weight:700}
+/* 表格独占一屏时放大 */
+.hist.solo{margin-top:0}
+.hist.solo th{font-size:26px;padding:11px 0}
+.hist.solo td{padding:12px 0}
+.hist.solo td.dt{font-size:31px;color:var(--ink)}
+.hist.solo td.u,.hist.solo td.d{font-size:46px}
+.hist.solo tr.today{background:rgba(45,40,34,.05)}
+.hist.solo tr.today td.dt{font-size:36px}
+.hist.solo tr.today td.u,.hist.solo tr.today td.d{font-size:62px}
 /* 数据大数字封面 */
 .hero-title{position:absolute;left:0;width:1080px;text-align:center;top:262px;font-size:32px;font-weight:700;letter-spacing:.28em;color:var(--ink2)}
 .hero-date{position:absolute;left:0;width:1080px;text-align:center;top:150px;font-size:72px;font-weight:700;letter-spacing:.04em;color:var(--ink)}
 .hero{position:absolute;left:104px;top:500px;width:872px}
 .hero-row{display:flex;align-items:baseline;gap:24px;line-height:1}
 .hero-row + .hero-row{margin-top:26px}
-.hero-num{font-family:var(--num);font-weight:700;font-size:210px;letter-spacing:-4px}
+.hero-num{font-family:var(--num);font-weight:700;font-size:210px;letter-spacing:-4px;font-variant-numeric:tabular-nums}
 .hero-row.up .hero-num{color:var(--red)}
 .hero-row.down .hero-num{color:var(--green)}
 .hero-lb{font-size:46px;color:var(--ink2)}
+.hero-stamp{position:absolute;right:86px;top:566px;font-size:32px;border-color:rgba(45,40,34,.5);color:var(--ink2);background:rgba(244,239,226,.55)}
 .hero-bar{position:absolute;left:104px;top:1020px;width:872px;height:36px;display:flex;overflow:hidden;border:3px solid rgba(45,40,34,.55);border-radius:6px;transform:rotate(-.5deg)}
-.hero-bar i{display:block;height:100%}
-.hero-bar i.up{background:var(--red)}
-.hero-bar i.down{background:var(--green)}
+.hero-bar i{display:block;height:100%;animation:barx .9s cubic-bezier(.2,.7,.2,1) both}
+.hero-bar i.up{background:var(--red);transform-origin:left;animation-delay:.5s}
+.hero-bar i.down{background:var(--green);transform-origin:right;animation-delay:.62s}
+@keyframes barx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .hero-legend{position:absolute;left:104px;top:1072px;width:872px;display:flex;justify-content:space-between;font-size:28px;color:var(--ink2)}
 .hero-legend .up{color:var(--red)}
 .hero-legend .down{color:var(--green)}
 .hero-sub{position:absolute;left:104px;top:1146px;width:872px;font-size:38px;line-height:1.5;color:var(--ink2)}
-.hero-idx{position:absolute;left:104px;top:1262px;width:872px;display:flex;gap:16px}
-.hero-idx .hi{flex:1;text-align:center;border-top:2px solid rgba(45,40,34,.25);padding-top:14px}
-.hero-idx .hin{display:block;font-size:27px;color:var(--ink2);letter-spacing:.08em}
-.hero-idx .hip{display:block;font-family:var(--num);font-weight:700;font-size:46px;line-height:1.2;margin-top:4px}
 .up{color:var(--red)}
 .down{color:var(--green)}
 `;
@@ -141,9 +152,21 @@ window.BEATS=BEATS;
 const Q=new URLSearchParams(location.search);
 const RENDER=Q.has('render'),ONLY=Q.get('scene');
 const scenes=[...document.querySelectorAll('.scene')];
+// 封面大数字 0 → 目标值滚动，随 __seek 的时间轴推进，录制时也能准确 seek
+const CNT_FROM=220,CNT_DUR=900;
+function heroCount(local){
+  const sc=scenes.find(s=>s.classList.contains('on'));
+  if(!sc)return;
+  const t=Math.min(1,Math.max(0,(local-CNT_FROM)/CNT_DUR));
+  const e=1-Math.pow(1-t,3);
+  sc.querySelectorAll('[data-count]').forEach(el=>{
+    el.textContent=String(Math.round((Number(el.dataset.count)||0)*e));
+  });
+}
 function show(i,local){
   scenes.forEach((s,k)=>s.classList.toggle('on',k===i));
   document.getAnimations().forEach(a=>{a.pause();a.currentTime=Math.max(0,local);});
+  heroCount(local);
 }
 window.__seek=(ms)=>{
   let acc=0,i=0,local=ms;
@@ -2273,21 +2296,17 @@ function heroCover(meta) {
     : [{ v: down, l: '家下跌', t: 'down' }, { v: up, l: '家上涨', t: 'up' }];
   const big = Math.max(up, down, 1);
   const small = Math.max(104, Math.round(210 * Math.pow(Math.min(up, down) / big, 0.33)));
-  const rowHTML = rows.map((r, i) => `<div class="hero-row ${r.t}"><span class="hero-num" style="font-size:${i ? small : 210}px">${esc(String(r.v))}</span><span class="hero-lb">${r.l}</span></div>`).join('\n');
-  const idxs = Array.isArray(d.indices) ? d.indices : [];
-  const idxHTML = idxs.length
-    ? `<div class="hero-idx f" style="--d:.95s">${idxs.map(x => `<div class="hi"><span class="hin">${esc(x.name)}</span><span class="hip ${x.tone === 'up' ? 'up' : x.tone === 'down' ? 'down' : ''}">${esc(x.pct)}</span></div>`).join('')}</div>`
-    : '';
+  const rowHTML = rows.map((r, i) => `<div class="hero-row ${r.t}"><span class="hero-num" data-count="${r.v}" style="font-size:${i ? small : 210}px">0</span><span class="hero-lb">${r.l}</span></div>`).join('\n');
   return `<section class="scene" id="s0">
 <div class="hero-title rise" style="--d:.18s">${esc(meta.heroTitle || '今日行情播报')}</div>
 <div class="hero-date rise" style="--d:.08s">${esc(d.kicker || '')}</div>
 <div class="hero f" style="--d:.24s">
 ${rowHTML}
 </div>
-<div class="hero-bar f" style="--d:.55s"><i class="up" style="width:${pct}%"></i><i class="down" style="width:${100 - pct}%"></i></div>
+${d.badge ? `<div class="stamp hero-stamp f" style="--d:.85s">${esc(d.badge)}</div>` : ''}
+<div class="hero-bar f" style="--d:.4s"><i class="up" style="width:${pct}%"></i><i class="down" style="width:${100 - pct}%"></i></div>
 <div class="hero-legend f" style="--d:.65s"><span class="up">${pct}% 上涨</span><span class="down">${100 - pct}% 下跌</span></div>
 <div class="hero-sub f" style="--d:.8s">两市成交 ${esc(d.amtText || '')} · 较昨日${esc(d.amtDiffText || '')}</div>
-${idxHTML}
 <div class="f cover-tag" style="--d:1.4s">${esc(meta.disclaimer || '公开数据复盘 · 不构成投资建议')}</div>
 </section>`;
 }
@@ -2693,7 +2712,9 @@ ${footOf(scene, scene._meta)}
 }
 
 function statsScene(scene, idx) {
-  const items = (scene.stats || []).slice(0, 3);
+  // 有「近 7 日」表格时，表格就是主角，不再重复上方的大数字（表格第一行即今天）
+  const hasHist = Array.isArray(scene.history) && scene.history.length > 0;
+  const items = hasHist ? [] : (scene.stats || []).slice(0, 3);
   const n = Math.max(1, items.length);
   const gap = 40, W = 872;
   const cw = (W - gap * (n - 1)) / n;
@@ -2717,18 +2738,24 @@ ${footOf(scene, scene._meta)}
 </section>`;
 }
 
-// 近 7 个交易日涨跌家数：一行一天，红涨绿跌
+// 近 7 个交易日涨跌家数：从近到远竖排，今天那行字号更大
 function histOf(scene) {
   const list = Array.isArray(scene.history) ? scene.history : [];
   if (!list.length) return '';
-  const cols = list.map((x, i) => `<div class="col${i === list.length - 1 ? ' today' : ''}">
-<div class="u">${esc(String(x.up))}</div>
-<div class="d">${esc(String(x.down))}</div>
-<div class="dt">${esc(x.date)}</div></div>`).join('');
-  return `<div class="hist f" style="top:980px;--d:.7s">
+  const rows = list.slice().reverse().map((x, i) => {
+    const tag = i === 0 ? ' class="today"' : '';
+    const raw = String(x.date || '');
+    const day = (raw.length > 5 ? raw.slice(5) : raw) + (i === 0 ? ' · 今天' : '');
+    return `<tr${tag}><td class="dt">${esc(day)}</td><td class="u">${esc(String(x.up))}</td><td class="d">${esc(String(x.down))}</td></tr>`;
+  }).join('');
+  return `<div class="hist solo f" style="top:600px;--d:.45s">
 ${scene.historyCaption ? `<div class="cap">${esc(scene.historyCaption)}</div>` : ''}
-<div class="hd">近 ${list.length} 个交易日 · 上涨 / 下跌家数</div>
-<div class="cols">${cols}</div>
+<div class="hd">近 ${list.length} 个交易日 · 涨跌家数</div>
+<table>
+<colgroup><col style="width:44%"><col style="width:28%"><col style="width:28%"></colgroup>
+<thead><tr><th>日期</th><th class="r">上涨</th><th class="r">下跌</th></tr></thead>
+<tbody>${rows}</tbody>
+</table>
 </div>`;
 }
 

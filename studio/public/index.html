@@ -133,8 +133,11 @@ ul.news .meta a{text-decoration:none}
     <div>
       <div class="card" style="margin-bottom:18px">
         <h2>固定模式 · A股播报<small id="dailyTime">每日自动取数</small></h2>
-        <div class="hint" style="margin:0 0 12px">点一下抓取当天行情，核对数据无误后直接出片：固定 9 屏，不用写选题，也不用再确认封面。</div>
-        <button class="btn primary" id="dailyFetch">获取今日行情数据</button>
+        <div class="hint" style="margin:0 0 12px">选日期抓取行情，核对数据无误后直接出片：固定 9 屏，不用写选题，也不用再确认封面。补发历史交易日时，涨跌家数要手填。</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="dailyDate" style="width:auto;min-width:200px"></select>
+          <button class="btn primary" id="dailyFetch">获取行情数据</button>
+        </div>
         <div id="dailyBox" style="display:none;margin-top:14px">
           <div class="daily-list" id="dailyList"></div>
           <div class="board-actions">
@@ -565,12 +568,40 @@ $('#newsGen').onclick = async () => {
 
 /* ---------------- 固定模式：每日 A 股播报 ---------------- */
 let dailySnap = null;
+let dailyView = null;
 let dailyBusy = false;
 
+// 日期下拉：第一项为今日/最新交易日，后面是最近 40 个工作日
+(function initDailyDates(){
+  const sel = $('#dailyDate');
+  if (!sel) return;
+  const opts = ['<option value="">今日（最新交易日）</option>'];
+  const now = new Date();
+  for (let i = 1, n = 0; i < 90 && n < 40; i++) {
+    const d = new Date(now.getTime() - i * 86400000);
+    if (d.getDay() === 0 || d.getDay() === 6) continue;
+    const s = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    opts.push(`<option value="${s}">${s}</option>`);
+    n++;
+  }
+  sel.innerHTML = opts.join('');
+})();
+
 function renderDaily(view){
-  const items = [{ k: '日期', v: view.dateLabel + (view.intraday ? ' · 盘中，数据会变' : ' · 收盘') + ' · ' + view.updatedAt + (view.trendText ? ' · ' + view.trendText : '') }]
-    .concat(view.lines.map(l => ({ k: l.label, v: l.text })));
-  $('#dailyList').innerHTML = items.map(x => `<div class="daily-item"><b>${esc(x.k)}</b><span>${esc(x.v)}</span></div>`).join('');
+  dailyView = view;
+  const skip = view.historical ? ['涨跌', '情绪', '板块'] : [];
+  const items = [{ k: '日期', v: view.dateLabel + (view.historical ? ' · 补发' : view.intraday ? ' · 盘中，数据会变' : ' · 收盘') + (view.historical ? '' : ' · ' + view.updatedAt) + (view.trendText ? ' · ' + view.trendText : '') }]
+    .concat(view.lines.filter(l => !skip.includes(l.label)).map(l => ({ k: l.label, v: l.text })));
+  let html = items.map(x => `<div class="daily-item"><b>${esc(x.k)}</b><span>${esc(x.v)}</span></div>`).join('');
+  if (view.historical) {
+    const fields = [
+      ['上涨家数', 'dUp', view.breadth.up], ['下跌家数', 'dDown', view.breadth.down],
+      ['平盘家数', 'dFlat', view.breadth.flat], ['涨停家数', 'dZt', view.limit.zt], ['跌停家数', 'dDt', view.limit.dt],
+    ];
+    html += fields.map(([k, id, v]) => `<div class="daily-item"><b>${k}</b><span><input id="${id}" type="number" min="0" style="width:100%;padding:6px 8px;font-size:13px" value="${v || ''}" placeholder="按当天真实数据填"></span></div>`).join('');
+    html += '<div class="hint" style="margin:8px 0 0">历史交易日没有涨跌家数/涨停跌停接口，请手填；板块屏会自动省略。留空或 0 的项不会出现。</div>';
+  }
+  $('#dailyList').innerHTML = html;
   $('#dailyBox').style.display = 'block';
 }
 
@@ -580,17 +611,18 @@ async function fetchDaily(){
   btn.textContent = '抓取中…';
   $('#dailyTip').textContent = '';
   try {
-    const r = await fetch('/api/daily');
+    const date = ($('#dailyDate').value || '').trim();
+    const r = await fetch('/api/daily' + (date ? '?date=' + encodeURIComponent(date) : ''));
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || '抓取失败');
     dailySnap = d.snapshotId;
     renderDaily(d.view);
-    $('#dailyTime').textContent = d.view.dateLabel + ' ' + d.view.updatedAt;
+    $('#dailyTime').textContent = d.view.dateLabel + (d.view.historical ? ' 补发' : ' ' + d.view.updatedAt);
   } catch (e) {
     alert(e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = '获取今日行情数据';
+    btn.textContent = '获取行情数据';
   }
 }
 
@@ -604,6 +636,21 @@ $('#dailyGo').onclick = async () => {
   btn.disabled = true;
   btn.textContent = '提交中…';
   try {
+    // 补发历史日：先把手填的家数并进去，重新生成快照
+    if (dailyView && dailyView.historical) {
+      const val = id => Number(($(id).value || '').trim() || 0);
+      const q = new URLSearchParams({
+        date: dailyView.date,
+        up: String(val('#dUp')), down: String(val('#dDown')), flat: String(val('#dFlat')),
+        zt: String(val('#dZt')), dt: String(val('#dDt')),
+      });
+      if (!val('#dUp') && !val('#dDown')) throw new Error('先填上涨和下跌家数');
+      const r1 = await fetch('/api/daily?' + q.toString());
+      const d1 = await r1.json();
+      if (!r1.ok) throw new Error(d1.error || '数据刷新失败');
+      dailySnap = d1.snapshotId;
+      renderDaily(d1.view);
+    }
     const r = await fetch('/api/daily', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ snapshotId: dailySnap }),
